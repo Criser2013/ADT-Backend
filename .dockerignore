@@ -1,0 +1,16 @@
+ejecutar.tests.sh
+pytest.ini
+conftest.py
+tests
+.env
+*.json
+__pycache__
+__init__.py
+README.md
+requirements.dev.txt
+.gitignore
+Dockerfile
+.env.**
+.github
+.pytest_cache
+.coverage

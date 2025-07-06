@@ -1,0 +1,74 @@
+# Backend - HADT
+
+Backend para la aplicación "Herramienta para apoyar el diagnóstico de TEP". Se requiere un proyecto de Firebase con los servicios de autenticación y base de datos habilitados (firestore). El proyecto hace uso de las siguientes bibliotecas:
+
+- FastAPI.
+- ONNX.
+- Firebase admin.
+
+## ¿Cómo ejecutar el proyecto?
+
+1. Cree un entorno virtual de Python:
+
+```
+virtualenv -m <nombre-entorno>
+```
+2. Ejecute el entorno con alguno de los comandos:
+
+```
+.\<nombre-entorno>\Scripts\activate        # En el caso de Windows
+source .\<nombre-entorno>\Scripts          # En el caso de MacOS y Linux
+```
+
+3. Para ejecutar el proyecto debe instalar las dependencias con el siguiente comando:
+
+```
+pip install -r requirements.dev.txt
+```
+
+4. Para ejecutar la aplicación utilice el siguiente comando:
+
+```
+fastapi dev main.py
+```
+
+Tenga en cuenta que de esta forma se requiere un header con la clave `Authorization` y el valor `Bearer <token-firebase>` para que las peticiones no sean rechazadas.
+
+### Credenciales de Firebase admin
+Debe tener un archivo en formato JSON con el nombre `firebase-token.json`. Este archivo puede ser obtenido desde el apartado de configuración del proyecto en la consola de Firebase.
+
+### Variables de entorno requeridas
+```
+FRONT_URL=<string>          # URL del frontend (política de CORS)
+```
+
+## Dockerfile
+
+La imagen generada `Dockerfile` corresponde a una imagen de despliegue, para construirla use el comando:
+
+```
+docker image build --build-arg FIREBASE_CREDENTIALS=<texto-con-credenciales>
+```
+
+La aplicación será visible en el puerto `80` del contenedor.
+
+## Sobre el modelo
+El modelo se ejecuta sobre la librería ONNX. Puede cambiar el modelo reemplazando el archivo `modelo.onnx`. Tenga en cuenta que se espera
+que los datos para realizar diagnósticos ya se encuentren en formato númerico. El backend solo realiza la normalización de los valores y a partir de eso genera la predicción.
+
+## Pruebas unitarias
+
+Para ejecutar las pruebas unitarias utilice el siguiente comando:
+
+```
+./ejecutar-tests-sh
+```  
+En la carpeta `tests/scripts` se encuentran los scripts de prueba. En la carpeta `cobertura` se guardan los informes de cobertura de código de las pruebas. De igual forma, la carpeta `resultados` almacena los informes de ejecución en formato **HTML**.  
+
+Sino desea ejecutar las pruebas sin almacenar el informe de resultados y la cobertura, ejecute el comando:
+
+```
+pytest
+```
+
+Para cambiar la configuración de este apartado, modifique el archivo `pytest.ini` y `conftest.py`. Para más informaciónc consulte la [documentación](https://docs.pytest.org/en/stable/reference/customize.html).
