@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from sklearn.preprocessing import StandardScaler
 import numpy as np
-import onnx
+import pickle
 import onnxruntime as rt
 
 class Diagnostico(BaseModel):
@@ -52,12 +51,17 @@ class Diagnostico(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.datos_normalizados = np.array([], dtype=np.float32)
-        self.scaler = StandardScaler()        
+
+    def cargar_scaler(self):
+        """
+            Carga el normalizador con el que fue entrenado el modelo desde un archivo pickle
+        """
+        with open("../bin/scaler.pkl", "rb") as f:
+            self.scaler = pickle.load(f)
 
     def normalizar_datos(self):
         """
-        Normaliza los datos
+            Normaliza los datos
         """
         ARR = np.array([
             self.edad, self.sexo, self.bebedor, self.fumador,
@@ -78,10 +82,13 @@ class Diagnostico(BaseModel):
             self.vih
         ], dtype=np.float32)
 
-        self.datos_normalizados = self.scaler.fit_transform(ARR)
+        self.datos_normalizados = self.scaler.transform(ARR)
 
     def generar_diagnostico(self):
-        sesion = rt.InferenceSession("model_red_neuronal.onnx", providers=["CPUExecutionProvider"])
+        """
+            Genera el diagnóstico de los datos normalizados usando el modelo ONNX
+        """
+        sesion = rt.InferenceSession("../bin/model_red_neuronal.onnx", providers=["CPUExecutionProvider"])
         input_name = sesion.get_inputs()[0].name
 
         pred = sesion.run(None, {input_name: self.datos_normalizados})[0]
