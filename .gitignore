@@ -1,6 +1,6 @@
+*.env
 __pycache__
 .coverage
 .pytest_cache
 __init__.py
 *.json
-.env

@@ -35,11 +35,19 @@ fastapi dev main.py
 Tenga en cuenta que de esta forma se requiere un header con la clave `Authorization` y el valor `Bearer <token-firebase>` para que las peticiones no sean rechazadas.
 
 ### Credenciales de Firebase admin
-Debe tener un archivo en formato JSON con el nombre `firebase-token.json`. Este archivo puede ser obtenido desde el apartado de configuración del proyecto en la consola de Firebase.
+Debe tener un archivo en formato JSON con el nombre `firebase_token.json`. Este archivo puede ser obtenido desde el apartado de configuración del proyecto en la consola de Firebase.
 
 ### Variables de entorno requeridas
 ```
 FRONT_URL=<string>          # URL del frontend (política de CORS)
+CLIENTE_FIREBASE_API_KEY=<string>           # API key del proyecto de Firebase
+CLIENTE_FIREBASE_AUTH_DOMAIN=<string>       # Dominio de autenticación de Firebase
+CLIENTE_FIREBASE_PROJECT_ID=<string>        # ID del proyecto en Firebase
+CLIENTE_FIREBASE_STORE_BUCKET=<string>      # ID del bucket de Firestore
+CLIENTE_FIREBASE_MESSAGING_SENDER_ID=<int>  # ID para envío de mensajes
+CLIENTE_FIREBASE_APP_ID=<string>            # ID de la aplicación de Firebase
+CLIENTE_FIREBASE_MEASUREMENT_ID=<string>    # ID de Google Analytics (métricas)
+CLIENTE_DRIVE_SCOPES=<string>               # URLs de permisos de Drive requeridos
 ```
 
 ## Dockerfile

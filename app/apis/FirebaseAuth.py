@@ -1,5 +1,5 @@
 import firebase_admin.auth
-from .models import Diagnostico
+from app.models import Diagnostico
 from firebase_admin.auth import *
 from fastapi import Response
 
