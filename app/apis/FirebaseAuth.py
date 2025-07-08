@@ -2,6 +2,7 @@ import firebase_admin.auth
 from firebase_admin.auth import *
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from utils.Validadores import validar_txt_token
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -32,7 +33,8 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
     """
     try:
         token = peticion.headers["authorization"].split("Bearer ")[1]
-        res_validacion = validar_token(token, firebase_app)
+        reg_validacion = validar_txt_token(token)
+        res_validacion = 0 if (not reg_validacion) else validar_token(token, firebase_app)
         match res_validacion:
             case 1:
                 return await call_next(peticion)
