@@ -1,32 +1,17 @@
-from dotenv import load_dotenv
-import firebase_admin
-from pathlib import Path
-from os import getenv
-from os.path import join
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
-from controller import router as controller_router
+from routers.main_router import router as main_router
 from apis.FirebaseAuth import verificar_token
-from utils.Dominios import obtener_lista_dominios
-
-load_dotenv()
-
-BASE_DIR = Path(__file__).resolve().parent
-
-# Inicialización del servicio de Firebase
-cred = firebase_admin.credentials.Certificate(join(BASE_DIR, "../firebase_token.json"))
-firebase_app = firebase_admin.initialize_app(cred)
+from constants import CORS_ORIGINS, ALLOWED_HOSTS
+from firebase_admin_config import firebase_app
 
 app = FastAPI()
 
-# CORS
-CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS"))
-ALLOWED_HOSTS = obtener_lista_dominios(getenv("ALLOWED_HOSTS"))
+app.include_router(main_router)
 
-app.include_router(controller_router)
-    
+# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -35,7 +20,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# Middleware que no permite peticiones de hosts no confiables
+# Middleware que no permite peticiones de hosts no autorizados
 app.add_middleware(
     TrustedHostMiddleware, 
     allowed_hosts=ALLOWED_HOSTS

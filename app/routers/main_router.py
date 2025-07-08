@@ -2,21 +2,7 @@ from models.Diagnostico import Diagnostico
 from models.PeticionDiagnostico import PeticionDiagnostico
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv()
-
-FIREBASE_CLIENTE = {
-    "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
-    "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),
-    "projectId": getenv("CLIENTE_FIREBASE_PROJECT_ID"),
-    "storageBucket": getenv("CLIENTE_FIREBASE_STORAGE_BUCKET"),
-    "messagingSenderId": getenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID"),
-    "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
-    "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
-    "driveScopes": getenv("CLIENTE_DRIVE_SCOPES"),
-}
+from constants import CREDS_FIREBASE_CLIENTE
 
 router = APIRouter()
 
@@ -24,7 +10,7 @@ router = APIRouter()
 async def obtener_credenciales():
     try:
         return JSONResponse(
-            FIREBASE_CLIENTE, status_code=200, media_type="application/json"
+            CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
         )
     except:
         return JSONResponse({ "error": "Error al obtener las credenciales" }, status_code=500, media_type="application/json")

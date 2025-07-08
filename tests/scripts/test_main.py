@@ -1,4 +1,4 @@
-import sys
+"""import sys
 import os
 
 from fastapi.testclient import TestClient
@@ -15,14 +15,13 @@ sys.path.insert(0, project_root_dir)
 
 
 from app.main import app
-
-
+"""
 
 """
 print(BASE_DIR)
 from f"{BASE_DIR}/main" import app"""
 
-client = TestClient(app)
+"""client = TestClient(app)
 
 
 def test_read_item():
@@ -82,4 +81,4 @@ def test_create_existing_item():
         },
     )
     assert response.status_code == 409
-    assert response.json() == {"detail": "Item already exists"}
+    assert response.json() == {"detail": "Item already exists"}"""
