@@ -1,23 +1,25 @@
-from main import firebase_app, app, FIREBASE_CLIENTE
 from models.Diagnostico import Diagnostico
-from fastapi import Request, Response
-from apis.FirebaseAuth import verificar_token
+from models.PeticionDiagnostico import PeticionDiagnostico
+from fastapi import Response, APIRouter
+from dotenv import load_dotenv
+from os import getenv
 
-@app.middleware("http")
-async def verificar_credenciales(peticion: Diagnostico, call_next):
-    """
-        Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
-        Args:
-            peticion (Diagnostico): La solicitud que contiene el token.
-            call_next: La función para pasar al siguiente middleware o ruta.
-    """
-    if peticion.method == "POST":
-        return await verificar_token(peticion, firebase_app, call_next)
-    else:
-        return await call_next(peticion)
+load_dotenv()
 
+FIREBASE_CLIENTE = {
+    "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
+    "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),
+    "projectId": getenv("CLIENTE_FIREBASE_PROJECT_ID"),
+    "storageBucket": getenv("CLIENTE_FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": getenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID"),
+    "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
+    "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
+    "driveScopes": getenv("CLIENTE_DRIVE_SCOPES"),
+}
 
-@app.get("/credenciales")
+router = APIRouter()
+
+@router.get("/credenciales")
 async def obtener_credenciales():
     try:
         return Response(
@@ -27,17 +29,13 @@ async def obtener_credenciales():
         return Response("Error al obtener las credenciales", status_code=500)
 
 
-@app.post("/diagnosticar")
-async def diagnosticar(req: Request):
+@router.post("/diagnosticar")
+async def diagnosticar(req: PeticionDiagnostico):
     try:
-        """data = await req.json()
-        fecha = data.get("fecha")
-        if not fecha or not validar_fecha(fecha):
-            return Response("Fecha inválida", status_code=400)"""
+        DATOS = req.obtener_array_instancia()
+        DIAGNOSTICO = Diagnostico(DATOS)
+        RES = DIAGNOSTICO.generar_diagnostico()
 
-        # Aquí se puede agregar la lógica de diagnóstico
-        # Por ejemplo, consultar Firestore o realizar cálculos
-
-        return Response("Diagnóstico realizado con éxito", status_code=200)
+        return Response(RES, status_code=200, media_type="application/json")
     except Exception as e:
         return Response(f"Error al procesar la solicitud: {str(e)}", status_code=500)

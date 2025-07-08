@@ -1,7 +1,6 @@
 import firebase_admin.auth
-from models.Diagnostico import Diagnostico
 from firebase_admin.auth import *
-from fastapi import Response
+from fastapi import Response, Request
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -20,7 +19,7 @@ def validar_token(token: str, firebase_app) -> int:
     except (ValueError, CertificateFetchError, InvalidIdTokenError):
         return -1
 
-async def verificar_token(peticion: Diagnostico, firebase_app, call_next):
+async def verificar_token(peticion: Request, firebase_app, call_next):
     """
         Verifica el token de Firebase en la solicitud.
         Args:
@@ -31,14 +30,14 @@ async def verificar_token(peticion: Diagnostico, firebase_app, call_next):
             Response: La respuesta de la solicitud, o un error si el token es inválido.
     """
     try:
-        token = peticion.headers.get("Authorization").split("Bearer ")[1]
+        token = peticion.headers["authorization"].split("Bearer ")[1]
         res_validacion = validar_token(token, firebase_app)
         match res_validacion:
             case 1:
                 return await call_next(peticion)
             case 0:
-                return Response({ "error": "Token inválido" }, status_code=403)
+                return Response({ "error": "Token inválido" }, status_code=403, media_type="application/json")
             case -1:
-                return Response({ "error": "Error al validar el token" }, status_code=400)
+                return Response({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
     except:
-        return Response({ "error": "Error al procesar la solicitud" }, status_code=500)
+        return Response({ "error": "Error al procesar la solicitud" }, status_code=500, media_type="application/json")

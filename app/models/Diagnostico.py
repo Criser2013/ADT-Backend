@@ -1,94 +1,41 @@
-from pydantic import BaseModel
 import numpy as np
 import pickle
 import onnxruntime as rt
+from pathlib import Path
 
-class Diagnostico(BaseModel):
-    edad: int
-    sexo: int
-    bebedor: int
-    fumador: int
-    cirugia_reciente:int
-    inmovilidad_de_m_inferiores: int
-    viaje_prolongado: int
-    TEP_TVP_previo: int
-    malignidad: int
-    disnea: int
-    dolor_toracico: int
-    tos: int
-    hemoptisis: int
-    sintomas_disautonomicos: int
-    edema_de_m_inferiores: int
-    frecuencia_respiratoria: int
-    saturacion_de_la_sangre: int
-    frecuencia_cardiaca: int
-    presion_sistolica: int
-    presion_diastolica: int
-    fiebre: int
-    crepitaciones: int
-    sibilancias: int
-    soplos: int
-    wbc: int
-    hb: int
-    plt: int
-    derrame: int
-    otra_enfermedad: int
-    hematologica: int
-    cardiaca: int
-    enfermedad_coronaria: int
-    diabetes_mellitus: int
-    endocrina: int
-    gastrointestinal: int
-    hepatopatia_cronica: int
-    hipertension_arterial: int
-    neurologica: int
-    pulmonar: int
-    renal: int
-    trombofilia: int
-    urologica: int
-    vascular: int
-    vih: int
+class Diagnostico():
+    """
+    Clase que representa una instancia de diagnóstico usando el modelo
+    de red neuronal en ONNX.
+    """
+    def __init__(self, datos):
+        self.datos = datos
+        self.datos_normalizados = np.array([])
+        self.scaler = None
+        self.BASE_PATH = Path(__file__).resolve().parent.parent
 
-    def __init__(self, **data):
-        super().__init__(**data)
+        self.cargar_scaler()
 
     def cargar_scaler(self):
         """
             Carga el normalizador con el que fue entrenado el modelo desde un archivo pickle
         """
-        with open("../bin/scaler.pkl", "rb") as f:
+        with open(f"{self.BASE_PATH}/bin/scaler.pkl", "rb") as f:
             self.scaler = pickle.load(f)
 
     def normalizar_datos(self):
         """
             Normaliza los datos
         """
-        ARR = np.array([
-            self.edad, self.sexo, self.bebedor, self.fumador,
-            self.cirugia_reciente, self.inmovilidad_de_m_inferiores,
-            self.viaje_prolongado, self.TEP_TVP_previo, self.malignidad,
-            self.disnea, self.dolor_toracico, self.tos,
-            self.hemoptisis, self.sintomas_disautonomicos,
-            self.edema_de_m_inferiores, self.frecuencia_respiratoria,
-            self.saturacion_de_la_sangre, self.frecuencia_cardiaca,
-            self.presion_sistolica, self.presion_diastolica,
-            self.fiebre, self.crepitaciones, self.sibilancias,
-            self.soplos, self.wbc, self.hb, self.plt,
-            self.derrame, self.otra_enfermedad, self.hematologica,
-            self.cardiaca, self.enfermedad_coronaria, self.diabetes_mellitus,
-            self.endocrina, self.gastrointestinal, self.hepatopatia_cronica,
-            self.hipertension_arterial, self.neurologica, self.pulmonar,
-            self.renal, self.trombofilia, self.urologica, self.vascular,
-            self.vih
-        ], dtype=np.float32)
-
-        self.datos_normalizados = self.scaler.transform(ARR)
+        self.datos_normalizados = self.scaler.transform([self.datos,])[0].astype(np.float32).reshape(1, -1)
 
     def generar_diagnostico(self):
         """
             Genera el diagnóstico de los datos normalizados usando el modelo ONNX
         """
-        sesion = rt.InferenceSession("../bin/model_red_neuronal.onnx", providers=["CPUExecutionProvider"])
+        self.normalizar_datos()
+
+        sesion = rt.InferenceSession(f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx", providers=["CPUExecutionProvider"])
         input_name = sesion.get_inputs()[0].name
 
         pred = sesion.run(None, {input_name: self.datos_normalizados})[0]

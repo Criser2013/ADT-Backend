@@ -5,6 +5,10 @@ from os import getenv
 from os.path import join
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from models.Diagnostico import Diagnostico
+from fastapi import Request, Response
+from controller import router as controller_router
+from apis.FirebaseAuth import verificar_token
 
 load_dotenv()
 
@@ -14,23 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent
 cred = firebase_admin.credentials.Certificate(join(BASE_DIR, "../firebase_token.json"))
 firebase_app = firebase_admin.initialize_app(cred)
 
-# Credenciales de Firebase para el cliente
-FIREBASE_CLIENTE = {
-    "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
-    "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),
-    "projectId": getenv("CLIENTE_FIREBASE_PROJECT_ID"),
-    "storageBucket": getenv("CLIENTE_FIREBASE_STORAGE_BUCKET"),
-    "messagingSenderId": getenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID"),
-    "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
-    "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
-    "driveScopes": getenv("CLIENTE_DRIVE_SCOPES"),
-}
-
 app = FastAPI()
 
 # CORS
 FRONT_URL = getenv("FRONT_URL")
 ORIGENES = [FRONT_URL] if FRONT_URL else ["*"]
+
+app.include_router(controller_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,3 +33,16 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+@app.middleware("http")
+async def verificar_credenciales(peticion: Request, call_next):
+    """
+        Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
+        Args:
+            peticion (Diagnostico): La solicitud que contiene el token.
+            call_next: La función para pasar al siguiente middleware o ruta.
+    """
+    if peticion.method == "POST":
+        return await verificar_token(peticion, firebase_app, call_next)
+    else:
+        return await call_next(peticion)
