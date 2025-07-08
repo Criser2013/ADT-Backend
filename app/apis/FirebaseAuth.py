@@ -1,9 +1,9 @@
 import firebase_admin.auth
-from app.models import Diagnostico
+from models.Diagnostico import Diagnostico
 from firebase_admin.auth import *
 from fastapi import Response
 
-def validar_token(token: str, firebase_app) -> bool:
+def validar_token(token: str, firebase_app) -> int:
     """
         Verifica si el token de Firebase es válido.
         Args:

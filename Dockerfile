@@ -1,12 +1,10 @@
-FROM python:3.13.2-alpine3.21
+FROM python:3.13.5-bullseye
 
 WORKDIR /app/backend
 
 COPY . .
 
-RUN chmod +x install.sh && ./install.sh
-
-RUN rm install.sh
+RUN apt update && apt upgrade
 
 RUN pip install --upgrade pip
 

@@ -1,5 +1,5 @@
 from main import firebase_app, app, FIREBASE_CLIENTE
-from models import Diagnostico
+from models.Diagnostico import Diagnostico
 from fastapi import Request, Response
 from apis.FirebaseAuth import verificar_token
 
