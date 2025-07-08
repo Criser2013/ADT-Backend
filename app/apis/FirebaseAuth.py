@@ -42,5 +42,5 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
                 return JSONResponse({ "error": "Token inválido" }, status_code=403, media_type="application/json")
             case -1:
                 return JSONResponse({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
-    except:
-        return JSONResponse({ "error": "Error al procesar la solicitud" }, status_code=500, media_type="application/json")
+    except Exception as e:
+        return JSONResponse({ "error": f"Error al procesar la solicitud {e}" }, status_code=500, media_type="application/json")

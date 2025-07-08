@@ -39,7 +39,8 @@ Debe tener un archivo en formato JSON con el nombre `firebase_token.json`. Este 
 
 ### Variables de entorno requeridas
 ```
-FRONT_URL=<string>          # URL del frontend (política de CORS)
+CORS_ORIGINS=<string>                       # URLs permitidas para CORS (separadas por comas)
+ALLOWED_HOSTS=<string>                      # Hosts permitidos (separados por comas)
 CLIENTE_FIREBASE_API_KEY=<string>           # API key del proyecto de Firebase
 CLIENTE_FIREBASE_AUTH_DOMAIN=<string>       # Dominio de autenticación de Firebase
 CLIENTE_FIREBASE_PROJECT_ID=<string>        # ID del proyecto en Firebase
