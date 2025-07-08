@@ -1,6 +1,7 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Response, Request
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -19,7 +20,7 @@ def validar_token(token: str, firebase_app) -> int:
     except (ValueError, CertificateFetchError, InvalidIdTokenError):
         return -1
 
-async def verificar_token(peticion: Request, firebase_app, call_next):
+async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONResponse:
     """
         Verifica el token de Firebase en la solicitud.
         Args:
@@ -27,7 +28,7 @@ async def verificar_token(peticion: Request, firebase_app, call_next):
             firebase_app: La instancia de la aplicación Firebase.
             call_next: La función para pasar al siguiente middleware o ruta.
         Returns:
-            Response: La respuesta de la solicitud, o un error si el token es inválido.
+            JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
     """
     try:
         token = peticion.headers["authorization"].split("Bearer ")[1]
@@ -36,8 +37,8 @@ async def verificar_token(peticion: Request, firebase_app, call_next):
             case 1:
                 return await call_next(peticion)
             case 0:
-                return Response({ "error": "Token inválido" }, status_code=403, media_type="application/json")
+                return JSONResponse({ "error": "Token inválido" }, status_code=403, media_type="application/json")
             case -1:
-                return Response({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
+                return JSONResponse({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
     except:
-        return Response({ "error": "Error al procesar la solicitud" }, status_code=500, media_type="application/json")
+        return JSONResponse({ "error": "Error al procesar la solicitud" }, status_code=500, media_type="application/json")

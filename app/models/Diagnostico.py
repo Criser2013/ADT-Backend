@@ -40,4 +40,4 @@ class Diagnostico():
 
         pred = sesion.run(None, {input_name: self.datos_normalizados})[0]
 
-        return { "prediccion": pred[0] == 1 }
+        return { "prediccion": int(pred[0]) == 1 }

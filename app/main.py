@@ -5,7 +5,6 @@ from os import getenv
 from os.path import join
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from models.Diagnostico import Diagnostico
 from fastapi import Request, Response
 from controller import router as controller_router
 from apis.FirebaseAuth import verificar_token
@@ -35,7 +34,7 @@ app.add_middleware(
 )
 
 @app.middleware("http")
-async def verificar_credenciales(peticion: Request, call_next):
+async def verificar_credenciales(peticion: Request, call_next) -> Response:
     """
         Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
         Args:

@@ -1,6 +1,7 @@
 from models.Diagnostico import Diagnostico
 from models.PeticionDiagnostico import PeticionDiagnostico
-from fastapi import Response, APIRouter
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
 
@@ -22,20 +23,20 @@ router = APIRouter()
 @router.get("/credenciales")
 async def obtener_credenciales():
     try:
-        return Response(
-            str(FIREBASE_CLIENTE), status_code=200, media_type="application/json"
+        return JSONResponse(
+            FIREBASE_CLIENTE, status_code=200, media_type="application/json"
         )
     except:
-        return Response("Error al obtener las credenciales", status_code=500)
+        return JSONResponse({ "error": "Error al obtener las credenciales" }, status_code=500, media_type="application/json")
 
 
 @router.post("/diagnosticar")
-async def diagnosticar(req: PeticionDiagnostico):
+async def diagnosticar(req: PeticionDiagnostico) -> JSONResponse:
     try:
         DATOS = req.obtener_array_instancia()
         DIAGNOSTICO = Diagnostico(DATOS)
         RES = DIAGNOSTICO.generar_diagnostico()
 
-        return Response(RES, status_code=200, media_type="application/json")
+        return JSONResponse(RES, status_code=200, media_type="application/json")
     except Exception as e:
-        return Response(f"Error al procesar la solicitud: {str(e)}", status_code=500)
+        return JSONResponse({ "error": f"Error al procesar la solicitud: {str(e)}" }, status_code=500, media_type="application/json")
