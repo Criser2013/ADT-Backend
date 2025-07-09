@@ -2,16 +2,16 @@ import firebase_admin.auth
 from firebase_admin.auth import *
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from app.utils.Validadores import validar_txt_token
+from utils.Validadores import validar_txt_token
 
 def validar_token(token: str, firebase_app) -> int:
     """
-        Verifica si el token de Firebase es válido.
-        Args:
-            token (str): El token de Firebase a verificar.
-            firebase_app: La instancia de la aplicación Firebase.
-        Returns:
-            int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
+    Verifica si el token de Firebase es válido.
+    Args:
+        token (str): El token de Firebase a verificar.
+        firebase_app: La instancia de la aplicación Firebase.
+    Returns:
+        int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
     """
     try:
         firebase_admin.auth.verify_id_token(token, firebase_app, check_revoked=True)
@@ -23,13 +23,13 @@ def validar_token(token: str, firebase_app) -> int:
 
 async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONResponse:
     """
-        Verifica el token de Firebase en la solicitud.
-        Args:
-            peticion (Diagnostico): La solicitud que contiene el token.
-            firebase_app: La instancia de la aplicación Firebase.
-            call_next: La función para pasar al siguiente middleware o ruta.
-        Returns:
-            JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
+    Verifica el token de Firebase en la solicitud.
+    Args:
+        peticion (Diagnostico): La solicitud que contiene el token.
+        firebase_app: La instancia de la aplicación Firebase.
+        call_next: La función para pasar al siguiente middleware o ruta.
+    Returns:
+        JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
     """
     try:
         token = peticion.headers["authorization"].split("Bearer ")[1]

@@ -1,9 +1,10 @@
+from pathlib import Path
 import sys
-import os
-import pytest
 
-# Configuración de directorio del proyecto para que las pruebas puedan importar módulos correctamente
-@pytest.fixture(scope="session", autouse=True)
-def cambiar_path():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    sys.path.insert(0, current_dir)
+def configurar_path():
+    PATH = Path(__file__).resolve()
+    PROJECT_DIR = PATH.parent
+
+    sys.path.insert(0, f"{PROJECT_DIR}/app")
+
+configurar_path()

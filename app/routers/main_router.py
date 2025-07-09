@@ -1,8 +1,8 @@
-from app.models.Diagnostico import Diagnostico
-from app.models.PeticionDiagnostico import PeticionDiagnostico
+from models.Diagnostico import Diagnostico
+from models.PeticionDiagnostico import PeticionDiagnostico
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from app.constants import CREDS_FIREBASE_CLIENTE
+from constants import CREDS_FIREBASE_CLIENTE
 
 router = APIRouter()
 

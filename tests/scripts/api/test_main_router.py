@@ -82,7 +82,7 @@ def test_18(mocker: MockerFixture):
         "vih": 0,
     }
 
-    VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
+    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
 
     CLIENTE = TestClient(app.main.app)
@@ -156,9 +156,9 @@ def test_19(mocker: MockerFixture):
         "vih": 0,
     }
 
-    VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
+    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
-    DIAGNOSTICO = mocker.patch("app.models.Diagnostico.Diagnostico.generar_diagnostico")
+    DIAGNOSTICO = mocker.patch("models.Diagnostico.Diagnostico.generar_diagnostico")
 
     DIAGNOSTICO.side_effect = Exception("Error al generar el diagnóstico")
 

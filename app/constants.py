@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv
-from app.utils.Dominios import obtener_lista_dominios
+from utils.Dominios import obtener_lista_dominios
 
 load_dotenv()
 

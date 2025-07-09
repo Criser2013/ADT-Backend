@@ -1,7 +1,8 @@
+import pytest
 from pytest_mock import MockerFixture
 from fastapi.testclient import TestClient
 import app.main
-import pytest
+
 
 TEST_CREDS = {
         "apiKey": "test_api_key",
@@ -26,7 +27,7 @@ def setup_module(mocker: MockerFixture):
     mocker.patch("app.main.firebase_app", MOCK_APP)
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
     mocker.patch("app.main.ALLOWED_HOSTS", ["localhost",], )
-    mocker.patch("app.routers.main_router.CREDS_FIREBASE_CLIENTE", TEST_CREDS)
+    mocker.patch("routers.main_router.CREDS_FIREBASE_CLIENTE", TEST_CREDS)
     yield
     mocker.resetall()
 
@@ -53,7 +54,7 @@ def test_11(mocker: MockerFixture):
 
     CLIENTE = TestClient(app.main.app)
 
-    VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
+    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
 
     RES = CLIENTE.post(
@@ -81,7 +82,7 @@ def test_12(mocker: MockerFixture):
     cuando se hace una petición GET a la ruta /credenciales
     """
 
-    VALIDADOR = mocker.patch("app.apis.FirebaseAuth.verificar_token")
+    VALIDADOR = mocker.patch("apis.FirebaseAuth.verificar_token")
 
     CLIENTE = TestClient(app.main.app)
 
@@ -89,7 +90,7 @@ def test_12(mocker: MockerFixture):
         "/credenciales",
         headers={"Origin": "http://localhost:5178", "Host": "localhost"},
     )
-    # print(RES.content.decode("utf-8"))
+    print(RES.json())
 
     assert RES.status_code == 200
     assert RES.json() == TEST_CREDS

@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
-from app.routers.main_router import router as main_router
-from app.apis.FirebaseAuth import verificar_token
-from app.constants import CORS_ORIGINS, ALLOWED_HOSTS
-from app.firebase_admin_config import firebase_app
+from routers.main_router import router as main_router
+from apis.FirebaseAuth import verificar_token
+from constants import CORS_ORIGINS, ALLOWED_HOSTS
+from firebase_admin_config import firebase_app
 
 app = FastAPI()
 
@@ -29,10 +29,10 @@ app.add_middleware(
 @app.middleware("http")
 async def verificar_credenciales(peticion: Request, call_next) -> Response:
     """
-        Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
-        Args:
-            peticion (Diagnostico): La solicitud que contiene el token.
-            call_next: La función para pasar al siguiente middleware o ruta.
+    Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
+    Args:
+        peticion (Diagnostico): La solicitud que contiene el token.
+        call_next: La función para pasar al siguiente middleware o ruta.
     """
     if peticion.method == "POST":
         return await verificar_token(peticion, firebase_app, call_next)
