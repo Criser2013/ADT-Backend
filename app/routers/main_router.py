@@ -1,8 +1,8 @@
-from models.Diagnostico import Diagnostico
-from models.PeticionDiagnostico import PeticionDiagnostico
+from app.models.Diagnostico import Diagnostico
+from app.models.PeticionDiagnostico import PeticionDiagnostico
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from constants import CREDS_FIREBASE_CLIENTE
+from app.constants import CREDS_FIREBASE_CLIENTE
 
 router = APIRouter()
 
@@ -12,8 +12,8 @@ async def obtener_credenciales():
         return JSONResponse(
             CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
         )
-    except:
-        return JSONResponse({ "error": "Error al obtener las credenciales" }, status_code=500, media_type="application/json")
+    except Exception as e:
+        return JSONResponse({ "error": f"Error al obtener las credenciales: {e}" }, status_code=500, media_type="application/json")
 
 
 @router.post("/diagnosticar")

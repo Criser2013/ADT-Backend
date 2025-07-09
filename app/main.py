@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
-from routers.main_router import router as main_router
-from apis.FirebaseAuth import verificar_token
-from constants import CORS_ORIGINS, ALLOWED_HOSTS
-from firebase_admin_config import firebase_app
+from app.routers.main_router import router as main_router
+from app.apis.FirebaseAuth import verificar_token
+from app.constants import CORS_ORIGINS, ALLOWED_HOSTS
+from app.firebase_admin_config import firebase_app
 
 app = FastAPI()
 

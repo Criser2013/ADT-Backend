@@ -2,7 +2,7 @@ import firebase_admin.auth
 from firebase_admin.auth import *
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from utils.Validadores import validar_txt_token
+from app.utils.Validadores import validar_txt_token
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -43,4 +43,4 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
             case -1:
                 return JSONResponse({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
     except Exception as e:
-        return JSONResponse({ "error": f"Error al procesar la solicitud {e}" }, status_code=500, media_type="application/json")
+        return JSONResponse({ "error": f"Error al procesar la solicitud: {e}" }, status_code=500, media_type="application/json")
