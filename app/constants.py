@@ -14,5 +14,5 @@ CREDS_FIREBASE_CLIENTE = {
     "messagingSenderId": getenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID"),
     "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
     "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
-    "driveScopes": getenv("CLIENTE_DRIVE_SCOPES"),
+    "driveScopes": obtener_lista_dominios(getenv("CLIENTE_DRIVE_SCOPES","")),
 }

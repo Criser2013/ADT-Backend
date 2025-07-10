@@ -13,4 +13,4 @@ def test_2():
         Test para validar que la función retorne una lista vacía cuando no hay dominios.
     """
     RES = obtener_lista_dominios("")
-    assert RES == [""]
+    assert RES == []
