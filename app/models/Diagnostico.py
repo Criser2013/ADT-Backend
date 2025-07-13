@@ -38,6 +38,6 @@ class Diagnostico():
         sesion = rt.InferenceSession(f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx", providers=["CPUExecutionProvider"])
         input_name = sesion.get_inputs()[0].name
 
-        pred = sesion.run(None, {input_name: self.datos_normalizados})[0]
+        pred = sesion.run(None, {input_name: self.datos_normalizados})
 
-        return { "prediccion": int(pred[0]) == 1 }
+        return { "prediccion": int(pred[0][0]) == 1, "probabilidad": float(pred[1][0][pred[0][0]]) }
