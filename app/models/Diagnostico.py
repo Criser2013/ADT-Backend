@@ -39,5 +39,6 @@ class Diagnostico():
         input_name = sesion.get_inputs()[0].name
 
         pred = sesion.run(None, {input_name: self.datos_normalizados})
+        RES = pred[0][0]
 
-        return { "prediccion": int(pred[0][0]) == 1, "probabilidad": float(pred[1][0][pred[0][0]]) }
+        return { "prediccion": int(RES) == 1, "probabilidad": float(pred[1][0][RES]) }
