@@ -11,7 +11,7 @@ jobs:
     name: Run Python tests
     runs-on: ubuntu-latest
     container:
-      image: python:3.13.2-alpine3.21
+      image: python:3.13.5-bullseye
       volumes:
         - ${{ github.workspace  }}:/app
     steps:
