@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v4
+        
+      - name: Use Firebase credentials
+        run: echo ${{ secrets.FIREBASE_CREDENTIALS  }} > firebase_token.json
       
       - name: Installing dependencies
         run: pip install --no-cache-dir --no-input -r requirements-dev.txt
