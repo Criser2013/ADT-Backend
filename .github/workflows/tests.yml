@@ -33,6 +33,8 @@ jobs:
           chmod +x ./ejecutar-tests.sh
           ./ejecutar-tests.sh
         continue-on-error: true
+        env:
+          FIREBASE_ADMIN_CREDS_PATH: "./firebase_token.json"
 
       - name: Save tests results
         uses: actions/upload-artifact@v4
