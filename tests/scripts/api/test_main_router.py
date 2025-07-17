@@ -95,7 +95,7 @@ def test_18(mocker: MockerFixture):
     )
 
     assert RES.status_code == 200
-    assert RES.json() == { "prediccion": True }
+    assert RES.json() == { "prediccion": True, "probabilidad": 1.0 }
 
     VALIDADOR.assert_called_once_with("token_valido")
     FIREBASE.assert_called_once_with("token_valido", {
