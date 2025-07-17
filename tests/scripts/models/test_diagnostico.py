@@ -49,4 +49,4 @@ def test_9():
         ])
     OBJ = Diagnostico(INSTANCIA)
     RES = OBJ.generar_diagnostico()
-    assert {"prediccion": True } == RES
+    assert {"prediccion": True, "probabilidad": 1.0 } == RES
