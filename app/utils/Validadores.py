@@ -24,6 +24,6 @@ def validar_correo(correo: str) -> bool:
     Returns:
         bool: Si el texto es un correo.
     """
-    EXP = compile("^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$")
+    EXP = compile(r"^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$")
 
     return EXP.fullmatch(correo) is not None
