@@ -3,6 +3,8 @@ from firebase_admin.auth import *
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
+from datetime import datetime
+
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -21,6 +23,7 @@ def validar_token(token: str, firebase_app) -> int:
     except (ValueError, CertificateFetchError, InvalidIdTokenError):
         return -1
 
+
 async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.
@@ -34,13 +37,61 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
     try:
         token = peticion.headers["authorization"].split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
-        res_validacion = 0 if (not reg_validacion) else validar_token(token, firebase_app)
+        res_validacion = (
+            0 if (not reg_validacion) else validar_token(token, firebase_app)
+        )
         match res_validacion:
             case 1:
                 return await call_next(peticion)
             case 0:
-                return JSONResponse({ "error": "Token inválido" }, status_code=403, media_type="application/json")
+                return JSONResponse(
+                    {"error": "Token inválido"},
+                    status_code=403,
+                    media_type="application/json",
+                )
             case -1:
-                return JSONResponse({ "error": "Error al validar el token" }, status_code=400, media_type="application/json")
+                return JSONResponse(
+                    {"error": "Error al validar el token"},
+                    status_code=400,
+                    media_type="application/json",
+                )
     except Exception as e:
-        return JSONResponse({ "error": f"Error al procesar la solicitud: {e}" }, status_code=500, media_type="application/json")
+        return JSONResponse(
+            {"error": f"Error al procesar la solicitud: {e}"},
+            status_code=500,
+            media_type="application/json",
+        )
+
+
+def ver_datos_usuarios(firebase_app) -> JSONResponse:
+    """
+    Obtiene los datos de los usuarios registrados en Firebase.
+    Args:
+        firebase_app: La instancia de la aplicación Firebase.
+    Returns:
+        JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
+    """
+    try:
+        usuarios = firebase_admin.auth.list_users(firebase_app).users
+        usuarios = map(
+            lambda x: {
+                "correo": x["email"],
+                "nombre": x["display_name"],
+                "ultima_conexion": datetime.fromtimestamp(
+                    x["user_metadata"]["last_sign_in_timestamp"] / 1000
+                ),
+            },
+            usuarios,
+        )
+        usuarios = list(usuarios)
+        return JSONResponse(
+            {"usuarios": usuarios},
+            status_code=200,
+            media_type="application/json",
+        )
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Error al obtener los datos de los usuarios: {e}"},
+            status_code=400,
+            media_type="application/json",
+        )
