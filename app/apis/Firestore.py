@@ -21,4 +21,4 @@ async def verificar_rol_usuario(correo: str) -> bool:
     rol = await REF.get(["rol"])
     rol = rol.to_dict()
 
-    return rol == ROL_ADMIN
+    return rol["rol"] == ROL_ADMIN

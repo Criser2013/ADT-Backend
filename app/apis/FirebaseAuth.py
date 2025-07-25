@@ -3,8 +3,8 @@ from firebase_admin.auth import *
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
-from datetime import datetime
-
+from datetime import datetime, timedelta, timezone
+from utils.Fechas import convertir_datetime_str
 
 def validar_token(token: str, firebase_app) -> int:
     """
@@ -72,14 +72,17 @@ def ver_datos_usuarios(firebase_app) -> JSONResponse:
         JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
     """
     try:
-        usuarios = firebase_admin.auth.list_users(firebase_app).users
+        usuarios = firebase_admin.auth.list_users(app=firebase_app).users
+        print(usuarios)
         usuarios = map(
             lambda x: {
-                "correo": x["email"],
-                "nombre": x["display_name"],
-                "ultima_conexion": datetime.fromtimestamp(
-                    x["user_metadata"]["last_sign_in_timestamp"] / 1000
-                ),
+                "correo": x.email,
+                "nombre": x.display_name,
+                "ultima_conexion": 
+                convertir_datetime_str(datetime.fromtimestamp(
+                    x.user_metadata.last_sign_in_timestamp / 1000,
+                    tz=timezone(timedelta(hours=-5))
+                )),
             },
             usuarios,
         )
