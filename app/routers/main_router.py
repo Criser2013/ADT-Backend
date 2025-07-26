@@ -61,7 +61,7 @@ async def ver_usuarios(req: Request) -> JSONResponse:
                 media_type="application/json",
             )
 
-        return ver_datos_usuarios(firebase_app)
+        return await ver_datos_usuarios(firebase_app)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error al procesar la solicitud: {str(e)}"},

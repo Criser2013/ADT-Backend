@@ -1,4 +1,4 @@
-from app.utils.Dominios import obtener_lista_dominios
+from app.utils.Dominios import *
 
 def test_1():
     """

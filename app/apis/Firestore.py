@@ -17,3 +17,21 @@ async def verificar_rol_usuario(correo: str) -> bool:
     rol = rol.to_dict()
 
     return rol["rol"] == ROL_ADMIN
+
+async def obtener_roles_usuarios() -> list[dict]:
+    """
+    Obtiene los datos de los usuarios en la base de datos.
+
+    Returns:
+        list[dict]: Lista de diccionarios con los roles de los usuarios.
+    """
+    DB = firestore_async.client()
+    REF = DB.collection("usuarios")
+    docs = await REF.get()
+    AUX = {}
+
+    for doc in docs:
+        data = doc.to_dict()
+        AUX[data["correo"]] = data["rol"]
+
+    return AUX

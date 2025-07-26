@@ -1,7 +1,7 @@
 from pytest_mock import MockerFixture
 from fastapi import Request
 import pytest
-from app.apis.FirebaseAuth import verificar_token, validar_token, ver_datos_token, ver_datos_usuarios
+from app.apis.FirebaseAuth import *
 from firebase_admin.auth import ExpiredIdTokenError, CertificateFetchError, ListUsersPage, ExportedUserRecord, UserMetadata
 
 TEST_CREDS = {
@@ -186,7 +186,8 @@ def test_27(mocker: MockerFixture):
     assert RES == (-1, {"error": "Error al procesar el token: Error inesperado."})
     VALIDADOR.assert_called_once_with("token_invalido")
 
-def test_28(mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_28(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuarios" retorne los datos de los usuarios.
     """
@@ -203,16 +204,21 @@ def test_28(mocker: MockerFixture):
     LISTA.users = [USUARIO]
     LISTA.has_next_page = False
 
+    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_roles_usuarios")
+    FIRESTORE.return_value = { "usuario@correo.com": 0 }
+
     FIREBASE = mocker.patch("firebase_admin.auth.list_users", return_value=LISTA)
 
-    RES = ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
+    FIRESTORE.assert_called_once()
 
-def test_29(mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_29(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuarios" retorne los datos de los usuarios
     cuando hay múltiples páginas de usuarios.
@@ -235,23 +241,27 @@ def test_29(mocker: MockerFixture):
     LISTA.has_next_page = True
     LISTA.get_next_page.side_effect = lambda: LISTA2
 
+    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_roles_usuarios")
+    FIRESTORE.return_value = { "usuario@correo.com": 0 }
+
     FIREBASE = mocker.patch("firebase_admin.auth.list_users", return_value=LISTA)
 
-    RES = ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 
-def test_30(mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_30(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuarios" maneje correctamente las excepciones.
     """
     FIREBASE = mocker.patch("firebase_admin.auth.list_users")
     FIREBASE.side_effect = Exception("Error al obtener los usuarios")
 
-    RES = ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 400
     assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos de los usuarios: Error al obtener los usuarios"}'

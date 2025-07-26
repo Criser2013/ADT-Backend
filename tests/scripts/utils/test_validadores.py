@@ -1,4 +1,4 @@
-from app.utils.Validadores import validar_txt_token
+from app.utils.Validadores import *
 
 def test_3():
     """

@@ -1,7 +1,7 @@
 from pytest_mock import MockerFixture
 import pytest
-from app.apis.Firestore import verificar_rol_usuario
-from google.cloud.firestore_v1 import AsyncClient, AsyncDocumentReference, DocumentSnapshot
+from app.apis.Firestore import *
+from google.cloud.firestore_v1 import AsyncClient, AsyncDocumentReference, DocumentSnapshot, AsyncCollectionReference
 
 @pytest.mark.asyncio
 async def test_31(mocker: MockerFixture):
@@ -46,5 +46,30 @@ async def test_32(mocker: MockerFixture):
     RES = await verificar_rol_usuario("usuario@correo.com")
 
     assert RES == False
+
+    FIREBASE.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_38(mocker: MockerFixture):
+    """
+    Test para validar que la función "obtener_roles_usuarios" retorne los roles de los usuarios.
+    """
+    DOCUMENTO1 = mocker.MagicMock(spec=DocumentSnapshot)
+    DOCUMENTO1.to_dict.return_value = {"correo": "usuario@correo.com", "rol": 0}
+
+    DOCUMENTO2 = mocker.MagicMock(spec=DocumentSnapshot)
+    DOCUMENTO2.to_dict.return_value = {"correo": "usuario2@correo.com", "rol": 1001}
+
+    REF = mocker.MagicMock(spec=AsyncCollectionReference)
+    REF.get.return_value = [DOCUMENTO1, DOCUMENTO2]
+
+    CLIENTE = mocker.MagicMock(spec=AsyncClient)
+    CLIENTE.collection.return_value = REF
+
+    FIREBASE = mocker.patch("firebase_admin.firestore_async.client",return_value=CLIENTE)
+
+    RES = await obtener_roles_usuarios()
+
+    assert RES == {"usuario@correo.com": 0, "usuario2@correo.com": 1001}
 
     FIREBASE.assert_called_once()

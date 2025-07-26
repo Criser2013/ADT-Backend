@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from datetime import datetime, timedelta, timezone
 from utils.Fechas import convertir_datetime_str
-
+from apis.Firestore import obtener_roles_usuarios
 
 def validar_token(
     token: str, firebase_app, obtener_datos: bool
@@ -98,7 +98,7 @@ def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
     except Exception as e:
         return (-1, {"error": f"Error al procesar el token: {e}."})
 
-def ver_datos_usuarios(firebase_app) -> JSONResponse:
+async def ver_datos_usuarios(firebase_app) -> JSONResponse:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
@@ -108,6 +108,7 @@ def ver_datos_usuarios(firebase_app) -> JSONResponse:
     """
     try:
         AUX = []
+        ROLES = await obtener_roles_usuarios()
         usuarios = firebase_admin.auth.list_users(app=firebase_app)
 
         while True:
@@ -116,6 +117,7 @@ def ver_datos_usuarios(firebase_app) -> JSONResponse:
                     {
                         "correo": x.email,
                         "nombre": x.display_name,
+                        "rol": ROLES[x.email],
                         "ultima_conexion": convertir_datetime_str(
                             datetime.fromtimestamp(
                                 x.user_metadata.last_sign_in_timestamp / 1000,

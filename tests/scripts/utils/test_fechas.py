@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.utils.Fechas import convertir_hora, convertir_datetime_str
+from app.utils.Fechas import *
 
 def test_20():
     """
