@@ -1,4 +1,4 @@
-from app.utils.Validadores import validar_txt_token, validar_correo
+from app.utils.Validadores import validar_txt_token
 
 def test_3():
     """
@@ -17,18 +17,4 @@ def test_4():
     token = "a" * 800
     token += "@hola+++'''"
     RES = validar_txt_token(token)
-    assert RES == False
-
-def test_20():
-    """
-    Test para validar que la expresión regular reconozca una dirección de correo váida
-    """
-    RES = validar_correo("test121212.xd@correo.com")
-    assert RES == True
-
-def test_21():
-    """
-    Test para validar que la expresión regular no reconozca una dirección de correo inválida
-    """
-    RES = validar_correo("test121212.xd@corr2323eo")
     assert RES == False

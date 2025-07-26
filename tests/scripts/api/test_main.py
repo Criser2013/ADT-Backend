@@ -90,7 +90,6 @@ def test_12(mocker: MockerFixture):
         "/credenciales",
         headers={"Origin": "http://localhost:5178", "Host": "localhost"},
     )
-    print(RES.json())
 
     assert RES.status_code == 200
     assert RES.json() == TEST_CREDS

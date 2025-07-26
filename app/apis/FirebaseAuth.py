@@ -82,7 +82,7 @@ def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
         reg_validacion = validar_txt_token(token)
 
         if not reg_validacion:
-            return (False, {"error": "Token inválido"})
+            return (0, {"error": "Token inválido"})
         
         res_validacion = validar_token(token, firebase_app, True)
 
@@ -95,7 +95,7 @@ def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
                 return (-1, {"error": "Error al validar el token"})
 
     except Exception as e:
-        return (-1, {"error": f"Error al procesar el token: {e}"})
+        return (-1, {"error": f"Error al procesar el token: {e}."})
 
 def ver_datos_usuarios(firebase_app) -> JSONResponse:
     """

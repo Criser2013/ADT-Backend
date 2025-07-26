@@ -28,4 +28,4 @@ def convertir_datetime_str(fecha: datetime) -> str:
         str: La fecha en formato ISO 8601.
     """
     HORA = convertir_hora(fecha.hour, fecha.minute)
-    return f"{fecha.day}/{fecha.month}/{fecha.year} {HORA}"
+    return f"{fecha.day:02d}/{fecha.month:02d}/{fecha.year} {HORA}"
