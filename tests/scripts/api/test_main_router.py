@@ -182,7 +182,7 @@ def test_19(mocker: MockerFixture):
     }, check_revoked=True)
     DIAGNOSTICO.assert_called_once()
 
-def test_31(mocker: MockerFixture):
+def test_33(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de los usuarios con una petición
     autenticada.
@@ -214,7 +214,7 @@ def test_31(mocker: MockerFixture):
     ROL.assert_called_once_with("usuario@correo.com")
     USUARIO.assert_called_once()
 
-def test_32(mocker: MockerFixture):
+def test_34(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el token es inválido.
     """
@@ -234,7 +234,7 @@ def test_32(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-def test_33(mocker: MockerFixture):
+def test_35(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si se produjo un error
     al verificar el token
@@ -255,7 +255,7 @@ def test_33(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-def test_34(mocker: MockerFixture):
+def test_36(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
     es administrador.
@@ -278,7 +278,7 @@ def test_34(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("usuario@correo.com")
 
-def test_35(mocker: MockerFixture):
+def test_37(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
     es administrador.

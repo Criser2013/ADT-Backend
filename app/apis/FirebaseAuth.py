@@ -15,6 +15,7 @@ def validar_token(
     Args:
         token (str): El token de Firebase a verificar.
         firebase_app: La instancia de la aplicación Firebase.
+        obtener_datos (bool): Si True, retorna los datos del token si es válido.
     Returns:
         int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
     """
