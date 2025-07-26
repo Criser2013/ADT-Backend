@@ -6,7 +6,10 @@ from utils.Validadores import validar_txt_token
 from datetime import datetime, timedelta, timezone
 from utils.Fechas import convertir_datetime_str
 
-def validar_token(token: str, firebase_app) -> int:
+
+def validar_token(
+    token: str, firebase_app, obtener_datos: bool
+) -> int | tuple[int, dict | None]:
     """
     Verifica si el token de Firebase es válido.
     Args:
@@ -16,12 +19,14 @@ def validar_token(token: str, firebase_app) -> int:
         int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
     """
     try:
-        firebase_admin.auth.verify_id_token(token, firebase_app, check_revoked=True)
-        return 1
+        datos = firebase_admin.auth.verify_id_token(
+            token, firebase_app, check_revoked=True
+        )
+        return (1, datos) if obtener_datos else 1
     except (ExpiredIdTokenError, RevokedIdTokenError, UserDisabledError):
-        return 0
+        return (0, None) if obtener_datos else 0
     except (ValueError, CertificateFetchError, InvalidIdTokenError):
-        return -1
+        return (-1, None) if obtener_datos else -1
 
 
 async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONResponse:
@@ -38,7 +43,7 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
         token = peticion.headers["authorization"].split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
         res_validacion = (
-            0 if (not reg_validacion) else validar_token(token, firebase_app)
+            0 if (not reg_validacion) else validar_token(token, firebase_app, False)
         )
         match res_validacion:
             case 1:
@@ -49,7 +54,7 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
                     status_code=403,
                     media_type="application/json",
                 )
-            case -1:
+            case _:
                 return JSONResponse(
                     {"error": "Error al validar el token"},
                     status_code=400,
@@ -63,6 +68,35 @@ async def verificar_token(peticion: Request, firebase_app, call_next) -> JSONRes
         )
 
 
+def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
+    """
+    Obtiene los datos del token de Firebase.
+    Args:
+        peticion (Request): La solicitud que contiene el token.
+        firebase_app: La instancia de la aplicación Firebase.
+    Returns:
+        tuple: (True, datos) si el token es válido, (False, error) si hay un error.
+    """
+    try:
+        token = peticion.headers["authorization"].split("Bearer ")[1]
+        reg_validacion = validar_txt_token(token)
+
+        if not reg_validacion:
+            return (False, {"error": "Token inválido"})
+        
+        res_validacion = validar_token(token, firebase_app, True)
+
+        match res_validacion[0]:
+            case 1:
+                return res_validacion
+            case 0:
+                return (0, {"error": "Token inválido"})
+            case _:
+                return (-1, {"error": "Error al validar el token"})
+
+    except Exception as e:
+        return (-1, {"error": f"Error al procesar el token: {e}"})
+
 def ver_datos_usuarios(firebase_app) -> JSONResponse:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
@@ -72,23 +106,32 @@ def ver_datos_usuarios(firebase_app) -> JSONResponse:
         JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
     """
     try:
-        usuarios = firebase_admin.auth.list_users(app=firebase_app).users
-        print(usuarios)
-        usuarios = map(
-            lambda x: {
-                "correo": x.email,
-                "nombre": x.display_name,
-                "ultima_conexion": 
-                convertir_datetime_str(datetime.fromtimestamp(
-                    x.user_metadata.last_sign_in_timestamp / 1000,
-                    tz=timezone(timedelta(hours=-5))
-                )),
-            },
-            usuarios,
-        )
-        usuarios = list(usuarios)
+        AUX = []
+        usuarios = firebase_admin.auth.list_users(app=firebase_app)
+
+        while True:
+            AUX.extend(
+                [
+                    {
+                        "correo": x.email,
+                        "nombre": x.display_name,
+                        "ultima_conexion": convertir_datetime_str(
+                            datetime.fromtimestamp(
+                                x.user_metadata.last_sign_in_timestamp / 1000,
+                                tz=timezone(timedelta(hours=-5)),
+                            )
+                        ),
+                    }
+                    for x in usuarios.users
+                ]
+            )
+            if not usuarios.has_next_page:
+                break
+            else:
+                usuarios = usuarios.get_next_page()
+
         return JSONResponse(
-            {"usuarios": usuarios},
+            {"usuarios": AUX},
             status_code=200,
             media_type="application/json",
         )

@@ -1,15 +1,14 @@
 from models.Diagnostico import Diagnostico
 from models.PeticionDiagnostico import PeticionDiagnostico
-from models.PeticionUsuarios import PeticionUsuarios
+from apis.FirebaseAuth import ver_datos_token
 from apis.Firestore import verificar_rol_usuario
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from constants import CREDS_FIREBASE_CLIENTE
 from apis.FirebaseAuth import ver_datos_usuarios
 from firebase_admin_config import firebase_app
 
 router = APIRouter()
-
 
 @router.get("/credenciales")
 async def obtener_credenciales():
@@ -41,10 +40,19 @@ async def diagnosticar(req: PeticionDiagnostico) -> JSONResponse:
         )
 
 
-@router.post("/usuarios")
-async def ver_usuarios(req: PeticionUsuarios) -> JSONResponse:
+@router.get("/usuarios")
+async def ver_usuarios(req: Request) -> JSONResponse:
     try:
-        VALIDAR_ROL = await verificar_rol_usuario(req.correo)
+        RES, DATOS = ver_datos_token(req, firebase_app)
+
+        if RES in (-1, 0):
+            return JSONResponse(
+                DATOS,
+                status_code=403 if RES == 0 else 400,
+                media_type="application/json",
+            )
+
+        VALIDAR_ROL = await verificar_rol_usuario(DATOS["email"])
 
         if not VALIDAR_ROL:
             return JSONResponse(

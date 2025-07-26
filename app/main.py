@@ -34,7 +34,7 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
-    if peticion.method == "POST":
+    if peticion.method in ("POST",):
         return await verificar_token(peticion, firebase_app, call_next)
     else:
         return await call_next(peticion)
