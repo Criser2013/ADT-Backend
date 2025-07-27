@@ -200,6 +200,7 @@ async def test_28(mocker: MockerFixture):
     USUARIO.email = "usuario@correo.com"
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
+    USUARIO.disabled = False
 
     LISTA.users = [USUARIO]
     LISTA.has_next_page = False
@@ -212,7 +213,7 @@ async def test_28(mocker: MockerFixture):
     RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
     FIRESTORE.assert_called_once()
@@ -233,6 +234,7 @@ async def test_29(mocker: MockerFixture):
     USUARIO.email = "usuario@correo.com"
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
+    USUARIO.disabled = False
 
     LISTA2.users = [USUARIO]
     LISTA2.has_next_page = False
@@ -249,7 +251,7 @@ async def test_29(mocker: MockerFixture):
     RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 

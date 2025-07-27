@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from datetime import datetime, timedelta, timezone
 from utils.Fechas import convertir_datetime_str
+from utils.Diccionario import ver_si_existe_clave
 from apis.Firestore import obtener_roles_usuarios
 
 def validar_token(
@@ -106,10 +107,12 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
     Returns:
         JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
     """
+    import asyncio
     try:
         AUX = []
-        ROLES = await obtener_roles_usuarios()
+        roles_task = asyncio.create_task(obtener_roles_usuarios())
         usuarios = firebase_admin.auth.list_users(app=firebase_app)
+        ROLES = await roles_task
 
         while True:
             AUX.extend(
@@ -117,7 +120,8 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
                     {
                         "correo": x.email,
                         "nombre": x.display_name,
-                        "rol": ROLES[x.email],
+                        "rol": (ROLES[x.email] if ver_si_existe_clave(ROLES, x.email) else "N/A"),
+                        "estado": not x.disabled,
                         "ultima_conexion": convertir_datetime_str(
                             datetime.fromtimestamp(
                                 x.user_metadata.last_sign_in_timestamp / 1000,

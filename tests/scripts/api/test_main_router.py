@@ -188,7 +188,7 @@ def test_33(mocker: MockerFixture):
     autenticada.
     """
 
-    DATOS = [{"correo": "usuario@correo.com", "nombre": "usuario", "ultima_conexion": 1000}]
+    DATOS = [{"correo": "usuario@correo.com", "nombre": "usuario", "ultima_conexion": 1000, "rol": 0, "estado": True}]
     DATOS_TOKEN = mocker.patch("routers.main_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
     ROL = mocker.patch("routers.main_router.verificar_rol_usuario", return_value=True)
 
