@@ -7,7 +7,7 @@ from firebase_admin_config import firebase_app
 from utils.Validadores import validar_correo
 from urllib.parse import unquote
 
-router = APIRouter()
+router = APIRouter(prefix="/usuarios")
 
 @router.get("")
 async def ver_usuarios(req: Request) -> JSONResponse:

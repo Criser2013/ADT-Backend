@@ -1,12 +1,8 @@
 from models.Diagnostico import Diagnostico
 from models.PeticionDiagnostico import PeticionDiagnostico
-from apis.FirebaseAuth import ver_datos_token
-from apis.Firestore import verificar_rol_usuario
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from constants import CREDS_FIREBASE_CLIENTE
-from apis.FirebaseAuth import ver_datos_usuarios
-from firebase_admin_config import firebase_app
 
 router = APIRouter()
 

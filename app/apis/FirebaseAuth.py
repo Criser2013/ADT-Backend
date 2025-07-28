@@ -187,7 +187,7 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
         }
 
         return JSONResponse(
-            {"usuario": RES},
+            RES,
             status_code=200,
             media_type="application/json",
         )
@@ -199,7 +199,7 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error al obtener los datos de los usuarios: {e}"},
+            {"error": f"Error al obtener los datos del usuario: {e}"},
             status_code=400,
             media_type="application/json",
         )

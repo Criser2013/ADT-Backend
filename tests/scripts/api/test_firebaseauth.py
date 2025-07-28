@@ -269,3 +269,66 @@ async def test_30(mocker: MockerFixture):
     assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos de los usuarios: Error al obtener los usuarios"}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
+
+@pytest.mark.asyncio
+async def test_43(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_datos_usuario" retorne los datos de un usuario.
+    """
+    USUARIO = mocker.MagicMock(spec=ExportedUserRecord)
+    METADATOS = mocker.MagicMock(spec=UserMetadata)
+
+    METADATOS.last_sign_in_timestamp = 1753549008090
+
+    USUARIO.email = "usuario@correo.com"
+    USUARIO.display_name = "usuario"
+    USUARIO.user_metadata =  METADATOS
+    USUARIO.disabled = False
+
+    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
+    FIRESTORE.return_value = 0
+
+    FIREBASE = mocker.patch("firebase_admin.auth.get_user_by_email", return_value=USUARIO)
+
+    RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
+
+    assert RES.status_code == 200
+    assert RES.body.decode("utf-8") == '{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}'
+
+    FIREBASE.assert_called_once_with("usuario@correo.com", "firebase_app")
+    FIRESTORE.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_44(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_datos_usuario" arroje una excepción al no
+    encontrar el usuario.
+    """
+    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
+    FIRESTORE.return_value = -1
+
+    FIREBASE = mocker.patch("firebase_admin.auth.get_user_by_email", return_value=None)
+
+    RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
+
+    print(RES.status_code, RES.body.decode("utf-8"))
+    assert RES.status_code == 404
+    assert RES.body.decode("utf-8") == '{"error":"Usuario no encontrado"}'
+
+    FIRESTORE.assert_called_once_with("usuario@correo.com")
+    FIREBASE.assert_called_once_with("usuario@correo.com", "firebase_app")
+
+@pytest.mark.asyncio
+async def test_45(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_datos_usuario" maneje correctamente las excepciones.
+    """
+    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
+    FIRESTORE.side_effect = Exception("usuario@correo.com")
+
+    mocker.patch("firebase_admin.auth.get_user_by_email", return_value=None)
+
+    RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
+
+    assert RES.status_code == 400
+    assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos del usuario: usuario@correo.com"}'

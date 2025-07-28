@@ -18,3 +18,20 @@ def test_4():
     token += "@hola+++'''"
     RES = validar_txt_token(token)
     assert RES == False
+
+def test_52():
+    """
+    Test para validar que la función reconozca un correo electrónico válido.
+    
+    """
+    correo = "usuario@correo.com"
+    RES = validar_correo(correo)
+    assert RES == True
+
+def test_53():
+    """
+    Test para validar que la función reconozca un correo electrónico inválido.
+    """
+    correo = "usuario@cor1212reo.com@"
+    RES = validar_correo(correo)
+    assert RES == False

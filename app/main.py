@@ -11,7 +11,7 @@ from firebase_admin_config import firebase_app
 app = FastAPI()
 
 app.include_router(main_router)
-app.include_router(usuarios_router, prefix="/admin/usuarios")
+app.include_router(usuarios_router, prefix="/admin")
 
 # Configuración de CORS
 app.add_middleware(
