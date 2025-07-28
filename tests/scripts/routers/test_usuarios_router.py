@@ -24,8 +24,8 @@ def test_33(mocker: MockerFixture):
     """
 
     DATOS = [{"correo": "usuario@correo.com", "nombre": "usuario", "ultima_conexion": 1000, "rol": 0, "estado": True}]
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
-    ROL = mocker.patch("routers.usuarios_router.verificar_rol_usuario", return_value=True)
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
     USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuarios")
     USUARIO.return_value = JSONResponse(
@@ -54,7 +54,7 @@ def test_34(mocker: MockerFixture):
     Test para validar que el API no retorne los datos de los usuarios si el token es inválido.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
 
     CLIENTE = TestClient(app.main.app)
 
@@ -75,7 +75,7 @@ def test_35(mocker: MockerFixture):
     al verificar el token
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
 
     CLIENTE = TestClient(app.main.app)
 
@@ -96,8 +96,8 @@ def test_36(mocker: MockerFixture):
     es administrador.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
-    ROL = mocker.patch("routers.usuarios_router.verificar_rol_usuario", return_value=False)
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
 
     CLIENTE = TestClient(app.main.app)
 
@@ -119,7 +119,7 @@ def test_37(mocker: MockerFixture):
     es administrador.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token")
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.side_effect = Exception("Error inesperado")
 
     CLIENTE = TestClient(app.main.app)
@@ -142,8 +142,8 @@ def test_46(mocker: MockerFixture):
     """
 
     DATOS = {"correo": "usuario@correo.com", "nombre": "usuario", "ultima_conexion": 1000, "rol": 0, "estado": True}
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
-    ROL = mocker.patch("routers.usuarios_router.verificar_rol_usuario", return_value=True)
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
     USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuario")
     USUARIO.return_value = JSONResponse(
@@ -175,7 +175,7 @@ def test_47(mocker: MockerFixture):
     Test para validar que el API no retorne los datos del usuario si el token es inválido.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
 
     CLIENTE = TestClient(app.main.app)
 
@@ -196,7 +196,7 @@ def test_48(mocker: MockerFixture):
     al verificar el token
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
 
     CLIENTE = TestClient(app.main.app)
 
@@ -217,8 +217,8 @@ def test_49(mocker: MockerFixture):
     es administrador.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
-    ROL = mocker.patch("routers.usuarios_router.verificar_rol_usuario", return_value=False)
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
 
     CLIENTE = TestClient(app.main.app)
 
@@ -239,7 +239,7 @@ def test_50(mocker: MockerFixture):
     Test para validar que el API no retorne los datos de los usuarios si ocurre una excepción.
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token")
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.side_effect = Exception("Error inesperado")
 
     CLIENTE = TestClient(app.main.app)
@@ -261,8 +261,8 @@ def test_51(mocker: MockerFixture):
     correo inválido
     """
 
-    DATOS_TOKEN = mocker.patch("routers.usuarios_router.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
-    ROL = mocker.patch("routers.usuarios_router.verificar_rol_usuario", return_value=True)
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
     mocker.patch("routers.usuarios_router.validar_correo", return_value=False)
 
     CLIENTE = TestClient(app.main.app)
