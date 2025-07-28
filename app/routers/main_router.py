@@ -38,33 +38,3 @@ async def diagnosticar(req: PeticionDiagnostico) -> JSONResponse:
             status_code=500,
             media_type="application/json",
         )
-
-
-@router.get("/usuarios")
-async def ver_usuarios(req: Request) -> JSONResponse:
-    try:
-        RES, DATOS = ver_datos_token(req, firebase_app)
-
-        if RES in (-1, 0):
-            return JSONResponse(
-                DATOS,
-                status_code=403 if RES == 0 else 400,
-                media_type="application/json",
-            )
-
-        VALIDAR_ROL = await verificar_rol_usuario(DATOS["email"])
-
-        if not VALIDAR_ROL:
-            return JSONResponse(
-                {"error": "Acceso denegado."},
-                status_code=403,
-                media_type="application/json",
-            )
-
-        return await ver_datos_usuarios(firebase_app)
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"Error al procesar la solicitud: {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )

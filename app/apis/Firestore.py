@@ -35,3 +35,21 @@ async def obtener_roles_usuarios() -> list[dict]:
         AUX[data["correo"]] = data["rol"]
 
     return AUX
+
+async def obtener_rol_usuario(correo: str) -> int:
+    """
+    Obtiene el rol del usuario con el correo especificado.
+
+    Args:
+        correo (str): Correo del usuario.
+    Returns:
+        int: Rol del usuario.
+    """
+    DB = firestore_async.client()
+    REF = DB.document(f"usuarios/{correo}")
+    doc = await REF.get(["rol"])
+
+    if doc.exists:
+        return doc.to_dict()["rol"]
+    
+    return -1  # Usuario no encontrado

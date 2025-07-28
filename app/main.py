@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
 from routers.main_router import router as main_router
+from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
 from constants import CORS_ORIGINS, ALLOWED_HOSTS
 from firebase_admin_config import firebase_app
@@ -10,6 +11,7 @@ from firebase_admin_config import firebase_app
 app = FastAPI()
 
 app.include_router(main_router)
+app.include_router(usuarios_router, prefix="/admin/usuarios")
 
 # Configuración de CORS
 app.add_middleware(

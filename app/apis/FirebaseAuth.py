@@ -6,7 +6,9 @@ from utils.Validadores import validar_txt_token
 from datetime import datetime, timedelta, timezone
 from utils.Fechas import convertir_datetime_str
 from utils.Diccionario import ver_si_existe_clave
-from apis.Firestore import obtener_roles_usuarios
+from apis.Firestore import obtener_roles_usuarios, obtener_rol_usuario
+import asyncio
+
 
 def validar_token(
     token: str, firebase_app, obtener_datos: bool
@@ -85,7 +87,7 @@ def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
 
         if not reg_validacion:
             return (0, {"error": "Token inválido"})
-        
+
         res_validacion = validar_token(token, firebase_app, True)
 
         match res_validacion[0]:
@@ -99,6 +101,7 @@ def ver_datos_token(peticion: Request, firebase_app) -> tuple[int, dict]:
     except Exception as e:
         return (-1, {"error": f"Error al procesar el token: {e}."})
 
+
 async def ver_datos_usuarios(firebase_app) -> JSONResponse:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
@@ -107,7 +110,6 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
     Returns:
         JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
     """
-    import asyncio
     try:
         AUX = []
         roles_task = asyncio.create_task(obtener_roles_usuarios())
@@ -120,7 +122,11 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
                     {
                         "correo": x.email,
                         "nombre": x.display_name,
-                        "rol": (ROLES[x.email] if ver_si_existe_clave(ROLES, x.email) else "N/A"),
+                        "rol": (
+                            ROLES[x.email]
+                            if ver_si_existe_clave(ROLES, x.email)
+                            else "N/A"
+                        ),
                         "estado": not x.disabled,
                         "ultima_conexion": convertir_datetime_str(
                             datetime.fromtimestamp(
@@ -140,6 +146,55 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
         return JSONResponse(
             {"usuarios": AUX},
             status_code=200,
+            media_type="application/json",
+        )
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Error al obtener los datos de los usuarios: {e}"},
+            status_code=400,
+            media_type="application/json",
+        )
+
+
+async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
+    """
+    Obtiene los datos de un usuario específico usando el correo electrónico.
+    Args:
+        firebase_app: La instancia de la aplicación Firebase.
+        correo (str): El correo del usuario a buscar.
+    Returns:
+        JSONResponse: Los datos del usuario, o un error si ocurre un problema.
+    """
+    try:
+        roles_task = asyncio.create_task(obtener_rol_usuario(correo))
+        usuario = firebase_admin.auth.get_user_by_email(correo, firebase_app)
+        ROL = await roles_task
+
+        if ROL == -1:
+            raise UserNotFoundError("Usuario no encontrado")
+
+        RES = {
+            "correo": usuario.email,
+            "nombre": usuario.display_name,
+            "rol": ROL,
+            "estado": not usuario.disabled,
+            "ultima_conexion": convertir_datetime_str(
+                datetime.fromtimestamp(
+                    usuario.user_metadata.last_sign_in_timestamp / 1000,
+                    tz=timezone(timedelta(hours=-5)),
+                )
+            ),
+        }
+
+        return JSONResponse(
+            {"usuario": RES},
+            status_code=200,
+            media_type="application/json",
+        )
+    except UserNotFoundError:
+        return JSONResponse(
+            {"error": "Usuario no encontrado"},
+            status_code=404,
             media_type="application/json",
         )
     except Exception as e:
