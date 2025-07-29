@@ -217,8 +217,8 @@ def ver_usuario_firebase(firebase_app, correo: str) -> tuple[int, UserRecord | N
         return 1, firebase_admin.auth.get_user_by_email(correo, firebase_app)
     except UserNotFoundError:
         return 0, None
-    except Exception:
-        return 2, None
+    except:
+        return -1, None
 
 def actualizar_estado_usuario(firebase_app, uid: str, estado: bool) -> JSONResponse:
     """

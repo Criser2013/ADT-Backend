@@ -71,14 +71,13 @@ async def actualizar_usuario(
             raise ValueError("Correo inválido")
 
         DATOS = ver_usuario_firebase(firebase_app, correo)
-
         if DATOS[0] == 0:
             return JSONResponse(
                 {"error": "Usuario no encontrado"},
                 status_code=404,
                 media_type="application/json",
             )
-        elif DATOS[0] == 2:
+        elif DATOS[0] == -1:
             raise Exception("Error al obtener el usuario")
 
         return actualizar_estado_usuario(firebase_app, DATOS[1].uid, desactivar)
