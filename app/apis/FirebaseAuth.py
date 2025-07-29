@@ -1,6 +1,6 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Request
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from datetime import datetime, timedelta, timezone
@@ -201,5 +201,51 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
         return JSONResponse(
             {"error": f"Error al obtener los datos del usuario: {e}"},
             status_code=400,
+            media_type="application/json",
+        )
+
+def ver_usuario_firebase(firebase_app, correo: str) -> tuple[int, UserRecord | None]:
+    """
+    Obtiene los datos de un usuario específico usando el correo electrónico.
+    Args:
+        firebase_app: La instancia de la aplicación Firebase.
+        correo (str): El correo del usuario a buscar.
+    Returns:
+        tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
+    """
+    try:
+        return 1, firebase_admin.auth.get_user_by_email(correo, firebase_app)
+    except UserNotFoundError:
+        return 0, None
+    except Exception:
+        return 2, None
+
+def actualizar_estado_usuario(firebase_app, uid: str, estado: bool) -> JSONResponse:
+    """
+    Actualiza el estado (activado/desactivado) de un usuario específico.
+    Args:
+        firebase_app: La instancia de la aplicación Firebase.
+        correo (str): El correo del usuario a actualizar.
+    Returns:
+        JSONResponse | Response: Mensaje de éxito o error.
+    """
+    try:
+        firebase_admin.auth.update_user(uid=uid, disabled=estado, app=firebase_app)
+
+        return JSONResponse(
+            {"mensaje": "Estado del usuario actualizado correctamente"},
+            status_code=200,
+            media_type="application/json",
+        )
+    except ValueError:
+        return JSONResponse(
+            {"error": "Estado inválido"},
+            status_code=401,
+            media_type="application/json",
+        )
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            status_code=500,
             media_type="application/json",
         )
