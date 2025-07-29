@@ -23,10 +23,10 @@ def setup_module(mocker: MockerFixture):
         "appId": "test_app_id",
         "cred": {"projectId": "test_project_id", "certificated": True},
     }
-    
+
     mocker.patch("app.main.firebase_app", MOCK_APP)
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
-    mocker.patch("app.main.ALLOWED_HOSTS", ["localhost",], )
+    mocker.patch("app.main.ALLOWED_HOSTS", ["localhost",])
     mocker.patch("routers.main_router.CREDS_FIREBASE_CLIENTE", TEST_CREDS)
     yield
     mocker.resetall()
@@ -90,7 +90,6 @@ def test_12(mocker: MockerFixture):
         "/credenciales",
         headers={"Origin": "http://localhost:5178", "Host": "localhost"},
     )
-    print(RES.json())
 
     assert RES.status_code == 200
     assert RES.json() == TEST_CREDS

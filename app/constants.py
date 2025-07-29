@@ -4,6 +4,7 @@ from utils.Dominios import obtener_lista_dominios
 
 load_dotenv()
 
+ROL_ADMIN = 1001
 CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS", "http://localhost:5178,"))
 ALLOWED_HOSTS = obtener_lista_dominios(getenv("ALLOWED_HOSTS", "localhost,"))
 CREDS_FIREBASE_CLIENTE = {

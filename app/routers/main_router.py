@@ -13,7 +13,11 @@ async def obtener_credenciales():
             CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
         )
     except Exception as e:
-        return JSONResponse({ "error": f"Error al obtener las credenciales: {e}" }, status_code=500, media_type="application/json")
+        return JSONResponse(
+            {"error": f"Error al obtener las credenciales: {e}"},
+            status_code=500,
+            media_type="application/json",
+        )
 
 
 @router.post("/diagnosticar")
@@ -25,4 +29,8 @@ async def diagnosticar(req: PeticionDiagnostico) -> JSONResponse:
 
         return JSONResponse(RES, status_code=200, media_type="application/json")
     except Exception as e:
-        return JSONResponse({ "error": f"Error al procesar la solicitud: {str(e)}" }, status_code=500, media_type="application/json")
+        return JSONResponse(
+            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            status_code=500,
+            media_type="application/json",
+        )
