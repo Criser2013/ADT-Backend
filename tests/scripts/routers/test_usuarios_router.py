@@ -274,7 +274,6 @@ def test_63(mocker: MockerFixture):
                  "Authorization": "Bearer token_invalido"}
     )
 
-    print(RES.json())
     assert RES.status_code == 403
     assert RES.json() == {"error": "Token inválido"}
 
@@ -304,7 +303,6 @@ def test_64(mocker: MockerFixture):
                  "Authorization": "Bearer token_valido"}
     )
 
-    print(RES.json())
     assert RES.status_code == 404
     assert RES.json() == {"error": "Usuario no encontrado"}
 
@@ -334,8 +332,6 @@ def test_65(mocker: MockerFixture):
                  "Authorization": "Bearer token_valido"}
     )
 
-    print(RES.json())
-
     assert RES.status_code == 500
     assert RES.json() == {"error": "Error al procesar la solicitud: Error al obtener el usuario"}
 
@@ -347,9 +343,14 @@ def test_66(mocker: MockerFixture):
     Test para validar que actualice los datos de un usuario si se lanza un ValueError.
     """
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = ValueError("Correo inválido")
+    DATOS_TOKEN.return_value = (1, {"email": "correo@correo.com"})
 
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
+
+    mocker.patch("routers.usuarios_router.validar_correo", return_value=False)
+
+    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
+
 
     CLIENTE = TestClient(app.main.app)
 
@@ -359,10 +360,11 @@ def test_66(mocker: MockerFixture):
                  "Authorization": "Bearer token_valido"}
     )
 
-    assert RES.status_code == 500
-    assert RES.json() == {"error": "Error al procesar la solicitud: Correo inválido"}
+    assert RES.status_code == 400
+    assert RES.json() == {"error": "Correo inválido"}
 
     FUNC.assert_not_called()
+    ROL.assert_called_once_with("correo@correo.com")
 
 def test_67(mocker: MockerFixture):
     """
@@ -380,8 +382,6 @@ def test_67(mocker: MockerFixture):
         headers={"Origin": "http://localhost:5178", "Host": "localhost",
                  "Authorization": "Bearer token_valido"}
     )
-
-    print(RES.json())
 
     assert RES.status_code == 500
     assert RES.json() == {"error": "Error al procesar la solicitud: Error inesperado"}

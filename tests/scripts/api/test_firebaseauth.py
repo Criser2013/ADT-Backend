@@ -311,7 +311,6 @@ async def test_42(mocker: MockerFixture):
 
     RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
 
-    print(RES.status_code, RES.body.decode("utf-8"))
     assert RES.status_code == 404
     assert RES.body.decode("utf-8") == '{"error":"Usuario no encontrado"}'
 
