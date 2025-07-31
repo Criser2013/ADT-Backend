@@ -3,23 +3,28 @@ on:
   pull_request:
     branches:
     - develop
-  release:
-    types: [published]
+    - main
 
 jobs:
   run-tests:
     name: Run Python tests
     runs-on: ubuntu-latest
     container:
-      image: python:3.13.2-alpine3.21
+      image: python:3.13.5-bullseye
       volumes:
         - ${{ github.workspace  }}:/app
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v4
+
+      - name: Use Firebase credentials
+        run: echo $FIREBASE_CREDENTIALS >> ./firebase_token.json
+        shell: bash
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS  }}
       
       - name: Installing dependencies
-        run: pip install --no-cache-dir --no-input -r requirements.txt
+        run: pip install --no-cache-dir --no-input -r requirements-dev.txt
 
       - name: Running tests
         id: tests
@@ -27,6 +32,8 @@ jobs:
           chmod +x ./ejecutar-tests.sh
           ./ejecutar-tests.sh
         continue-on-error: true
+        env:
+          FIREBASE_ADMIN_CREDS_PATH: "./firebase_token.json"
 
       - name: Save tests results
         uses: actions/upload-artifact@v4

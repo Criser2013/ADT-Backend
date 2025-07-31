@@ -6,6 +6,7 @@ certifi==2025.6.15
 cffi==1.17.1
 charset-normalizer==3.4.2
 coloredlogs==15.0.1
+coverage==7.9.2
 cryptography==45.0.5
 fastapi==0.116.0
 fastapi-cli==0.0.8
@@ -54,6 +55,12 @@ pydantic_core==2.33.2
 Pygments==2.19.2
 PyJWT==2.10.1
 pyparsing==3.2.3
+pytest==8.4.1
+pytest-asyncio==1.0.0
+pytest-cov==6.2.1
+pytest-html==4.1.1
+pytest-metadata==3.1.1
+pytest-mock==3.14.1
 python-dotenv==1.1.1
 PyYAML==6.0.2
 requests==2.32.4

@@ -14,3 +14,5 @@ Dockerfile
 .github
 .pytest_cache
 .coverage
+.vscode
+conftest.py
