@@ -271,7 +271,7 @@ async def test_30(mocker: MockerFixture):
     FIREBASE.assert_called_once_with(app="firebase_app")
 
 @pytest.mark.asyncio
-async def test_43(mocker: MockerFixture):
+async def test_41(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuario" retorne los datos de un usuario.
     """
@@ -299,7 +299,7 @@ async def test_43(mocker: MockerFixture):
     FIRESTORE.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_44(mocker: MockerFixture):
+async def test_42(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuario" arroje una excepción al no
     encontrar el usuario.
@@ -311,7 +311,6 @@ async def test_44(mocker: MockerFixture):
 
     RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
 
-    print(RES.status_code, RES.body.decode("utf-8"))
     assert RES.status_code == 404
     assert RES.body.decode("utf-8") == '{"error":"Usuario no encontrado"}'
 
@@ -319,7 +318,7 @@ async def test_44(mocker: MockerFixture):
     FIREBASE.assert_called_once_with("usuario@correo.com", "firebase_app")
 
 @pytest.mark.asyncio
-async def test_45(mocker: MockerFixture):
+async def test_43(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuario" maneje correctamente las excepciones.
     """
@@ -332,3 +331,91 @@ async def test_45(mocker: MockerFixture):
 
     assert RES.status_code == 400
     assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos del usuario: usuario@correo.com"}'
+
+def test_49(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_usuario_firebase" retorne los datos de un usuario existente.
+    """
+
+    USUARIO = mocker.MagicMock(spec=UserRecord)
+    USUARIO.uid = "12345"
+    USUARIO.disabled = False
+    USUARIO.email = "correo@correo.com"
+
+    FIREBASE = mocker.patch("firebase_admin.auth.get_user_by_email", return_value=USUARIO)
+
+    RES = ver_usuario_firebase("firebase_app", "correo@correo.com")
+
+    assert RES == (1, USUARIO)
+
+    FIREBASE.assert_called_once_with("correo@correo.com", "firebase_app")
+
+def test_50(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_usuario_firebase" no retorne los datos de un
+    usuario que no existe.
+    """
+    FIREBASE = mocker.patch("firebase_admin.auth.get_user_by_email")
+    FIREBASE.side_effect = UserNotFoundError("Usuario no encontrado")
+
+    RES = ver_usuario_firebase("firebase_app", "correo@correo.com")
+
+    assert RES == (0, None)
+
+    FIREBASE.assert_called_once_with("correo@correo.com", "firebase_app")
+
+def test_51(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_usuario_firebase" maneje correctamente las excepciones
+    """
+    FIREBASE = mocker.patch("firebase_admin.auth.get_user_by_email")
+    FIREBASE.side_effect = Exception("Error inesperado")
+
+    RES = ver_usuario_firebase("firebase_app", "correo@correo.com")
+
+    assert RES == (-1, None)
+
+    FIREBASE.assert_called_once_with("correo@correo.com","firebase_app")
+
+def test_52(mocker: MockerFixture):
+    """
+    Test para validar que la función "actualizar_estado_usuario" retorne una JSONResponse indicando que el usuario
+    fue actualizado correctamente.
+    """
+    FIREBASE = mocker.patch("firebase_admin.auth.update_user")
+
+    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+
+    assert RES.status_code == 200
+    assert RES.body.decode("utf-8") == '{"mensaje":"Estado del usuario actualizado correctamente"}'
+
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")
+
+def test_53(mocker: MockerFixture):
+    """
+    Test para validar que la función "actualizar_estado_usuario" retorne un error cuando los valores
+    de actualización son inválidos
+    """
+    FIREBASE = mocker.patch("firebase_admin.auth.update_user")
+    FIREBASE.side_effect = ValueError("Estado inválido")
+
+    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+
+    assert RES.status_code == 401
+    assert RES.body.decode("utf-8") == '{"error":"Estado inválido"}'
+
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")
+
+def test_54(mocker: MockerFixture):
+    """
+    Test para validar que la función "actualizar_estado_usuario" maneje correctamente las excepciones
+    """
+    FIREBASE = mocker.patch("firebase_admin.auth.update_user")
+    FIREBASE.side_effect = Exception("Error inesperado")
+
+    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+
+    assert RES.status_code == 500
+    assert RES.body.decode("utf-8") == '{"error":"Error al procesar la solicitud: Error inesperado"}'
+
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")

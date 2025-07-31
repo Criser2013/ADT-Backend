@@ -51,7 +51,7 @@ async def test_32(mocker: MockerFixture):
     FIREBASE.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_38(mocker: MockerFixture):
+async def test_36(mocker: MockerFixture):
     """
     Test para validar que la función "obtener_roles_usuarios" retorne los roles de los usuarios.
     """
@@ -76,7 +76,7 @@ async def test_38(mocker: MockerFixture):
     FIREBASE.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_41(mocker: MockerFixture):
+async def test_39(mocker: MockerFixture):
     """
     Test para validar que la función "obtener_rol_usuario" retorne el rol de un usuario.
     """
@@ -99,7 +99,7 @@ async def test_41(mocker: MockerFixture):
     FIREBASE.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_42(mocker: MockerFixture):
+async def test_40(mocker: MockerFixture):
     """
     Test para validar que la función "obtener_rol_usuario" retorne -1 cuando el usuario no existe.
     """

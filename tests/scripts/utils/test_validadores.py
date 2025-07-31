@@ -19,7 +19,7 @@ def test_4():
     RES = validar_txt_token(token)
     assert RES == False
 
-def test_52():
+def test_60():
     """
     Test para validar que la función reconozca un correo electrónico válido.
     
@@ -28,7 +28,7 @@ def test_52():
     RES = validar_correo(correo)
     assert RES == True
 
-def test_53():
+def test_61():
     """
     Test para validar que la función reconozca un correo electrónico inválido.
     """
