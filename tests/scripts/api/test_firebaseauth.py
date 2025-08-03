@@ -194,8 +194,8 @@ async def test_28(mocker: MockerFixture):
     LISTA = mocker.MagicMock(spec=ListUsersPage)
     USUARIO = mocker.MagicMock(spec=ExportedUserRecord)
     METADATOS = mocker.MagicMock(spec=UserMetadata)
-
-    METADATOS.last_sign_in_timestamp = 1753549008090
+    METADATOS.creation_timestamp = 1753549006090
+    METADATOS.last_refresh_timestamp = 1753549008090
 
     USUARIO.email = "usuario@correo.com"
     USUARIO.display_name = "usuario"
@@ -213,7 +213,7 @@ async def test_28(mocker: MockerFixture):
     RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
     FIRESTORE.assert_called_once()
@@ -228,8 +228,8 @@ async def test_29(mocker: MockerFixture):
     LISTA2 = mocker.MagicMock(spec=ListUsersPage)
     USUARIO = mocker.MagicMock(spec=ExportedUserRecord)
     METADATOS = mocker.MagicMock(spec=UserMetadata)
-
-    METADATOS.last_sign_in_timestamp = 1753549008090
+    METADATOS.creation_timestamp = 1753549006090
+    METADATOS.last_refresh_timestamp = 1753549008090
 
     USUARIO.email = "usuario@correo.com"
     USUARIO.display_name = "usuario"
@@ -251,7 +251,7 @@ async def test_29(mocker: MockerFixture):
     RES = await ver_datos_usuarios("firebase_app")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}]}'
+    assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]}'
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 
@@ -278,7 +278,8 @@ async def test_41(mocker: MockerFixture):
     USUARIO = mocker.MagicMock(spec=ExportedUserRecord)
     METADATOS = mocker.MagicMock(spec=UserMetadata)
 
-    METADATOS.last_sign_in_timestamp = 1753549008090
+    METADATOS.creation_timestamp = 1753549006090
+    METADATOS.last_refresh_timestamp = 1753549008090
 
     USUARIO.email = "usuario@correo.com"
     USUARIO.display_name = "usuario"
@@ -293,7 +294,7 @@ async def test_41(mocker: MockerFixture):
     RES = await ver_datos_usuario("firebase_app", "usuario@correo.com")
 
     assert RES.status_code == 200
-    assert RES.body.decode("utf-8") == '{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"ultima_conexion":"26/07/2025 11:56 AM"}'
+    assert RES.body.decode("utf-8") == '{"correo":"usuario@correo.com","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}'
 
     FIREBASE.assert_called_once_with("usuario@correo.com", "firebase_app")
     FIRESTORE.assert_called_once()

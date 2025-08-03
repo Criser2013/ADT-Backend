@@ -36,6 +36,6 @@ def test_23():
     Test para validar que la función convierte correctamente un objeto datetime
     a una cadena de texto en formato ISO 8601.
     """
-    fecha = datetime(2025, 10, 5, 14, 30)
+    fecha = 1759674600 * 1000
     resultado = convertir_datetime_str(fecha)
-    assert resultado == "05/10/2025 02:30 PM"
+    assert resultado == "05/10/2025 09:30 AM"
