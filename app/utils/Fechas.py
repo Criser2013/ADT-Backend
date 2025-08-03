@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 def convertir_hora(hora: int, minuto: int) -> str:
     """
@@ -17,15 +17,20 @@ def convertir_hora(hora: int, minuto: int) -> str:
 
     return f"{AUXHORA:02d}:{minuto:02d} {momento}"
 
-def convertir_datetime_str(fecha: datetime) -> str:
+def convertir_datetime_str(tiempo: int) -> str:
     """
     Convierte un objeto datetime a una cadena de texto en formato ISO 8601.
 
     Args:
-        fecha (datetime): El objeto datetime a convertir.
+        tiempo (int): El tiempo en milisegundos desde la época (1 de enero de 1970).
 
     Returns:
         str: La fecha en formato ISO 8601.
     """
+
+    fecha = datetime.fromtimestamp(
+        tiempo / 1000,
+        tz=timezone(timedelta(hours=-5)),
+    )
     HORA = convertir_hora(fecha.hour, fecha.minute)
     return f"{fecha.day:02d}/{fecha.month:02d}/{fecha.year} {HORA}"

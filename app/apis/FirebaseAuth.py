@@ -1,9 +1,8 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Request, Response
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
-from datetime import datetime, timedelta, timezone
 from utils.Fechas import convertir_datetime_str
 from utils.Diccionario import ver_si_existe_clave
 from apis.Firestore import obtener_roles_usuarios, obtener_rol_usuario
@@ -128,11 +127,11 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
                             else "N/A"
                         ),
                         "estado": not x.disabled,
+                        "fecha_registro": convertir_datetime_str(
+                            x.user_metadata.creation_timestamp
+                        ),
                         "ultima_conexion": convertir_datetime_str(
-                            datetime.fromtimestamp(
-                                x.user_metadata.last_sign_in_timestamp / 1000,
-                                tz=timezone(timedelta(hours=-5)),
-                            )
+                            x.user_metadata.last_refresh_timestamp
                         ),
                     }
                     for x in usuarios.users
@@ -178,11 +177,11 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
             "nombre": usuario.display_name,
             "rol": ROL,
             "estado": not usuario.disabled,
+            "fecha_registro": convertir_datetime_str(
+                usuario.user_metadata.creation_timestamp
+            ),
             "ultima_conexion": convertir_datetime_str(
-                datetime.fromtimestamp(
-                    usuario.user_metadata.last_sign_in_timestamp / 1000,
-                    tz=timezone(timedelta(hours=-5)),
-                )
+                usuario.user_metadata.last_refresh_timestamp
             ),
         }
 
