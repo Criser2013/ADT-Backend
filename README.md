@@ -49,6 +49,7 @@ CLIENTE_FIREBASE_MESSAGING_SENDER_ID=<int>  # ID para envío de mensajes
 CLIENTE_FIREBASE_APP_ID=<string>            # ID de la aplicación de Firebase
 CLIENTE_FIREBASE_MEASUREMENT_ID=<string>    # ID de Google Analytics (métricas)
 CLIENTE_DRIVE_SCOPES=<string>               # URLs de permisos de Drive requeridos
+CLIENTE_CAPTCHA=<string>                    # API key de reCAPTCHA
 FIREBASE_ADMIN_CREDS_PATH=<string>          # Ruta al archivo de credenciales de administrador de Firebase
 ```
 

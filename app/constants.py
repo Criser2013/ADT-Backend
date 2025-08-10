@@ -16,4 +16,5 @@ CREDS_FIREBASE_CLIENTE = {
     "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
     "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
     "driveScopes": obtener_lista_dominios(getenv("CLIENTE_DRIVE_SCOPES","")),
+    "reCAPTCHA": getenv("CLIENTE_CAPTCHA")
 }
