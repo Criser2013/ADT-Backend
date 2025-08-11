@@ -4,7 +4,7 @@ WORKDIR /app/backend
 
 COPY . .
 
-RUN apt update && apt upgrade
+RUN apt update && apt upgrade -y
 
 RUN pip install --upgrade pip
 
