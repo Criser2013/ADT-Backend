@@ -23,10 +23,7 @@ jobs:
         with:
           context: ./
           push: true
-          build-args: |
-            FRONT_URL=${{ secrets.FRONT_URL_ARG }}
-            FIREBASE_CREDS=${{ secrets.FIREBASE_CREDS_ARG }}
-          tags: ${{ secrets.FRONT_REP }}:latest, ${{ secrets.FRONT_REP }}:${{ github.ref_name }}
+          tags: ${{ secrets.BACK_REP }}:latest, ${{ secrets.BACK_REP }}:${{ github.ref_name }}
           labels: backend
 
       - name: Deploy to production
