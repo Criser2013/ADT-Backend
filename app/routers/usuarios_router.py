@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from apis.FirebaseAuth import *
 from firebase_admin_config import firebase_app
-from utils.Validadores import validar_correo
+from utils.Validadores import validar_uid
 from urllib.parse import unquote
 from dependencies.usuarios_dependencies import verificar_usuario_administrador
 
@@ -28,24 +28,24 @@ async def ver_usuarios(
         )
 
 
-@router.get("/{correo}")
+@router.get("/{uid}")
 async def ver_usuario(
-    correo: str, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
+    uid: str, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
 ) -> JSONResponse:
     try:
         if not res_validacion_auth[0]:
             return res_validacion_auth[1]
 
-        correo = unquote(correo)
-        VALIDACION = validar_correo(correo)
+        uid = unquote(uid)
+        VALIDACION = validar_uid(uid)
 
         if not VALIDACION:
-            raise ValueError("Correo inválido")
+            raise ValueError("UID inválido")
 
-        return await ver_datos_usuario(firebase_app, correo)
+        return await ver_datos_usuario(firebase_app, uid)
     except ValueError:
         return JSONResponse(
-            {"error": "Correo inválido"},
+            {"error": "UID inválido"},
             status_code=400,
             media_type="application/json",
         )
@@ -56,21 +56,21 @@ async def ver_usuario(
             media_type="application/json",
         )
 
-@router.patch("/{correo}")
+@router.patch("/{uid}")
 async def actualizar_usuario(
-    correo: str, desactivar: bool, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
+    uid: str, desactivar: bool, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
 ) -> JSONResponse:
     try:
         if not res_validacion_auth[0]:
             return res_validacion_auth[1]
 
-        correo = unquote(correo)
-        VALIDACION = validar_correo(correo)
+        uid = unquote(uid)
+        VALIDACION = validar_uid(uid)
 
         if not VALIDACION:
-            raise ValueError("Correo inválido")
+            raise ValueError("UID inválido")
 
-        DATOS = ver_usuario_firebase(firebase_app, correo)
+        DATOS = ver_usuario_firebase(firebase_app, uid)
         if DATOS[0] == 0:
             return JSONResponse(
                 {"error": "Usuario no encontrado"},
@@ -80,10 +80,10 @@ async def actualizar_usuario(
         elif DATOS[0] == -1:
             raise Exception("Error al obtener el usuario")
 
-        return actualizar_estado_usuario(firebase_app, DATOS[1].uid, desactivar)
+        return actualizar_estado_usuario(firebase_app, uid, desactivar)
     except ValueError:
         return JSONResponse(
-            {"error": "Correo inválido"},
+            {"error": "UID inválido"},
             status_code=400,
             media_type="application/json",
         )

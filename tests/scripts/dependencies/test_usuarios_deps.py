@@ -12,7 +12,7 @@ async def test_55(mocker: MockerFixture):
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.headers = {"authorization": "Bearer token_valido"}
 
-    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "correo@correo.com"}))
+    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
     RES = await verificar_usuario_administrador(PETICION)
@@ -21,7 +21,7 @@ async def test_55(mocker: MockerFixture):
     assert RES[1] is None
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("correo@correo.com")
+    ROL.assert_called_once_with("a1234H")
 
 @pytest.mark.asyncio
 async def test_56(mocker: MockerFixture):
@@ -69,7 +69,7 @@ async def test_58(mocker: MockerFixture):
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.headers = {"authorization": "Bearer token_valido"}
 
-    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"email": "usuario@correo.com"}))
+    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
 
     RES = await verificar_usuario_administrador(PETICION)
@@ -79,7 +79,7 @@ async def test_58(mocker: MockerFixture):
     assert RES[1].body.decode("utf-8") == '{"error":"Acceso denegado."}'
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("usuario@correo.com")
+    ROL.assert_called_once_with("a1234H")
 
 @pytest.mark.asyncio
 async def test_59(mocker: MockerFixture):

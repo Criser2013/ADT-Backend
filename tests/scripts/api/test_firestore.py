@@ -21,7 +21,7 @@ async def test_31(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.firestore_async.client",return_value=CLIENTE)
 
-    RES = await verificar_rol_usuario("usuario@correo.com")
+    RES = await verificar_rol_usuario("a1234H")
 
     assert RES == True
 
@@ -44,7 +44,7 @@ async def test_32(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.firestore_async.client",return_value=CLIENTE)
 
-    RES = await verificar_rol_usuario("usuario@correo.com")
+    RES = await verificar_rol_usuario("a1234H")
 
     assert RES == False
 
@@ -56,10 +56,12 @@ async def test_36(mocker: MockerFixture):
     Test para validar que la función "obtener_roles_usuarios" retorne los roles de los usuarios.
     """
     DOCUMENTO1 = mocker.MagicMock(spec=DocumentSnapshot)
-    DOCUMENTO1.to_dict.return_value = {"correo": "usuario@correo.com", "rol": 0}
+    DOCUMENTO1.id = "a1234H"
+    DOCUMENTO1.to_dict.return_value = {"uid": "a1234H", "rol": 0}
 
     DOCUMENTO2 = mocker.MagicMock(spec=DocumentSnapshot)
-    DOCUMENTO2.to_dict.return_value = {"correo": "usuario2@correo.com", "rol": 1001}
+    DOCUMENTO2.id = "a12345"
+    DOCUMENTO2.to_dict.return_value = {"uid": "a12345", "rol": 1001}
 
     REF = mocker.MagicMock(spec=AsyncCollectionReference)
     REF.get.return_value = [DOCUMENTO1, DOCUMENTO2]
@@ -71,7 +73,7 @@ async def test_36(mocker: MockerFixture):
 
     RES = await obtener_roles_usuarios()
 
-    assert RES == {"usuario@correo.com": 0, "usuario2@correo.com": 1001}
+    assert RES == {"a1234H": 0, "a12345": 1001}
 
     FIREBASE.assert_called_once()
 
@@ -82,7 +84,7 @@ async def test_39(mocker: MockerFixture):
     """
     DOCUMENTO = mocker.MagicMock(spec=DocumentSnapshot)
     DOCUMENTO.exists = True
-    DOCUMENTO.to_dict.return_value = {"correo": "usuario@correo.com", "rol": 0}
+    DOCUMENTO.to_dict.return_value = {"uid": "a1234H", "rol": 0}
 
     REF = mocker.MagicMock(spec=AsyncCollectionReference)
     REF.get.return_value = DOCUMENTO
@@ -92,7 +94,7 @@ async def test_39(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.firestore_async.client",return_value=CLIENTE)
 
-    RES = await obtener_rol_usuario("usuario@correo.com")
+    RES = await obtener_rol_usuario("a1234H")
 
     assert RES == 0
 
@@ -105,7 +107,7 @@ async def test_40(mocker: MockerFixture):
     """
     DOCUMENTO = mocker.MagicMock(spec=DocumentSnapshot)
     DOCUMENTO.exists = False
-    DOCUMENTO.to_dict.return_value = {"correo": "usuario1@correo.com", "rol": 0}
+    DOCUMENTO.to_dict.return_value = {"uid": "a1234H", "rol": 0}
 
     REF = mocker.MagicMock(spec=AsyncCollectionReference)
     REF.get.return_value = DOCUMENTO
@@ -116,7 +118,7 @@ async def test_40(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.firestore_async.client",return_value=CLIENTE)
 
-    RES = await obtener_rol_usuario("usuario@correo.com")
+    RES = await obtener_rol_usuario("a1234H")
 
     assert RES == -1
 

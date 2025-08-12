@@ -24,7 +24,7 @@ async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResp
                 media_type="application/json",
             )
 
-        VALIDAR_ROL = await verificar_rol_usuario(DATOS["email"])
+        VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
 
         if not VALIDAR_ROL:
             return False, JSONResponse(

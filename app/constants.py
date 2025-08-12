@@ -6,6 +6,7 @@ load_dotenv()
 
 ROL_ADMIN = 1001
 CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS", "http://localhost:5178,"))
+ACTIVAR_DOCS = getenv("ACTIVAR_DOCS", "false").lower() == "true"
 ALLOWED_HOSTS = obtener_lista_dominios(getenv("ALLOWED_HOSTS", "localhost,"))
 CREDS_FIREBASE_CLIENTE = {
     "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
@@ -16,4 +17,5 @@ CREDS_FIREBASE_CLIENTE = {
     "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
     "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
     "driveScopes": obtener_lista_dominios(getenv("CLIENTE_DRIVE_SCOPES","")),
+    "reCAPTCHA": getenv("CLIENTE_CAPTCHA")
 }

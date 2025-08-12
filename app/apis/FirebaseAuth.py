@@ -120,10 +120,11 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
                 [
                     {
                         "correo": x.email,
+                        "uid": x.uid,
                         "nombre": x.display_name,
                         "rol": (
-                            ROLES[x.email]
-                            if ver_si_existe_clave(ROLES, x.email)
+                            ROLES[x.uid]
+                            if ver_si_existe_clave(ROLES, x.uid)
                             else "N/A"
                         ),
                         "estado": not x.disabled,
@@ -155,18 +156,18 @@ async def ver_datos_usuarios(firebase_app) -> JSONResponse:
         )
 
 
-async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
+async def ver_datos_usuario(firebase_app, uid: str) -> JSONResponse:
     """
-    Obtiene los datos de un usuario específico usando el correo electrónico.
+    Obtiene los datos de un usuario específico usando el UID.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
-        correo (str): El correo del usuario a buscar.
+        uid (str): El UID del usuario a buscar.
     Returns:
         JSONResponse: Los datos del usuario, o un error si ocurre un problema.
     """
     try:
-        roles_task = asyncio.create_task(obtener_rol_usuario(correo))
-        usuario = firebase_admin.auth.get_user_by_email(correo, firebase_app)
+        roles_task = asyncio.create_task(obtener_rol_usuario(uid))
+        usuario = firebase_admin.auth.get_user(uid, firebase_app)
         ROL = await roles_task
 
         if ROL == -1:
@@ -174,6 +175,7 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
 
         RES = {
             "correo": usuario.email,
+            "uid": usuario.uid,
             "nombre": usuario.display_name,
             "rol": ROL,
             "estado": not usuario.disabled,
@@ -203,17 +205,17 @@ async def ver_datos_usuario(firebase_app, correo: str) -> JSONResponse:
             media_type="application/json",
         )
 
-def ver_usuario_firebase(firebase_app, correo: str) -> tuple[int, UserRecord | None]:
+def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
     """
-    Obtiene los datos de un usuario específico usando el correo electrónico.
+    Obtiene los datos de un usuario específico usando el UID.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
-        correo (str): El correo del usuario a buscar.
+        uid (str): El UID del usuario a buscar.
     Returns:
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
     """
     try:
-        return 1, firebase_admin.auth.get_user_by_email(correo, firebase_app)
+        return 1, firebase_admin.auth.get_user(uid, firebase_app)
     except UserNotFoundError:
         return 0, None
     except:
@@ -224,7 +226,8 @@ def actualizar_estado_usuario(firebase_app, uid: str, estado: bool) -> JSONRespo
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
-        correo (str): El correo del usuario a actualizar.
+        uid (str): El UID del usuario a actualizar.
+        estado (bool): El nuevo estado del usuario (True para desactivado, False para activado).
     Returns:
         JSONResponse | Response: Mensaje de éxito o error.
     """
