@@ -5,10 +5,10 @@ from fastapi import Request, Response
 from routers.main_router import router as main_router
 from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
-from constants import CORS_ORIGINS, ALLOWED_HOSTS
+from constants import CORS_ORIGINS, ALLOWED_HOSTS, ACTIVAR_DOCS
 from firebase_admin_config import firebase_app
 
-app = FastAPI()
+app = FastAPI(docs_url=None if not ACTIVAR_DOCS else "/docs", redoc_url=None if not ACTIVAR_DOCS else "/redoc")
 
 app.include_router(main_router)
 app.include_router(usuarios_router, prefix="/admin")

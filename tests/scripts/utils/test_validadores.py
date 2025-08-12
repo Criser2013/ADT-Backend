@@ -21,17 +21,17 @@ def test_4():
 
 def test_60():
     """
-    Test para validar que la función reconozca un correo electrónico válido.
+    Test para validar que la función reconozca un UID válido.
     
     """
-    correo = "usuario@correo.com"
-    RES = validar_correo(correo)
+    uid = "nSlvkDbxNBUY5WoKwUmBWGNJQHv2"
+    RES = validar_uid(uid)
     assert RES == True
 
 def test_61():
     """
-    Test para validar que la función reconozca un correo electrónico inválido.
+    Test para validar que la función reconozca un UID inválido.
     """
-    correo = "usuario@cor1212reo.com@"
-    RES = validar_correo(correo)
+    uid = "usuario@cor1212reo.com@"
+    RES = validar_uid(uid)
     assert RES == False

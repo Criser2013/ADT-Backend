@@ -14,16 +14,16 @@ def validar_txt_token(token: str) -> bool:
 
     return (EXP.fullmatch(token) is not None) and len(token) >= 817
 
-def validar_correo(correo: str) -> bool:
+def validar_uid(uid: str) -> bool:
     """
-    Determina si el texto proveído es un correo.
+    Determina si el texto proveído es un UID.
 
     Args:
-        correo (str): Correo a probar.
+        uid (str): UID a probar.
 
     Returns:
-        bool: Si el texto es un correo.
+        bool: Si el texto es un UID.
     """
-    EXP = compile("^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$")
+    EXP = compile(r"^\w{28}$")
 
-    return EXP.fullmatch(correo) is not None
+    return EXP.fullmatch(uid) is not None

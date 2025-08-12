@@ -2,17 +2,17 @@ from firebase_admin import firestore_async
 from constants import ROL_ADMIN
 
 
-async def verificar_rol_usuario(correo: str) -> bool:
+async def verificar_rol_usuario(uid: str) -> bool:
     """
-    Válida si el correo ingresado es un administrador.
+    Válida si el uid ingresado es un administrador.
 
     Args:
-        correo (str): Correo del usuario.
+        uid (str): UID del usuario.
     Returns:
-        bool: El usuario con el correo asociado tiene el rol de administrador.
+        bool: El usuario con el uid asociado tiene el rol de administrador.
     """
     DB = firestore_async.client()
-    REF = DB.document(f"usuarios/{correo}")
+    REF = DB.document(f"usuarios/{uid}")
     rol = await REF.get(["rol"])
     rol = rol.to_dict()
 
@@ -32,21 +32,21 @@ async def obtener_roles_usuarios() -> list[dict]:
 
     for doc in docs:
         data = doc.to_dict()
-        AUX[data["correo"]] = data["rol"]
+        AUX[doc.id] = data["rol"]
 
     return AUX
 
-async def obtener_rol_usuario(correo: str) -> int:
+async def obtener_rol_usuario(uid: str) -> int:
     """
-    Obtiene el rol del usuario con el correo especificado.
+    Obtiene el rol del usuario con el UID especificado.
 
     Args:
-        correo (str): Correo del usuario.
+        uid (str): UID del usuario.
     Returns:
         int: Rol del usuario.
     """
     DB = firestore_async.client()
-    REF = DB.document(f"usuarios/{correo}")
+    REF = DB.document(f"usuarios/{uid}")
     doc = await REF.get(["rol"])
 
     if doc.exists:
