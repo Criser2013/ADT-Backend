@@ -50,6 +50,8 @@ CLIENTE_FIREBASE_APP_ID=<string>            # ID de la aplicación de Firebase
 CLIENTE_FIREBASE_MEASUREMENT_ID=<string>    # ID de Google Analytics (métricas)
 CLIENTE_DRIVE_SCOPES=<string>               # URLs de permisos de Drive requeridos
 CLIENTE_CAPTCHA=<string>                    # API key de reCAPTCHA
+CAPTCHA_SECRET=<string>                     # Clave secreta de reCAPTCHA
+API_RECAPTCHA_URL=<string>                  # URL del API de reCAPTCHA
 FIREBASE_ADMIN_CREDS_PATH=<string>          # Ruta al archivo de credenciales de administrador de Firebase
 ACTIVAR_DOCS=<string>                       #Activar documentación de la API "false" o "true"
 ```
