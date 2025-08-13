@@ -1,14 +1,25 @@
 from constants import RECAPTCHA_SECRET, RECAPTCHA_API_URL
 from requests import post
 
-def manejador_errores(error):
+def manejador_errores(error: str) -> str:
+    """
+    Maneja los errores devueltos por la API de reCAPTCHA.
+
+    Args:
+        error (str): El mensaje de error devuelto por la API de reCAPTCHA.
+
+    Returns:
+        str: Un mensaje de error amigable para el usuario.
+    """
     match error:
         case "invalid-input-response":
             return "El token proveído tiene errores."
         case "timeout-or-duplicate":
             return "El token ha expirado o ya fue utilizado."
+        case _:
+            return error
 
-def verificar_peticion_recaptcha(token):
+def verificar_peticion_recaptcha(token: str) -> dict:
     """
     Envía una petición al API de ReCAPTCHA para verificar que el token es válido.
 

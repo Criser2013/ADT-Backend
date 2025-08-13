@@ -180,3 +180,45 @@ def test_19(mocker: MockerFixture):
         "cred": {"projectId": "test_project_id", "certificated": True},
     }, check_revoked=True)
     DIAGNOSTICO.assert_called_once()
+
+def test_75(mocker: MockerFixture):
+    """
+    Test para validar el endpoint de recaptcha retorne la respuesta correspondiente a
+    la verificación de un token.
+    """
+    FUNC = mocker.patch("routers.main_router.verificar_peticion_recaptcha", return_value={"success": True, "hostname": "0.0.0.0"})
+
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.post(
+        "/recaptcha",
+        headers={"Origin": "http://localhost:5178", "Host": "localhost",
+                 "Authorization": "Bearer token_valido"},
+        json={"token": "token_valido"}
+    )
+
+    assert RES.status_code == 200
+    assert RES.json() == {"success": True, "hostname": "0.0.0.0"}
+
+    FUNC.assert_called_once_with("token_valido")
+
+def test_76(mocker: MockerFixture):
+    """
+    Test para validar que el endpoint para verificar el captcha maneje correctamente
+    las excepciones.
+    """
+    FUNC = mocker.patch("routers.main_router.verificar_peticion_recaptcha", side_effect=Exception("Error de verificación"))
+
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.post(
+        "/recaptcha",
+        headers={"Origin": "http://localhost:5178", "Host": "localhost",
+                 "Authorization": "Bearer token_valido"},
+        json={"token": "token_valido"}
+    )
+
+    assert RES.status_code == 500
+    assert RES.json() == {"error": "Error al procesar la solicitud: Error de verificación"}
+
+    FUNC.assert_called_once_with("token_valido")
