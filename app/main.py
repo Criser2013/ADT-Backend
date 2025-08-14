@@ -36,7 +36,9 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
-    if peticion.method in ("POST",):
+    RUTAS_NO_PROTEGIDAS = ("/recaptcha",)
+    METODOS_RESTRINGIDOS = ("POST",)
+    if peticion.method in METODOS_RESTRINGIDOS and (peticion.url.path not in RUTAS_NO_PROTEGIDAS):
         return await verificar_token(peticion, firebase_app, call_next)
     else:
         return await call_next(peticion)

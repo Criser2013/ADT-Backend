@@ -1,0 +1,43 @@
+from constants import RECAPTCHA_SECRET, RECAPTCHA_API_URL
+from requests import post
+
+def manejador_errores(error: str) -> str:
+    """
+    Maneja los errores devueltos por la API de reCAPTCHA.
+
+    Args:
+        error (str): El mensaje de error devuelto por la API de reCAPTCHA.
+
+    Returns:
+        str: Un mensaje de error amigable para el usuario.
+    """
+    match error:
+        case "invalid-input-response":
+            return "El token proveído tiene errores."
+        case "timeout-or-duplicate":
+            return "El token ha expirado o ya fue utilizado."
+        case _:
+            return error
+
+def verificar_peticion_recaptcha(token: str) -> dict:
+    """
+    Envía una petición al API de ReCAPTCHA para verificar que el token es válido.
+
+    Args:
+        token (str): El token de ReCAPTCHA a verificar.
+
+    Returns:
+        dict: La respuesta del API de ReCAPTCHA.
+    """
+    cuerpo = {
+        "secret": RECAPTCHA_SECRET,
+        "response": token
+    }
+    res = post(RECAPTCHA_API_URL, data=cuerpo, headers={"Content-Type": "application/x-www-form-urlencoded"})
+    res = res.json()
+
+    for key, value in res.items():
+        if key == "error-codes":
+            res[key] = [manejador_errores(i) for i in value]
+
+    return res
