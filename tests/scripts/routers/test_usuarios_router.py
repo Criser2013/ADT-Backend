@@ -18,7 +18,7 @@ def setup_module(mocker: MockerFixture):
     yield
     mocker.resetall()
 
-def test_33(mocker: MockerFixture):
+def test_31(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de los usuarios con una petición
     autenticada.
@@ -50,7 +50,7 @@ def test_33(mocker: MockerFixture):
     ROL.assert_called_once_with("a1234H")
     USUARIO.assert_called_once()
 
-def test_34(mocker: MockerFixture):
+def test_32(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
     es administrador.
@@ -73,7 +73,7 @@ def test_34(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
 
-def test_35(mocker: MockerFixture):
+def test_33(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
     es administrador.
@@ -95,7 +95,7 @@ def test_35(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-def test_44(mocker: MockerFixture):
+def test_42(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de un usuario con una petición
     autenticada.
@@ -131,7 +131,7 @@ def test_44(mocker: MockerFixture):
         "cred": {"projectId": "test_project_id", "certificated": True},
     }, "a1234H")
 
-def test_45(mocker: MockerFixture):
+def test_43(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos del usuario si el token es inválido.
     """
@@ -151,7 +151,7 @@ def test_45(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-def test_46(mocker: MockerFixture):
+def test_44(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si ocurre una excepción.
     """
@@ -172,7 +172,7 @@ def test_46(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-def test_47(mocker: MockerFixture):
+def test_45(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de un usuario con un
     UID inválido
@@ -196,7 +196,7 @@ def test_47(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
 
-def test_48(mocker: MockerFixture):
+def test_46(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de un usuario si se lanza un ValueError.
     """
@@ -220,7 +220,7 @@ def test_48(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
 
-def test_62(mocker: MockerFixture):
+def test_60(mocker: MockerFixture):
     """
     Test para validar que el API actualice el estado de un usuario correctamente.
     """
@@ -259,7 +259,7 @@ def test_62(mocker: MockerFixture):
         "cred": {"projectId": "test_project_id", "certificated": True},
     }, "a1234H")
 
-def test_63(mocker: MockerFixture):
+def test_61(mocker: MockerFixture):
     """
     Test para validar que el API no actualice el estado del usuario si el token es inválido.
     """
@@ -282,7 +282,7 @@ def test_63(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_not_called()
 
-def test_64(mocker: MockerFixture):
+def test_62(mocker: MockerFixture):
     """
     Test para validar que el API retorne un error al intentar actualizar el estado de un
     usuario inexistente.
@@ -314,7 +314,7 @@ def test_64(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_not_called()
 
-def test_65(mocker: MockerFixture):
+def test_63(mocker: MockerFixture):
     """
     Test para validar que el API no actualice los datos de un usuario si ocurre una excepción.
     """
@@ -343,7 +343,7 @@ def test_65(mocker: MockerFixture):
     FUNC.assert_not_called()
     ROL.assert_called_once()
 
-def test_66(mocker: MockerFixture):
+def test_64(mocker: MockerFixture):
     """
     Test para validar que actualice los datos de un usuario si se lanza un ValueError.
     """
@@ -371,7 +371,7 @@ def test_66(mocker: MockerFixture):
     FUNC.assert_not_called()
     ROL.assert_called_once_with("a1234H")
 
-def test_67(mocker: MockerFixture):
+def test_65(mocker: MockerFixture):
     """
     Test para validar que actualice los datos de un usuario si se lanza un ValueError.
     """

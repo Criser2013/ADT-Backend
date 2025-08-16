@@ -19,7 +19,7 @@ def test_4():
     RES = validar_txt_token(token)
     assert RES == False
 
-def test_60():
+def test_58():
     """
     Test para validar que la función reconozca un UID válido.
     
@@ -28,7 +28,7 @@ def test_60():
     RES = validar_uid(uid)
     assert RES == True
 
-def test_61():
+def test_59():
     """
     Test para validar que la función reconozca un UID inválido.
     """
