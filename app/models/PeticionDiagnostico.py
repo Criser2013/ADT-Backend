@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from numpy import array
+from numpy import array, float32
 
 class PeticionDiagnostico(BaseModel):
     """
@@ -59,7 +59,7 @@ class PeticionDiagnostico(BaseModel):
             Returns:
                 numpy.array: Array con los valores de la instancia
         """
-        return array([
+        return array([[
             self.edad, self.sexo, self.bebedor, self.fumador,
             self.cirugia_reciente, self.inmovilidad_de_m_inferiores,
             self.viaje_prolongado, self.TEP_TVP_previo, self.malignidad,
@@ -76,4 +76,4 @@ class PeticionDiagnostico(BaseModel):
             self.hipertension_arterial, self.neurologica, self.pulmonar,
             self.renal, self.trombofilia, self.urologica, self.vascular,
             self.vih
-        ])
+        ],]).astype(float32).reshape(1, -1)
