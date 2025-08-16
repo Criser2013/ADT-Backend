@@ -96,3 +96,50 @@ def test_10(mocker: MockerFixture):
     assert RES.json() == TEST_CREDS
 
     VALIDADOR.assert_not_called()
+
+def test_80():
+    """
+    Test para validar que el middleware retorne el mensaje adecuado cuando no se ha colocado
+    el header 'origin'
+    """
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.get(
+        "/credenciales"
+    )
+
+    assert RES.status_code == 400
+    assert RES.content.decode() == "Encabezado 'origin' inválido"
+
+def test_81(mocker: MockerFixture):
+    """
+    Test para validar que el middleware rechace la petición cuando viene de un origen no
+    autorizado
+    """
+    mocker.patch("app.main.ORIGENES_AUTORIZADOS", ["https://dominio.subdominio1.*.com"])
+
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.get(
+        "/credenciales",
+        headers={ "origin": "https://dominio.subdominio2.hola.com"}
+    )
+
+    assert RES.status_code == 403
+    assert RES.content.decode() == "Origen no autorizado"
+
+def test_82(mocker: MockerFixture):
+    """
+    Test para validar que el middleware acepte una petición de un origen autorizado
+    """
+    mocker.patch("app.main.ORIGENES_AUTORIZADOS", ["https://dominio.subdominio1.*.com"])
+
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.get(
+        "/credenciales",
+        headers={ "origin": "https://dominio.subdominio1.hola.com", "Host": "localhost"}
+    )
+
+    assert RES.status_code == 200
+    assert RES.json() == TEST_CREDS
