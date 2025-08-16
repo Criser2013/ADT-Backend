@@ -28,6 +28,7 @@ def setup_module(mocker: MockerFixture):
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
     mocker.patch("app.main.ALLOWED_HOSTS", ["localhost",])
     mocker.patch("routers.main_router.CREDS_FIREBASE_CLIENTE", TEST_CREDS)
+    mocker.patch("app.main.ORIGENES_AUTORIZADOS", ["*"])
     yield
     mocker.resetall()
 

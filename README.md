@@ -41,6 +41,7 @@ Debe tener un archivo en formato JSON con el nombre `firebase_token.json`. Este 
 ```
 CORS_ORIGINS=<string>                       # URLs permitidas para CORS (separadas por comas)
 ALLOWED_HOSTS=<string>                      # Hosts permitidos (separados por comas)
+ORIGENES_AUTORIZADOS=<string>               # Origenes permitidos (separados por comas)
 CLIENTE_FIREBASE_API_KEY=<string>           # API key del proyecto de Firebase
 CLIENTE_FIREBASE_AUTH_DOMAIN=<string>       # Dominio de autenticación de Firebase
 CLIENTE_FIREBASE_PROJECT_ID=<string>        # ID del proyecto en Firebase
@@ -86,7 +87,7 @@ La aplicación será visible en el puerto `80` del `localhost`.
 
 ## Sobre el modelo
 Puede cambiar el modelo reemplazando el archivo `modelo_redes_neuronbales.onnx` en la carpeta `app/bin`. Tenga en cuenta que se espera
-que los datos para realizar diagnósticos ya se encuentren en formato númerico. El backend solo realiza la normalización de los valores y a partir de eso genera la predicción. También se requiere el normalizador utilizado para entrenar los modelos (StandardScaler de Scikit), si desea cambiarlo solo reemplace el archivo `scaler.pkl`.
+que los datos para realizar diagnósticos ya se encuentren en formato númerico. El backend solo realiza la normalización de los valores y a partir de eso genera la predicción.
 
 ## Pruebas unitarias
 

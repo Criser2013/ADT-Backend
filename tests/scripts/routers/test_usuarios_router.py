@@ -15,6 +15,7 @@ def setup_module(mocker: MockerFixture):
     mocker.patch("routers.usuarios_router.firebase_app", MOCK_APP)
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
     mocker.patch("app.main.ALLOWED_HOSTS", ["localhost",] )
+    mocker.patch("app.main.ORIGENES_AUTORIZADOS", ["*"])
     yield
     mocker.resetall()
 
