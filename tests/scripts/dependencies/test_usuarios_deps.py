@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 import pytest
 
 @pytest.mark.asyncio
-async def test_55(mocker: MockerFixture):
+async def test_53(mocker: MockerFixture):
     """
     Test para validar que la dependencia "verificar_usuario_administrador" retorne los datos si el token es válido
     y el usuario es administrador.
@@ -24,7 +24,7 @@ async def test_55(mocker: MockerFixture):
     ROL.assert_called_once_with("a1234H")
 
 @pytest.mark.asyncio
-async def test_56(mocker: MockerFixture):
+async def test_54(mocker: MockerFixture):
     """
     Test para validar que la dependencia "verificar_usuario_administrador" no retorne los datos de los usuarios si el token es inválido.
     """
@@ -42,7 +42,7 @@ async def test_56(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_57(mocker: MockerFixture):
+async def test_55(mocker: MockerFixture):
     """
     Test para validar que la dependencia "verificar_usuario_administrador" no retorne los datos de los usuarios si se produjo un error
     al verificar el token
@@ -61,7 +61,7 @@ async def test_57(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_58(mocker: MockerFixture):
+async def test_56(mocker: MockerFixture):
     """
     Test para validar que la dependencia "verificar_usuario_administrador" no retorne los datos de los usuarios si el usuario no
     es administrador.
@@ -82,7 +82,7 @@ async def test_58(mocker: MockerFixture):
     ROL.assert_called_once_with("a1234H")
 
 @pytest.mark.asyncio
-async def test_59(mocker: MockerFixture):
+async def test_57(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
     es administrador.

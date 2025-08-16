@@ -31,7 +31,7 @@ def setup_module(mocker: MockerFixture):
     yield
     mocker.resetall()
 
-def test_10():
+def test_8():
     """
     Test para validar que el API rechace las peticiones de hosts no autorizados
     """
@@ -46,7 +46,7 @@ def test_10():
     assert RES.status_code == 400
     assert RES.content.decode() == "Invalid host header"
 
-def test_11(mocker: MockerFixture):
+def test_9(mocker: MockerFixture):
     """
     Test para validar que el middleware que revisa las credenciales de Firebase
     deje pasar un token válido con una petición POST proveniente de un host autorizado
@@ -75,7 +75,7 @@ def test_11(mocker: MockerFixture):
         "cred": {"projectId": "test_project_id", "certificated": True},
     }, check_revoked=True)
 
-def test_12(mocker: MockerFixture):
+def test_10(mocker: MockerFixture):
     """
     Test para validar que el API retorne correctamente las credenciales de Firebase
     y no aplique el middleware de verificación de credenciales

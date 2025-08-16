@@ -1,44 +1,24 @@
-import numpy as np
-import pickle
 import onnxruntime as rt
 from pathlib import Path
+from numpy import ndarray
 
-class Diagnostico():
+class Diagnostico:
     """
     Clase que representa una instancia de diagnóstico usando el modelo
     de red neuronal en ONNX.
     """
-    def __init__(self, datos):
+    def __init__(self, datos: ndarray):
         self.datos = datos
-        self.datos_normalizados = np.array([])
-        self.scaler = None
         self.BASE_PATH = Path(__file__).resolve().parent.parent
-
-        self.cargar_scaler()
-
-    def cargar_scaler(self):
-        """
-            Carga el normalizador con el que fue entrenado el modelo desde un archivo pickle
-        """
-        with open(f"{self.BASE_PATH}/bin/scaler.pkl", "rb") as f:
-            self.scaler = pickle.load(f)
-
-    def normalizar_datos(self):
-        """
-            Normaliza los datos
-        """
-        self.datos_normalizados = self.scaler.transform([self.datos,])[0].astype(np.float32).reshape(1, -1)
 
     def generar_diagnostico(self):
         """
-            Genera el diagnóstico de los datos normalizados usando el modelo ONNX
+        Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
+        y luego clasificarlos
         """
-        self.normalizar_datos()
-
         sesion = rt.InferenceSession(f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx", providers=["CPUExecutionProvider"])
         input_name = sesion.get_inputs()[0].name
-
-        pred = sesion.run(None, {input_name: self.datos_normalizados})
+        pred = sesion.run(None, {input_name: self.datos})
         RES = pred[0][0]
 
         return { "prediccion": int(RES) == 1, "probabilidad": float(pred[1][0][RES]) }

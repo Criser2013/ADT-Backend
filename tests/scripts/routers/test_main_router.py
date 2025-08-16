@@ -30,7 +30,7 @@ def setup_module(mocker: MockerFixture):
     yield
     mocker.resetall()
 
-def test_18(mocker: MockerFixture):
+def test_16(mocker: MockerFixture):
     """
     Test para validar que el API haga correctamente un diagnóstico de TEP
     """
@@ -93,9 +93,11 @@ def test_18(mocker: MockerFixture):
                  "Authorization": "Bearer token_valido"},
         json=INSTANCIA
     )
+    JSON = RES.json()
 
     assert RES.status_code == 200
-    assert RES.json() == { "prediccion": True, "probabilidad": 1.0 }
+    assert JSON["prediccion"] == True
+    assert round(JSON["probabilidad"],0) == 1.0
 
     VALIDADOR.assert_called_once_with("token_valido")
     FIREBASE.assert_called_once_with("token_valido", {
@@ -103,7 +105,7 @@ def test_18(mocker: MockerFixture):
         "cred": {"projectId": "test_project_id", "certificated": True},
     }, check_revoked=True)
 
-def test_19(mocker: MockerFixture):
+def test_17(mocker: MockerFixture):
     """
     Test para validar que el API maneje correctamente un error al realizar
     un diagnóstico
@@ -181,7 +183,7 @@ def test_19(mocker: MockerFixture):
     }, check_revoked=True)
     DIAGNOSTICO.assert_called_once()
 
-def test_75(mocker: MockerFixture):
+def test_73(mocker: MockerFixture):
     """
     Test para validar el endpoint de recaptcha retorne la respuesta correspondiente a
     la verificación de un token.
@@ -202,7 +204,7 @@ def test_75(mocker: MockerFixture):
 
     FUNC.assert_called_once_with("token_valido")
 
-def test_76(mocker: MockerFixture):
+def test_74(mocker: MockerFixture):
     """
     Test para validar que el endpoint para verificar el captcha maneje correctamente
     las excepciones.
