@@ -5,7 +5,8 @@ from utils.Dominios import obtener_lista_dominios
 load_dotenv()
 
 ROL_ADMIN = 1001
-CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS", "http://localhost:5178,"))
+CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS", "http://localhost:5173,"))
+ORIGENES_AUTORIZADOS = obtener_lista_dominios(getenv("ORIGENES_AUTORIZADOS", "http://localhost:5173,"))
 ACTIVAR_DOCS = getenv("ACTIVAR_DOCS", "false").lower() == "true"
 ALLOWED_HOSTS = obtener_lista_dominios(getenv("ALLOWED_HOSTS", "localhost,"))
 RECAPTCHA_SECRET = getenv("CAPTCHA_SECRET")

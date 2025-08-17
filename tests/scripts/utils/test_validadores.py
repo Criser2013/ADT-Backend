@@ -35,3 +35,41 @@ def test_59():
     uid = "usuario@cor1212reo.com@"
     RES = validar_uid(uid)
     assert RES == False
+
+def test_75():
+    """
+    Test para validar que la función convierta el caracter '*' en una expresión
+    regular que admita cualquier carácter.
+    """
+    RES = proc_origen("*")
+    assert RES == r"([\w|-|_|.|/|:])*"
+
+def test_76():
+    """
+    Test para validar que la función convierta el caracter '*' en una expresión
+    regular que admita cualquier carácter en una subcadena
+    """
+    RES = proc_origen("https://dominio.subdominio1.*.com")
+    assert RES == r"https://dominio.subdominio1.([\w|-|_|.|/|:])*.com"
+
+def test_77():
+    """
+    Test para validar que la función tome como válidos todos dominios que coincidan con la
+    lista (tiene elementos con comodines)
+    """
+    RES = validar_origen("https://dominio.subdominio1.hola.com", ["https://dominio.subdominio1.*.com"])
+    assert RES == True
+
+def test_78():
+    """
+    Test para validar que la función tome como válidos todos los dominios
+    """
+    RES = validar_origen("https://dominio.subdominio1.hola.com", ["*"])
+    assert RES == True
+
+def test_79():
+    """
+    Test para validar que la función no tome como válido un dominio no autorizado
+    """
+    RES = validar_origen("https://dominio.subdominio1.hola.com", ["http://dominio.subdominio4.com"])
+    assert RES == False
