@@ -1,6 +1,7 @@
-import onnxruntime as rt
+from onnxruntime import InferenceSession
 from pathlib import Path
 from numpy import ndarray
+from constants import EXPLAINER
 
 class Diagnostico:
     """
@@ -16,7 +17,7 @@ class Diagnostico:
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
         """
-        sesion = rt.InferenceSession(f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx", providers=["CPUExecutionProvider"])
+        sesion = InferenceSession(f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx", providers=["CPUExecutionProvider"])
         input_name = sesion.get_inputs()[0].name
         pred = sesion.run(None, {input_name: self.datos})
         RES = pred[0][0]

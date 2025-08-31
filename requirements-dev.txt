@@ -8,6 +8,8 @@ charset-normalizer==3.4.2
 coloredlogs==15.0.1
 coverage==7.9.2
 cryptography==45.0.5
+dill==0.4.0
+lime==0.2.0.1
 fastapi==0.116.0
 fastapi-cli==0.0.8
 firebase-admin==6.9.0

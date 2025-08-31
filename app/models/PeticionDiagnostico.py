@@ -76,4 +76,4 @@ class PeticionDiagnostico(BaseModel):
             self.hipertension_arterial, self.neurologica, self.pulmonar,
             self.renal, self.trombofilia, self.urologica, self.vascular,
             self.vih
-        ],]).astype(float32).reshape(1, -1)
+        ],]).astype(float32)
