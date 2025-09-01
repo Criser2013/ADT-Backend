@@ -59,5 +59,4 @@ def test_88():
 
     for i in OBJ.explicacion:
         assert "campo" in i.keys()
-        assert "valor" in i.keys()
         assert "contribucion" in i.keys()

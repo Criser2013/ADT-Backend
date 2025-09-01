@@ -1,7 +1,7 @@
 from onnxruntime import InferenceSession
 from pathlib import Path
 from numpy import ndarray, zeros, float32, array
-from app.utils.Preprocesamiento import preprocesar_instancias
+from utils.Preprocesamiento import preprocesar_instancias
 from constants import EXPLAINER
 
 
@@ -58,8 +58,7 @@ class Diagnostico:
             SALIDA.append(
                 {
                     "campo": CAMPO[0],
-                    "valor": "Positivo" if CAMPO[1] == 1 else "Negativo",
-                    "contribucion": round(i[1] * 100, 4),
+                    "contribucion": round(i[1] * 100, 2),
                 }
             )
 

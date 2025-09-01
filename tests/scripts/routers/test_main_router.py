@@ -37,7 +37,7 @@ def test_16(mocker: MockerFixture):
     """
 
     INSTANCIA = {
-        "edad": 4,
+        "edad": 68,
         "sexo": 1,
         "bebedor": 0,
         "fumador": 0,
@@ -52,18 +52,18 @@ def test_16(mocker: MockerFixture):
         "hemoptisis": 0,
         "sintomas_disautonomicos": 0,
         "edema_de_m_inferiores": 1,
-        "frecuencia_respiratoria": 1,
-        "saturacion_de_la_sangre": 9,
-        "frecuencia_cardiaca": 4,
-        "presion_sistolica": 4,
-        "presion_diastolica": 4,
+        "frecuencia_respiratoria": 18,
+        "saturacion_de_la_sangre": 91,
+        "frecuencia_cardiaca": 112,
+        "presion_sistolica": 110,
+        "presion_diastolica": 70,
         "fiebre": 0,
         "crepitaciones": 0,
         "sibilancias": 0,
         "soplos": 0,
-        "wbc": 2,
-        "hb": 4,
-        "plt": 4,
+        "wbc": 6800,
+        "hb": 13,
+        "plt": 313400,
         "derrame": 0,
         "otra_enfermedad": 1,
         "hematologica": 1,
@@ -99,6 +99,7 @@ def test_16(mocker: MockerFixture):
     assert RES.status_code == 200
     assert JSON["prediccion"] == True
     assert round(JSON["probabilidad"],0) == 1.0
+    assert len(JSON["lime"]) == 10
 
     VALIDADOR.assert_called_once_with("token_valido")
     FIREBASE.assert_called_once_with("token_valido", {
@@ -113,7 +114,7 @@ def test_17(mocker: MockerFixture):
     """
 
     INSTANCIA = {
-        "edad": 4,
+        "edad": 68,
         "sexo": 1,
         "bebedor": 0,
         "fumador": 0,
@@ -128,18 +129,18 @@ def test_17(mocker: MockerFixture):
         "hemoptisis": 0,
         "sintomas_disautonomicos": 0,
         "edema_de_m_inferiores": 1,
-        "frecuencia_respiratoria": 1,
-        "saturacion_de_la_sangre": 9,
-        "frecuencia_cardiaca": 4,
-        "presion_sistolica": 4,
-        "presion_diastolica": 4,
+        "frecuencia_respiratoria": 18,
+        "saturacion_de_la_sangre": 91,
+        "frecuencia_cardiaca": 112,
+        "presion_sistolica": 110,
+        "presion_diastolica": 70,
         "fiebre": 0,
         "crepitaciones": 0,
         "sibilancias": 0,
         "soplos": 0,
-        "wbc": 2,
-        "hb": 4,
-        "plt": 4,
+        "wbc": 6800,
+        "hb": 13,
+        "plt": 313400,
         "derrame": 0,
         "otra_enfermedad": 1,
         "hematologica": 1,
