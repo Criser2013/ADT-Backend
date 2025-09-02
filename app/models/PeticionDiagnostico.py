@@ -11,7 +11,7 @@ class PeticionDiagnostico(BaseModel):
     sexo: int
     bebedor: int
     fumador: int
-    cirugia_reciente:int
+    proc_quirurgico_traumatismo: int
     inmovilidad_de_m_inferiores: int
     viaje_prolongado: int
     TEP_TVP_previo: int
@@ -23,7 +23,7 @@ class PeticionDiagnostico(BaseModel):
     sintomas_disautonomicos: int
     edema_de_m_inferiores: int
     frecuencia_respiratoria: int
-    saturacion_de_la_sangre: int
+    saturacion_de_la_sangre: float
     frecuencia_cardiaca: int
     presion_sistolica: int
     presion_diastolica: int
@@ -31,9 +31,9 @@ class PeticionDiagnostico(BaseModel):
     crepitaciones: int
     sibilancias: int
     soplos: int
-    wbc: int
-    hb: int
-    plt: int
+    wbc: float
+    hb: float
+    plt: float
     derrame: int
     otra_enfermedad: int
     hematologica: int
@@ -61,7 +61,7 @@ class PeticionDiagnostico(BaseModel):
         """
         return array([[
             self.edad, self.sexo, self.bebedor, self.fumador,
-            self.cirugia_reciente, self.inmovilidad_de_m_inferiores,
+            self.proc_quirurgico_traumatismo, self.inmovilidad_de_m_inferiores,
             self.viaje_prolongado, self.TEP_TVP_previo, self.malignidad,
             self.disnea, self.dolor_toracico, self.tos,
             self.hemoptisis, self.sintomas_disautonomicos,
@@ -76,4 +76,4 @@ class PeticionDiagnostico(BaseModel):
             self.hipertension_arterial, self.neurologica, self.pulmonar,
             self.renal, self.trombofilia, self.urologica, self.vascular,
             self.vih
-        ],]).astype(float32).reshape(1, -1)
+        ],]).astype(float32)
