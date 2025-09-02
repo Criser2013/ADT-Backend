@@ -86,15 +86,15 @@ docker start <nombre-contenedor>
 La aplicación será visible en el puerto `80` del `localhost`.
 
 ## Sobre el modelo
-Puede cambiar el modelo reemplazando el archivo `modelo_redes_neuronbales.onnx` en la carpeta `app/bin`. Tenga en cuenta que se espera
-que los datos para realizar diagnósticos ya se encuentren en formato númerico. El backend solo realiza la normalización de los valores y a partir de eso genera la predicción.
+Puede cambiar el modelo reemplazando el archivo `modelo_redes_neuronales.onnx` en la carpeta `app/bin`.  
+Las explicaciones de cada instancia son generadas utilizando la biblioteca **LIME**. El explainer puede ser reemplazado al cambiar el archivo `explicador.pkl` de la carpeta mencionada anteriormente. Este objeto está configurado para realizar 5000 muestras de la instancia y retornar los 10 atributos más relevantes.
 
 ## Pruebas unitarias
 
 Para ejecutar las pruebas unitarias utilice el siguiente comando:
 
 ```
-./ejecutar-tests-sh
+./ejecutar-tests.sh
 ```  
 En la carpeta `tests/scripts` se encuentran los scripts de prueba. En la carpeta `cobertura` se guardan los informes de cobertura de código de las pruebas. De igual forma, la carpeta `resultados` almacena los informes de ejecución en formato **HTML**.  
 

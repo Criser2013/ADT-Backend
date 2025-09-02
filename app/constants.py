@@ -1,8 +1,13 @@
 from dotenv import load_dotenv
 from os import getenv
+from dill import load
+from pathlib import Path
 from utils.Dominios import obtener_lista_dominios
 
 load_dotenv()
+
+with open(f"{Path(__file__).resolve().parent}/bin/explicador.pkl", "rb") as archivo:
+    EXPLAINER = load(archivo)
 
 ROL_ADMIN = 1001
 CORS_ORIGINS = obtener_lista_dominios(getenv("CORS_ORIGINS", "http://localhost:5173,"))

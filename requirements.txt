@@ -7,6 +7,7 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 coloredlogs==15.0.1
 cryptography==45.0.5
+dill==0.4.0
 fastapi==0.116.0
 fastapi-cli==0.0.8
 firebase-admin==6.9.0
@@ -34,6 +35,7 @@ hyperframe==6.1.0
 idna==3.10
 iniconfig==2.1.0
 Jinja2==3.1.6
+lime==0.2.0.1
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
