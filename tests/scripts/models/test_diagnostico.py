@@ -22,17 +22,22 @@ def test_87():
     Test para validar que la función genere correctamente las probabilidades
     de pertenencia a una clase cuando se requiere clasificar varias instancias
     """
-    INSTANCIA = array([30, 0, 0, 0, 0, 1, 0, 0, 0,
-        1, 1, 0, 0, 0, 1, 22, 95, 85,
-        120, 80, 0, 0, 0, 0, 8000, 14, 300000,
-        1, 1, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1], dtype=float32)
+    INSTANCIA = array([68, 1, 0, 0, 0, 0, 0, 0, 1,
+            0, 1, 0, 0, 0, 1, 18, 91, 112, 110,
+            70, 0, 0, 0, 0, 6800, 13, 313400, 0,
+            1, 1, 0, 0, 0, 1, 1, 0, 1,
+            0, 0, 0, 0, 0, 0, 0], dtype=float32)
+    INSTANCIA1 = array(
+        [60, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1,
+         0, 19, 90, 128, 129, 93, 0, 0, 0, 0, 12300,
+         13.8, 211100, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0], dtype=float32)
     OBJ = Diagnostico(INSTANCIA)
     sesion = InferenceSession(
             f"{Path(__file__).resolve().parent.parent.parent.parent}/app/bin/modelo_red_neuronal.onnx",
             providers=["CPUExecutionProvider"],
         )
-    RES = OBJ.obtener_probabilidades_predicciones(array([INSTANCIA, INSTANCIA]).reshape(2, -1), sesion)
+    RES = OBJ.obtener_probabilidades_predicciones(array([INSTANCIA, INSTANCIA1]).reshape(2, -1), sesion)
 
     assert round(RES[0][1], 0) == 1
     assert round(RES[1][1], 0) == 1
