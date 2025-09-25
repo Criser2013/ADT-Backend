@@ -4,7 +4,11 @@ Backend para la aplicación "Herramienta para apoyar el diagnóstico de TEP". Se
 
 - FastAPI.
 - ONNX.
+- ONNX runtime.
 - Firebase admin.
+- Lime.
+
+Lo anterior, ejecutado sobre **Python 3.13.2**
 
 ## ¿Cómo ejecutar el proyecto?
 
