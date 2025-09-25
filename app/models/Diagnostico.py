@@ -54,10 +54,9 @@ class Diagnostico:
         explicacion = explicacion.as_list()
 
         for i in explicacion:
-            CAMPO = i[0].split("=")
             SALIDA.append(
                 {
-                    "campo": CAMPO[0],
+                    "campo": i[0],
                     "contribucion": round(i[1] * 100, 2),
                 }
             )
