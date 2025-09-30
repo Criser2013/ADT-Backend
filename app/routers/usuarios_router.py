@@ -5,24 +5,27 @@ from firebase_admin_config import firebase_app
 from utils.Validadores import validar_uid
 from urllib.parse import unquote
 from dependencies.usuarios_dependencies import verificar_usuario_administrador
+from dependencies.general_dependencies import verificar_idioma
+from constants import TEXTOS
 
 router = APIRouter(
-    prefix="/usuarios", dependencies=[Depends(verificar_usuario_administrador)]
+    prefix="/usuarios", dependencies=[Depends(verificar_usuario_administrador), Depends(verificar_idioma)]
 )
 
 
 @router.get("")
 async def ver_usuarios(
     res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador),
+    idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
     try:
         if not res_validacion_auth[0]:
             return res_validacion_auth[1]
 
-        return await ver_datos_usuarios(firebase_app)
+        return await ver_datos_usuarios(firebase_app, idioma)
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            {"error": f"{TEXTOS[idioma]['errTry']} Error al procesar la solicitud: {str(e)}"},
             status_code=500,
             media_type="application/json",
         )
@@ -30,7 +33,8 @@ async def ver_usuarios(
 
 @router.get("/{uid}")
 async def ver_usuario(
-    uid: str, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
+    uid: str, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador),
+    idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
     try:
         if not res_validacion_auth[0]:
@@ -40,25 +44,26 @@ async def ver_usuario(
         VALIDACION = validar_uid(uid)
 
         if not VALIDACION:
-            raise ValueError("UID inválido")
+            raise ValueError(f"{TEXTOS[idioma]['errUIDInvalido']}")
 
-        return await ver_datos_usuario(firebase_app, uid)
+        return await ver_datos_usuario(firebase_app, uid, idioma)
     except ValueError:
         return JSONResponse(
-            {"error": "UID inválido"},
+            {"error": TEXTOS[idioma]['errUIDInvalido']},
             status_code=400,
             media_type="application/json",
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
             status_code=500,
             media_type="application/json",
         )
 
 @router.patch("/{uid}")
 async def actualizar_usuario(
-    uid: str, desactivar: bool, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador)
+    uid: str, desactivar: bool, res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador),
+    idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
     try:
         if not res_validacion_auth[0]:
@@ -68,28 +73,28 @@ async def actualizar_usuario(
         VALIDACION = validar_uid(uid)
 
         if not VALIDACION:
-            raise ValueError("UID inválido")
+            raise ValueError(f"{TEXTOS[idioma]['errUIDInvalido']}")
 
         DATOS = ver_usuario_firebase(firebase_app, uid)
         if DATOS[0] == 0:
             return JSONResponse(
-                {"error": "Usuario no encontrado"},
+                {"error": f"{TEXTOS[idioma]['errUsuarioNoEncontrado']}"},
                 status_code=404,
                 media_type="application/json",
             )
         elif DATOS[0] == -1:
-            raise Exception("Error al obtener el usuario")
+            raise Exception(f"{TEXTOS[idioma]['errObtenerUsuario']}")
 
         return actualizar_estado_usuario(firebase_app, uid, desactivar)
     except ValueError:
         return JSONResponse(
-            {"error": "UID inválido"},
+            {"error": f"{TEXTOS[idioma]['errUIDInvalido']}"},
             status_code=400,
             media_type="application/json",
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
             status_code=500,
             media_type="application/json",
         )

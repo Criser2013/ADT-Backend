@@ -119,7 +119,7 @@ def test_42(mocker: MockerFixture):
     RES = CLIENTE.get(
         "/admin/usuarios/a1234H",
         headers={"Origin": "http://localhost:5178", "Host": "localhost",
-                 "Authorization": "Bearer token_valido"}
+                 "Authorization": "Bearer token_valido", "Language": "es"}
     )
 
     assert RES.status_code == 200
@@ -130,7 +130,7 @@ def test_42(mocker: MockerFixture):
     USUARIO.assert_called_once_with({
         "appId": "test_app_id",
         "cred": {"projectId": "test_project_id", "certificated": True},
-    }, "a1234H")
+    }, "a1234H", "es")
 
 def test_43(mocker: MockerFixture):
     """

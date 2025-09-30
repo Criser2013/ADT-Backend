@@ -3,6 +3,8 @@ from apis.FirebaseAuth import ver_datos_token
 from apis.Firestore import verificar_rol_usuario
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from utils.Diccionario import ver_si_existe_clave
+from constants import TEXTOS
 
 async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResponse | None]:
     """
@@ -14,6 +16,7 @@ async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResp
         tuple: Un tuple que contiene un booleano indicando si el usuario está autenticado y es administrador, y
         en caso de error, un JSONResponse con el mensaje de error y el código de estado correspondiente.
     """
+    idioma = req.headers["language"] if (ver_si_existe_clave(req.headers, "language") and req.headers["language"] in ("es", "en")) else "es"
     try:
         RES, DATOS = ver_datos_token(req, firebase_app)
 
@@ -28,7 +31,7 @@ async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResp
 
         if not VALIDAR_ROL:
             return False, JSONResponse(
-                {"error": "Acceso denegado."},
+                {"error": f"{TEXTOS[idioma]['errAccesoDenegado']}"},
                 status_code=403,
                 media_type="application/json",
             )
@@ -36,7 +39,7 @@ async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResp
         return True, None
     except Exception as e:
         return False, JSONResponse(
-            {"error": f"Error al procesar la solicitud: {str(e)}"},
+            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
             status_code=500,
             media_type="application/json",
         )
