@@ -85,7 +85,7 @@ async def actualizar_usuario(
         elif DATOS[0] == -1:
             raise Exception(f"{TEXTOS[idioma]['errObtenerUsuario']}")
 
-        return actualizar_estado_usuario(firebase_app, uid, desactivar)
+        return actualizar_estado_usuario(firebase_app, uid, desactivar, idioma)
     except ValueError:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errUIDInvalido']}"},

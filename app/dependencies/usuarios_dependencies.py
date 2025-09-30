@@ -18,7 +18,7 @@ async def verificar_usuario_administrador (req: Request) -> tuple[bool, JSONResp
     """
     idioma = req.headers["language"] if (ver_si_existe_clave(req.headers, "language") and req.headers["language"] in ("es", "en")) else "es"
     try:
-        RES, DATOS = ver_datos_token(req, firebase_app)
+        RES, DATOS = ver_datos_token(req, firebase_app, idioma)
 
         if RES in (-1, 0):
             return False, JSONResponse(
