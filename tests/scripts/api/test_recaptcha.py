@@ -7,7 +7,7 @@ def test_68():
     Test para validar que la función "manejador_errores" devuelve el mensaje de error correcto
     cuando el token es erroneo.
     """
-    RES = manejador_errores("invalid-input-response")
+    RES = manejador_errores("invalid-input-response", "es")
     assert RES == "El token proveído tiene errores."
 
 def test_69():
@@ -15,7 +15,7 @@ def test_69():
     Test para validar que la función "manejador_errores" devuelve el mensaje de error correcto
     cuando el token ya expiró o no es válido.
     """
-    RES = manejador_errores("timeout-or-duplicate")
+    RES = manejador_errores("timeout-or-duplicate", "es")
     assert RES == "El token ha expirado o ya fue utilizado."
 
 def test_70():
@@ -23,7 +23,7 @@ def test_70():
     Test para validar que la función "manejador_errores" no devuelve ningún mensaje cuando el
     error no es conocido.
     """
-    RES = manejador_errores("invalid-input-secret")
+    RES = manejador_errores("invalid-input-secret", "es")
     assert RES == "invalid-input-secret"
 
 def test_71(mocker: MockerFixture):
@@ -39,7 +39,7 @@ def test_71(mocker: MockerFixture):
     MOCK.return_value = RESPUESTA
 
     FUNC = mocker.patch("app.apis.Recaptcha.manejador_errores")
-    RES = verificar_peticion_recaptcha("token_valido")
+    RES = verificar_peticion_recaptcha("token_valido", "es")
 
     assert RES == {"success": True, "hostname": "host.com" }
     FUNC.assert_not_called()
@@ -55,6 +55,6 @@ def test_72(mocker: MockerFixture):
     MOCK = mocker.patch("app.apis.Recaptcha.post")
     MOCK.return_value = RESPUESTA
 
-    RES = verificar_peticion_recaptcha("token_invalido")
+    RES = verificar_peticion_recaptcha("token_invalido", "es")
 
     assert RES == {"success": False, "error-codes": ["El token proveído tiene errores.", "El token ha expirado o ya fue utilizado."] }

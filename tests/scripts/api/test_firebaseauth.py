@@ -148,7 +148,7 @@ def test_23(mocker: MockerFixture):
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
     TOKEN = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=(1, {"uid": "a1234H"}))
 
-    RES = ver_datos_token(REQ, "firebase_app")
+    RES = ver_datos_token(REQ, "firebase_app", "es")
 
     assert RES == (1, {"uid": "a1234H"})
     VALIDADOR.assert_called_once_with("token_valido")
@@ -164,7 +164,7 @@ def test_24(mocker: MockerFixture):
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=False)
     TOKEN = mocker.patch("apis.FirebaseAuth.validar_token")
 
-    RES = ver_datos_token(REQ, "firebase_app")
+    RES = ver_datos_token(REQ, "firebase_app", "es")
 
     assert RES == (0, {"error": "Token inválido"})
     VALIDADOR.assert_called_once_with("token_invalido")
@@ -181,7 +181,7 @@ def test_25(mocker: MockerFixture):
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token")
     VALIDADOR.side_effect = Exception("Error inesperado")
 
-    RES = ver_datos_token(REQ, "firebase_app")
+    RES = ver_datos_token(REQ, "firebase_app", "es")
 
     assert RES == (-1, {"error": "Error al procesar el token: Error inesperado."})
     VALIDADOR.assert_called_once_with("token_invalido")
@@ -211,7 +211,7 @@ async def test_26(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.auth.list_users", return_value=LISTA)
 
-    RES = await ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app", "es")
 
     assert RES.status_code == 200
     assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]}'
@@ -250,7 +250,7 @@ async def test_27(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.auth.list_users", return_value=LISTA)
 
-    RES = await ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app", "es")
 
     assert RES.status_code == 200
     assert RES.body.decode("utf-8") == '{"usuarios":[{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]}'
@@ -265,7 +265,7 @@ async def test_28(mocker: MockerFixture):
     FIREBASE = mocker.patch("firebase_admin.auth.list_users")
     FIREBASE.side_effect = Exception("Error al obtener los usuarios")
 
-    RES = await ver_datos_usuarios("firebase_app")
+    RES = await ver_datos_usuarios("firebase_app", "es")
 
     assert RES.status_code == 400
     assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos de los usuarios: Error al obtener los usuarios"}'
@@ -294,7 +294,7 @@ async def test_39(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.auth.get_user", return_value=USUARIO)
 
-    RES = await ver_datos_usuario("firebase_app", "12345")
+    RES = await ver_datos_usuario("firebase_app", "12345", "es")
 
     assert RES.status_code == 200
     assert RES.body.decode("utf-8") == '{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":true,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}'
@@ -313,7 +313,7 @@ async def test_40(mocker: MockerFixture):
 
     FIREBASE = mocker.patch("firebase_admin.auth.get_user", return_value=None)
 
-    RES = await ver_datos_usuario("firebase_app", "a1234H")
+    RES = await ver_datos_usuario("firebase_app", "a1234H", "es")
 
     assert RES.status_code == 404
     assert RES.body.decode("utf-8") == '{"error":"Usuario no encontrado"}'
@@ -331,10 +331,10 @@ async def test_41(mocker: MockerFixture):
 
     mocker.patch("firebase_admin.auth.get_user", return_value=None)
 
-    RES = await ver_datos_usuario("firebase_app", "a1234H")
+    RES = await ver_datos_usuario("firebase_app", "a1234H", "es")
 
     assert RES.status_code == 400
-    assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos del usuario: a1234H"}'
+    assert RES.body.decode("utf-8") == '{"error":"Error al obtener los datos de los usuarios: a1234H"}'
 
 def test_47(mocker: MockerFixture):
     """
@@ -388,7 +388,7 @@ def test_50(mocker: MockerFixture):
     """
     FIREBASE = mocker.patch("firebase_admin.auth.update_user")
 
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", False, "es")
 
     assert RES.status_code == 200
     assert RES.body.decode("utf-8") == '{"mensaje":"Estado del usuario actualizado correctamente"}'
@@ -403,7 +403,7 @@ def test_51(mocker: MockerFixture):
     FIREBASE = mocker.patch("firebase_admin.auth.update_user")
     FIREBASE.side_effect = ValueError("Estado inválido")
 
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", False, "es")
 
     assert RES.status_code == 401
     assert RES.body.decode("utf-8") == '{"error":"Estado inválido"}'
@@ -417,7 +417,7 @@ def test_52(mocker: MockerFixture):
     FIREBASE = mocker.patch("firebase_admin.auth.update_user")
     FIREBASE.side_effect = Exception("Error inesperado")
 
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", False, "es")
 
     assert RES.status_code == 500
     assert RES.body.decode("utf-8") == '{"error":"Error al procesar la solicitud: Error inesperado"}'

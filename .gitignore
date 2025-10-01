@@ -3,5 +3,5 @@ __pycache__
 .coverage
 .pytest_cache
 __init__.py
-*.json
+firebase_token.json
 .vscode

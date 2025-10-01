@@ -1,0 +1,32 @@
+{
+    "en": {
+        "errValidarToken": "Error validating the token",
+        "errTry": "Error processing the request:",
+        "errTokenInvalido": "Invalid token",
+        "errObtenerDatosUsuarios": "Error retrieving user data",
+        "errUIDInvalido": "Invalid UID",
+        "errUsuarioNoEncontrado": "User not found",
+        "errObtenerUsuario": "Error retrieving user",
+        "errEstadoInvalido": "Invalid status",
+        "msgUsuarioActualizado": "User status updated successfully",
+        "errProcesarToken": "Error processing the token",
+        "errCaptchaTokenErroneo": "The provided token contains errors.",
+        "errCaptchaTokenInvalido": "The token has expired or has already been used.",
+        "errAccesoDenegado": "Access denied."
+    },
+    "es": {
+        "errValidarToken": "Error al validar el token",
+        "errTry": "Error al procesar la solicitud:",
+        "errTokenInvalido": "Token inválido",
+        "errObtenerDatosUsuarios": "Error al obtener los datos de los usuarios",
+        "errUIDInvalido": "UID inválido",
+        "errUsuarioNoEncontrado": "Usuario no encontrado",
+        "errObtenerUsuario": "Error al obtener el usuario",
+        "errEstadoInvalido": "Estado inválido",
+        "msgUsuarioActualizado": "Estado del usuario actualizado correctamente",
+        "errProcesarToken": "Error al procesar el token",
+        "errCaptchaTokenErroneo": "El token proveído tiene errores.",
+        "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
+        "errAccesoDenegado": "Acceso denegado."
+    }
+}

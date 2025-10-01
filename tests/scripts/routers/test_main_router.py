@@ -204,7 +204,7 @@ def test_73(mocker: MockerFixture):
     assert RES.status_code == 200
     assert RES.json() == {"success": True, "hostname": "0.0.0.0"}
 
-    FUNC.assert_called_once_with("token_valido")
+    FUNC.assert_called_once_with("token_valido", "es")
 
 def test_74(mocker: MockerFixture):
     """
@@ -225,4 +225,4 @@ def test_74(mocker: MockerFixture):
     assert RES.status_code == 500
     assert RES.json() == {"error": "Error al procesar la solicitud: Error de verificación"}
 
-    FUNC.assert_called_once_with("token_valido")
+    FUNC.assert_called_once_with("token_valido", "es")
