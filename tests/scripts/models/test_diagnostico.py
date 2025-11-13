@@ -2,8 +2,10 @@ from app.models.Diagnostico import Diagnostico
 from onnxruntime import InferenceSession
 from numpy import array, float32
 from pathlib import Path
+import pytest
 
-def test_7():
+@pytest.mark.asyncio
+async def test_7():
     """
     Test para validar que la clase cargue el modelo y genere un diagnóstico
     correctamente.
@@ -12,7 +14,7 @@ def test_7():
         68,1,0,0,0,0,0,0,1,0,1,0,0,0,1,18,91,112,110,70,0,0,0,0,6800,13,313400,0,1,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0
         ],]).astype(float32)
     OBJ = Diagnostico(INSTANCIA)
-    RES = OBJ.generar_diagnostico()
+    RES = await OBJ.generar_diagnostico()
 
     assert RES["prediccion"] == True
     assert round(RES["probabilidad"],0) == 1.0
