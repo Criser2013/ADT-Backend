@@ -28,7 +28,7 @@ async def diagnosticar(req: PeticionDiagnostico, idioma: str = Depends(verificar
     try:
         DATOS = req.obtener_array_instancia()
         DIAGNOSTICO = Diagnostico(DATOS)
-        RES = DIAGNOSTICO.generar_diagnostico()
+        RES = await DIAGNOSTICO.generar_diagnostico()
 
         return JSONResponse(RES, status_code=200, media_type="application/json")
     except Exception as e:

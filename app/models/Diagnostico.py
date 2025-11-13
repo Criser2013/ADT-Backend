@@ -63,7 +63,7 @@ class Diagnostico:
 
         self.explicacion = SALIDA
 
-    def generar_diagnostico(self):
+    async def generar_diagnostico(self):
         """
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
