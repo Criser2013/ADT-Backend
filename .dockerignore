@@ -7,7 +7,7 @@ tests
 __pycache__
 __init__.py
 README.md
-requirements.dev.txt
+requirements-dev.txt
 .gitignore
 Dockerfile
 .env.**
