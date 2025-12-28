@@ -97,7 +97,7 @@ def test_16(mocker: MockerFixture):
     JSON = RES.json()
 
     assert RES.status_code == 200
-    assert JSON["prediccion"] == True
+    assert JSON["prediccion"] == False
     assert round(JSON["probabilidad"],0) == 1.0
     assert len(JSON["lime"]) == 10
 

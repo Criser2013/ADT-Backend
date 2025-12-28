@@ -1,7 +1,7 @@
 from onnxruntime import InferenceSession
 from pathlib import Path
 from numpy import ndarray, zeros, float32, array
-from utils.Preprocesamiento import preprocesar_instancias
+from utils.Preprocesamiento import preprocesar_instancia
 from constants import EXPLAINER
 
 
@@ -10,10 +10,68 @@ class Diagnostico:
     Clase que representa una instancia de diagnóstico usando el modelo
     de red neuronal en ONNX.
     """
-
-    def __init__(self, datos: ndarray):
+    def __init__(self, datos: dict):
         self.datos = datos
         self.BASE_PATH = Path(__file__).resolve().parent.parent
+
+    def obtener_array_datos(self) -> ndarray:
+        """
+        Convierte los datos del diagnóstico en un array de numpy.
+
+        Returns:
+            ndarray: Los datos convertidos en un array de numpy.
+        """
+        return array([self.datos["Edad"][0], self.datos["Género"][0], self.datos["Bebedor"][0], self.datos["Fumador"][0],
+            self.datos["Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias"][0], self.datos["Inmovilidad_de_M_inferiores"][0],
+            self.datos["Viaje_prolongado"][0], self.datos["TEP___TVP_Previo"][0], self.datos["Malignidad"][0],
+            self.datos["Disnea"][0], self.datos["Dolor_toracico"][0], self.datos["Tos"][0],
+            self.datos["Hemoptisis"][0], self.datos["Síntomas_disautonomicos"][0],
+            self.datos["Edema_de_M_inferiores"][0], self.datos["Frecuencia_respiratoria"][0],
+            self.datos["Saturación_de_la_sangre"][0], self.datos["Frecuencia_cardíaca"][0],
+            self.datos["Presión_sistólica"][0], self.datos["Presión_diastólica"][0],
+            self.datos["Fiebre"][0], self.datos["Crepitaciones"][0], self.datos["Sibilancias"][0],
+            self.datos["Soplos"][0], self.datos["WBC"][0], self.datos["HB"][0], self.datos["PLT"][0],
+            self.datos["Derrame"][0], self.datos["Otra_Enfermedad"][0], self.datos["Hematologica"][0],
+            self.datos["Cardíaca"][0], self.datos["Enfermedad_coronaria"][0], self.datos["Diabetes_Mellitus"][0],
+            self.datos["Endocrina"][0], self.datos["Gastrointestinal"][0], self.datos["Hepatopatía_crónica"][0],
+            self.datos["Hipertensión_arterial"][0], self.datos["Neurológica"][0], self.datos["Pulmonar"][0],
+            self.datos["Renal"][0], self.datos["Trombofilia"][0], self.datos["Urológica"][0], self.datos["Vascular"][0],
+            self.datos["VIH"][0]], dtype=float32)
+
+    def convertir_a_diccionario(self, array_datos: ndarray) -> dict:
+        """
+        Convierte un array de numpy en un diccionario con los datos del diagnóstico.
+
+        Args:
+            array_datos (ndarray): El array de datos a convertir.
+
+        Returns:
+            dict: El diccionario con los datos del diagnóstico.
+        """
+        claves = {
+            "Edad": [], "Género": [], "Bebedor": [], "Fumador": [],
+            "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [], "Inmovilidad_de_M_inferiores": [],
+            "Viaje_prolongado": [], "TEP___TVP_Previo": [], "Malignidad": [],
+            "Disnea": [], "Dolor_toracico": [], "Tos": [],
+            "Hemoptisis": [], "Síntomas_disautonomicos": [],
+            "Edema_de_M_inferiores": [], "Frecuencia_respiratoria": [],
+            "Saturación_de_la_sangre": [], "Frecuencia_cardíaca": [],
+            "Presión_sistólica": [], "Presión_diastólica": [],
+            "Fiebre": [], "Crepitaciones": [], "Sibilancias": [],
+            "Soplos": [], "WBC": [], "HB": [], "PLT": [],
+            "Derrame": [], "Otra_Enfermedad": [], "Hematologica": [],
+            "Cardíaca": [], "Enfermedad_coronaria": [], "Diabetes_Mellitus": [],
+            "Endocrina": [], "Gastrointestinal": [], "Hepatopatía_crónica": [],
+            "Hipertensión_arterial": [], "Neurológica": [], "Pulmonar": [],
+            "Renal": [], "Trombofilia": [], "Urológica": [], "Vascular": [],
+            "VIH": []
+        }
+        
+        for i in array_datos:
+            for j, clave in enumerate(claves.keys()):
+                claves[clave].append(i[j])
+
+        return claves
 
     def obtener_probabilidades_predicciones(
         self, instancias: ndarray, sesion: InferenceSession
@@ -28,12 +86,13 @@ class Diagnostico:
         Returns:
             ndarray: Las probabilidades de pertenecer a una clase u otra según el modelo.
         """
-        input_name = sesion.get_inputs()[0].name
-        instancias = preprocesar_instancias(instancias)
-        RES = sesion.run(None, {input_name: instancias})
-        ARRAY = zeros((len(instancias), 2), dtype=float32)
+        input_name = [i.name for i in sesion.get_inputs()]
+        instancias = self.convertir_a_diccionario(instancias)
+        instancias = preprocesar_instancia(instancias)
+        RES = sesion.run(None, {i: array(instancias[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        ARRAY = zeros((len(instancias["Edad"]), 2), dtype=float32)
 
-        for i in range(instancias.shape[0]):
+        for i in range(len(instancias["Edad"])):
             ARRAY[i] = array([RES[1][i][0], RES[1][i][1]])
 
         return ARRAY
@@ -46,7 +105,7 @@ class Diagnostico:
             sesion (InferenceSession): La sesión de inferencia de ONNX.
         """
         explicacion = EXPLAINER.explain_instance(
-            self.datos[0],
+            self.obtener_array_datos(),
             lambda x: self.obtener_probabilidades_predicciones(x, sesion),
             num_features=10,
         )
@@ -72,9 +131,9 @@ class Diagnostico:
             f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx",
             providers=["CPUExecutionProvider"],
         )
-        input_name = sesion.get_inputs()[0].name
-        preprocesados = preprocesar_instancias(self.datos)
-        pred = sesion.run(None, {input_name: preprocesados })
+        input_name = [i.name for i in sesion.get_inputs()]
+        preprocesados = preprocesar_instancia(self.datos)
+        pred = sesion.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
         self.generar_explicacion(sesion)
         RES = pred[0][0]
 
