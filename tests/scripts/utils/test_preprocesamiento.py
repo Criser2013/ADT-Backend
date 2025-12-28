@@ -1,5 +1,4 @@
 from app.utils.Preprocesamiento import *
-from numpy import array, float32
 
 def test_83():
     """
@@ -24,16 +23,31 @@ def test_85():
 
 def test_86():
     """
-    Validar que la función preprocesar_instancias retorne la instancia correctamente
+    Validar que la función preprocesar_instancia retorne la instancia correctamente
     """
-    ARRAY = array([30, 0, 0, 0, 0, 1, 0, 0, 0,
-        1, 1, 0, 0, 0, 1, 22, 95, 85,
-        120, 80, 0, 0, 0, 0, 8000, 14, 300000,
-        1, 1, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1])
-    RES = array([[ 1,  0,  0,  0,  0,  1,  0,  0,  0,  1,  1,  0,  0,
-         0,  1,  2, 10,  2,  4,  5,  0,  0,  0,  0,  2,  5,
-         4,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  1]], dtype=float32)
+    INSTANCIA = {
+            "Inmovilidad_de_M_inferiores": [1], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [0],
+            "Viaje_prolongado": [0], "Síntomas_disautonomicos": [0], "Edema_de_M_inferiores": [1],
+            "Diabetes_Mellitus": [0], "Hipertensión_arterial": [1], "Enfermedad_coronaria": [0],
+            "Dolor_toracico": [1], "TEP___TVP_Previo": [0], "Frecuencia_respiratoria": [22],
+            "Presión_sistólica": [120], "Presión_diastólica": [80], "Saturación_de_la_sangre": [95], "Frecuencia_cardíaca": [85],
+            "WBC": [8000], "HB": [14], "PLT": [300000], "Género": [0], "Edad": [30], "Fumador": [0], "Bebedor": [0], "Malignidad": [1],
+            "Disnea": [0], "Tos": [0], "Hemoptisis": [0], "Fiebre": [0], "Crepitaciones": [0], "Sibilancias": [0],
+            "Soplos": [0], "Derrame": [0], "Trombofilia": [0], "VIH": [0], "Otra_Enfermedad": [1], "Hematologica": [1], "Cardíaca": [0],
+            "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [0],
+            "Gastrointestinal": [0], "Urológica": [0], "Vascular": [0],
+        }
+    RES = {
+            "Inmovilidad_de_M_inferiores": [1], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [0],
+            "Viaje_prolongado": [0], "Síntomas_disautonomicos": [0], "Edema_de_M_inferiores": [1],
+            "Diabetes_Mellitus": [0], "Hipertensión_arterial": [1], "Enfermedad_coronaria": [0],
+            "Dolor_toracico": [1], "TEP___TVP_Previo": [0], "Frecuencia_respiratoria": [2],
+            "Presión_sistólica": [4], "Presión_diastólica": [5], "Saturación_de_la_sangre": [10], "Frecuencia_cardíaca": [2],
+            "WBC": [2], "HB": [5], "PLT": [4], "Género": [0], "Edad": [1], "Fumador": [0], "Bebedor": [0], "Malignidad": [1],
+            "Disnea": [0], "Tos": [0], "Hemoptisis": [0], "Fiebre": [0], "Crepitaciones": [0], "Sibilancias": [0],
+            "Soplos": [0], "Derrame": [0], "Trombofilia": [0], "VIH": [0], "Otra_Enfermedad": [1], "Hematologica": [1], "Cardíaca": [0],
+            "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [0],
+            "Gastrointestinal": [0], "Urológica": [0], "Vascular": [0],
+        }
     
-    assert (preprocesar_instancias(array([ARRAY], dtype=float32)) == RES).all()
+    assert preprocesar_instancia(INSTANCIA) == RES

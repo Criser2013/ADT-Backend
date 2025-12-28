@@ -55,10 +55,19 @@ def test_5():
         "vih": 0,
     }
     OBJ = PeticionDiagnostico(**DATOS)
-    RES = OBJ.obtener_array_instancia()
-    assert RES.all() == array([
-        68,1,0,0,0,0,0,0,1,0,1,0,0,0,1,18,91,112,110,70,0,0,0,0,6800,13,313400,0,1,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0
-        ]).all()
+    RES = OBJ.obtener_diccionario_instancia()
+    assert RES == {
+            "Inmovilidad_de_M_inferiores": [0], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [0],
+            "Viaje_prolongado": [0], "Síntomas_disautonomicos": [0], "Edema_de_M_inferiores": [1],
+            "Diabetes_Mellitus": [0], "Hipertensión_arterial": [1], "Enfermedad_coronaria": [0],
+            "Dolor_toracico": [1], "TEP___TVP_Previo": [0], "Frecuencia_respiratoria": [18],
+            "Presión_sistólica": [110], "Presión_diastólica": [70], "Saturación_de_la_sangre": [91], "Frecuencia_cardíaca": [112],
+            "WBC": [6800], "HB": [13], "PLT": [313400], "Género": [1], "Edad": [68], "Fumador": [0], "Bebedor": [0], "Malignidad": [1],
+            "Disnea": [0], "Tos": [0], "Hemoptisis": [0], "Fiebre": [0], "Crepitaciones": [0], "Sibilancias": [0],
+            "Soplos": [0], "Derrame": [0], "Trombofilia": [0], "VIH": [0], "Otra_Enfermedad": [1], "Hematologica": [1], "Cardíaca": [0],
+            "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [1],
+            "Gastrointestinal": [1], "Urológica": [0], "Vascular": [0],
+        }
 
 def test_6():
     """
