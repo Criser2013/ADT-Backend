@@ -52,28 +52,22 @@ class PeticionDiagnostico(BaseModel):
     vascular: int
     vih: int
 
-    def obtener_array_instancia(self):
+    def obtener_diccionario_instancia(self):
         """
-            Convierte la instancia de la petición de diagnóstico en un array de numpy
+            Convierte la instancia de la petición de diagnóstico en diccionario
 
             Returns:
-                numpy.array: Array con los valores de la instancia
+                dict: Diccionario con los valores de la instancia
         """
-        return array([[
-            self.edad, self.sexo, self.bebedor, self.fumador,
-            self.proc_quirurgico_traumatismo, self.inmovilidad_de_m_inferiores,
-            self.viaje_prolongado, self.TEP_TVP_previo, self.malignidad,
-            self.disnea, self.dolor_toracico, self.tos,
-            self.hemoptisis, self.sintomas_disautonomicos,
-            self.edema_de_m_inferiores, self.frecuencia_respiratoria,
-            self.saturacion_de_la_sangre, self.frecuencia_cardiaca,
-            self.presion_sistolica, self.presion_diastolica,
-            self.fiebre, self.crepitaciones, self.sibilancias,
-            self.soplos, self.wbc, self.hb, self.plt,
-            self.derrame, self.otra_enfermedad, self.hematologica,
-            self.cardiaca, self.enfermedad_coronaria, self.diabetes_mellitus,
-            self.endocrina, self.gastrointestinal, self.hepatopatia_cronica,
-            self.hipertension_arterial, self.neurologica, self.pulmonar,
-            self.renal, self.trombofilia, self.urologica, self.vascular,
-            self.vih
-        ],]).astype(float32)
+        return {
+            "Inmovilidad_de_M_inferiores": [self.inmovilidad_de_m_inferiores], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [self.proc_quirurgico_traumatismo],
+            "Viaje_prolongado": [self.viaje_prolongado], "Síntomas_disautonomicos": [self.sintomas_disautonomicos], "Edema_de_M_inferiores": [self.edema_de_m_inferiores],
+            "Dolor_toracico": [self.dolor_toracico], "TEP___TVP_Previo": [self.TEP_TVP_previo], "Frecuencia_respiratoria": [self.frecuencia_respiratoria],
+            "Presión_sistólica": [self.presion_sistolica], "Presión_diastólica": [self.presion_diastolica], "Saturación_de_la_sangre": [self.saturacion_de_la_sangre], "Frecuencia_cardíaca": [self.frecuencia_cardiaca],
+            "WBC": [self.wbc], "HB": [self.hb], "PLT": [self.plt], "Género": [self.sexo], "Edad": [self.edad], "Fumador": [self.fumador], "Bebedor": [self.bebedor], "Malignidad": [self.malignidad],
+            "Disnea": [self.disnea], "Tos": [self.tos], "Hemoptisis": [self.hemoptisis], "Fiebre": [self.fiebre], "Crepitaciones": [self.crepitaciones], "Sibilancias": [self.sibilancias],
+            "Soplos": [self.soplos], "Derrame": [self.derrame], "Otra_Enfermedad": [self.otra_enfermedad], "Diabetes_Mellitus": [self.diabetes_mellitus],
+            "Hipertensión_arterial": [self.hipertension_arterial], "Enfermedad_coronaria": [self.enfermedad_coronaria], "Trombofilia": [self.trombofilia], "VIH": [self.vih],
+            "Hepatopatía_crónica": [self.hepatopatia_cronica], "Renal": [self.renal], "Cardíaca": [self.cardiaca], "Neurológica": [self.neurologica], "Pulmonar": [self.pulmonar], "Endocrina": [self.endocrina],
+            "Gastrointestinal": [self.gastrointestinal], "Hematologica": [self.hematologica], "Urológica": [self.urologica], "Vascular": [self.vascular],
+        }

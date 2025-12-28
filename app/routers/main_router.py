@@ -26,7 +26,7 @@ async def obtener_credenciales(idioma: str = Depends(verificar_idioma)):
 @router.post("/diagnosticar")
 async def diagnosticar(req: PeticionDiagnostico, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
     try:
-        DATOS = req.obtener_array_instancia()
+        DATOS = req.obtener_diccionario_instancia()
         DIAGNOSTICO = Diagnostico(DATOS)
         RES = await DIAGNOSTICO.generar_diagnostico()
 
