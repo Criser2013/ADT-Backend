@@ -9,6 +9,10 @@ from dependencies.general_dependencies import verificar_idioma
 
 router = APIRouter(dependencies=[Depends(verificar_idioma)])
 
+@router.get("/healthcheck")
+async def healthcheck():
+    return JSONResponse({"status": "ok"}, status_code=200, media_type="application/json")
+
 @router.get("/credenciales")
 async def obtener_credenciales(idioma: str = Depends(verificar_idioma)):
     try:

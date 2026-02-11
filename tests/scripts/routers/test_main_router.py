@@ -226,3 +226,15 @@ def test_74(mocker: MockerFixture):
     assert RES.json() == {"error": "Error al procesar la solicitud: Error de verificación"}
 
     FUNC.assert_called_once_with("token_valido", "es")
+
+def test_91():
+    """
+    Test para validar que el endpoint de healthcheck retorne la respuesta correcta.
+    """
+
+    CLIENTE = TestClient(app.main.app)
+
+    RES = CLIENTE.get("/healthcheck")
+
+    assert RES.status_code == 200
+    assert RES.json() == {"status": "ok"}
