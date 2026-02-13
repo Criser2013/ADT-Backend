@@ -11,5 +11,5 @@ RUN pip install --no-cache-dir --no-input -r requirements.txt
 USER backend-user
 EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost/healthcheck || exit 1
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -H "Origin: localhost" -o /dev/null -s -w "%{http_code}\n" localhost:5000/healthcheck || exit 1
 CMD ["fastapi", "run", "./app/main.py", "--host", "0.0.0.0", "--port", "80"]
