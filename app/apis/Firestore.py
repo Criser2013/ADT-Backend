@@ -18,6 +18,7 @@ async def verificar_rol_usuario(uid: str) -> bool:
 
     return rol["rol"] == ROL_ADMIN
 
+
 async def obtener_roles_usuarios() -> list[dict]:
     """
     Obtiene los datos de los usuarios en la base de datos.
@@ -36,6 +37,7 @@ async def obtener_roles_usuarios() -> list[dict]:
 
     return AUX
 
+
 async def obtener_rol_usuario(uid: str) -> int:
     """
     Obtiene el rol del usuario con el UID especificado.
@@ -51,5 +53,5 @@ async def obtener_rol_usuario(uid: str) -> int:
 
     if doc.exists:
         return doc.to_dict()["rol"]
-    
+
     return -1  # Usuario no encontrado

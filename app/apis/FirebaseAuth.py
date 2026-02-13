@@ -33,7 +33,9 @@ def validar_token(
         return (-1, None) if obtener_datos else -1
 
 
-async def verificar_token(peticion: Request, firebase_app, call_next, idioma = "es") -> JSONResponse:
+async def verificar_token(
+    peticion: Request, firebase_app, call_next, idioma="es"
+) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
@@ -127,9 +129,7 @@ async def ver_datos_usuarios(firebase_app, idioma: str) -> JSONResponse:
                         "uid": x.uid,
                         "nombre": x.display_name,
                         "rol": (
-                            ROLES[x.uid]
-                            if ver_si_existe_clave(ROLES, x.uid)
-                            else "N/A"
+                            ROLES[x.uid] if ver_si_existe_clave(ROLES, x.uid) else "N/A"
                         ),
                         "estado": not x.disabled,
                         "fecha_registro": convertir_datetime_str(
@@ -210,6 +210,7 @@ async def ver_datos_usuario(firebase_app, uid: str, idioma: str) -> JSONResponse
             media_type="application/json",
         )
 
+
 def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
     """
     Obtiene los datos de un usuario específico usando el UID.
@@ -220,13 +221,16 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
     """
     try:
-        return 1, firebase_admin.auth.get_user(uid, firebase_app)
+        return (1, firebase_admin.auth.get_user(uid, firebase_app))
     except UserNotFoundError:
-        return 0, None
+        return (0, None)
     except:
-        return -1, None
+        return (-1, None)
 
-def actualizar_estado_usuario(firebase_app, uid: str, estado: bool, idioma: str) -> JSONResponse:
+
+def actualizar_estado_usuario(
+    firebase_app, uid: str, estado: bool, idioma: str
+) -> JSONResponse:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:

@@ -107,7 +107,7 @@ class Diagnostico:
         explicacion = EXPLAINER.explain_instance(
             self.obtener_array_datos(),
             lambda x: self.obtener_probabilidades_predicciones(x, sesion),
-            num_features=10,
+            num_features=10, num_samples=2000
         )
         SALIDA = []
         explicacion = explicacion.as_list()

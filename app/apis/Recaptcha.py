@@ -2,6 +2,7 @@ from constants import RECAPTCHA_SECRET, RECAPTCHA_API_URL
 from requests import post
 from constants import TEXTOS
 
+
 def manejador_errores(error: str, idioma: str) -> str:
     """
     Maneja los errores devueltos por la API de reCAPTCHA.
@@ -21,6 +22,7 @@ def manejador_errores(error: str, idioma: str) -> str:
         case _:
             return error
 
+
 def verificar_peticion_recaptcha(token: str, idioma: str) -> dict:
     """
     Envía una petición al API de ReCAPTCHA para verificar que el token es válido.
@@ -32,11 +34,12 @@ def verificar_peticion_recaptcha(token: str, idioma: str) -> dict:
     Returns:
         dict: La respuesta del API de ReCAPTCHA.
     """
-    cuerpo = {
-        "secret": RECAPTCHA_SECRET,
-        "response": token
-    }
-    res = post(RECAPTCHA_API_URL, data=cuerpo, headers={"Content-Type": "application/x-www-form-urlencoded"})
+    cuerpo = {"secret": RECAPTCHA_SECRET, "response": token}
+    res = post(
+        RECAPTCHA_API_URL,
+        data=cuerpo,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
     res = res.json()
 
     for key, value in res.items():
