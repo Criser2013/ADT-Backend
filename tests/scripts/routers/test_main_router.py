@@ -234,7 +234,7 @@ def test_91():
 
     CLIENTE = TestClient(app.main.app)
 
-    RES = CLIENTE.get("/healthcheck")
+    RES = CLIENTE.get("/healthcheck", headers={"Origin": "http://localhost:5178", "Host": "localhost"})
 
     assert RES.status_code == 200
     assert RES.json() == {"status": "ok"}
