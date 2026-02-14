@@ -34,7 +34,7 @@ def validar_token(
 
 
 async def verificar_token(
-    peticion: Request, firebase_app, call_next, idioma="es", authorization: str | None = Header(default="")
+    peticion: Request, firebase_app, call_next, authorization: str, idioma="es"
 ) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.

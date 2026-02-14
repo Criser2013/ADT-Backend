@@ -9,21 +9,21 @@ from constants import TEXTOS
 
 async def verificar_usuario_administrador(
     language: str | None = Header(default="es"),
-    token: str | None = Header(default=None),
+    authorization: str | None = Header(default=""),
 ) -> tuple[bool, JSONResponse | None]:
     """
     Verifica si el usuario está autenticado y es administrador antes de permitir el acceso a las rutas protegidas.
 
     Args:
         language (str | None): El idioma de la solicitud HTTP.
-        token (str | None): El token de autenticación de Firebase.
+        authorization (str | None): El token de autorización de Firebase.
     Returns:
         tuple: Un tuple que contiene un booleano indicando si el usuario está autenticado y es administrador, y
         en caso de error, un JSONResponse con el mensaje de error y el código de estado correspondiente.
     """
     idioma = language if language in ("es", "en") else "es"
     try:
-        RES, DATOS = ver_datos_token(token, firebase_app, idioma)
+        RES, DATOS = ver_datos_token(authorization, firebase_app, idioma)
 
         if RES in (-1, 0):
             return False, JSONResponse(

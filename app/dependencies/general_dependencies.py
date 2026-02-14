@@ -9,5 +9,4 @@ async def verificar_idioma (language: str | None = Header(default="es")) -> str:
     Returns:
         str: El idioma de la solicitud, por defecto "es" (español).
     """
-    print(language)
     return "es" if language not in ("es", "en") else language
