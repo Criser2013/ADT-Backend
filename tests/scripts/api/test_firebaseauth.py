@@ -38,11 +38,10 @@ async def test_11(mocker: MockerFixture):
     es inválido
     """
     REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
 
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=False)
 
-    RES = await verificar_token(REQ, "firebase_app", None)
+    RES = await verificar_token(REQ, "firebase_app", None, "es", "Bearer token_invalido")
 
     assert RES.status_code == 403
     assert RES.body.decode("utf-8") == '{"error":"Token inválido"}'
@@ -56,12 +55,11 @@ async def test_12(mocker: MockerFixture):
     una excepción al procesar la solicitud
     """
     REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
 
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE_VAL = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=-1)
 
-    RES = await verificar_token(REQ, "firebase_app", None)
+    RES = await verificar_token(REQ, "firebase_app", None, "es", "Bearer token_invalido")
 
     assert RES.status_code == 400
     assert RES.body.decode("utf-8") == '{"error":"Error al validar el token"}'

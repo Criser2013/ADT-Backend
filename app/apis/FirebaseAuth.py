@@ -1,6 +1,6 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Request
+from fastapi import Request, Header
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
@@ -34,12 +34,13 @@ def validar_token(
 
 
 async def verificar_token(
-    peticion: Request, firebase_app, call_next, idioma="es"
+    peticion: Request, firebase_app, call_next, idioma="es", authorization: str | None = Header(default="")
 ) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
-        peticion (Diagnostico): La solicitud que contiene el token.
+        peticion (Request): La solicitud que contiene el token.
+        authorization (str | None): El token de autorización de la solicitud.
         firebase_app (object): La instancia de la aplicación Firebase.
         call_next (function): La función para pasar al siguiente middleware o ruta.
         idioma (str): El idioma para los mensajes de error.
@@ -47,7 +48,7 @@ async def verificar_token(
         JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
     """
     try:
-        token = peticion.headers["authorization"].split("Bearer ")[1]
+        token = authorization.split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
         res_validacion = (
             0 if (not reg_validacion) else validar_token(token, firebase_app, False)
@@ -75,18 +76,18 @@ async def verificar_token(
         )
 
 
-def ver_datos_token(peticion: Request, firebase_app, idioma: str) -> tuple[int, dict]:
+def ver_datos_token(token: str, firebase_app, idioma: str) -> tuple[int, dict]:
     """
     Obtiene los datos del token de Firebase.
     Args:
-        peticion (Request): La solicitud que contiene el token.
+        token (str): El token de autorización de la solicitud.
         firebase_app: La instancia de la aplicación Firebase.
         idioma (str): El idioma para los mensajes de error.
     Returns:
         tuple: (True, datos) si el token es válido, (False, error) si hay un error.
     """
     try:
-        token = peticion.headers["authorization"].split("Bearer ")[1]
+        token = token.split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
 
         if not reg_validacion:
