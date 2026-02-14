@@ -1,6 +1,6 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Request
+from fastapi import Request, Header
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
@@ -33,11 +33,14 @@ def validar_token(
         return (-1, None) if obtener_datos else -1
 
 
-async def verificar_token(peticion: Request, firebase_app, call_next, idioma = "es") -> JSONResponse:
+async def verificar_token(
+    peticion: Request, firebase_app, call_next, authorization: str, idioma="es"
+) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
-        peticion (Diagnostico): La solicitud que contiene el token.
+        peticion (Request): La solicitud que contiene el token.
+        authorization (str | None): El token de autorización de la solicitud.
         firebase_app (object): La instancia de la aplicación Firebase.
         call_next (function): La función para pasar al siguiente middleware o ruta.
         idioma (str): El idioma para los mensajes de error.
@@ -45,7 +48,7 @@ async def verificar_token(peticion: Request, firebase_app, call_next, idioma = "
         JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
     """
     try:
-        token = peticion.headers["authorization"].split("Bearer ")[1]
+        token = authorization.split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
         res_validacion = (
             0 if (not reg_validacion) else validar_token(token, firebase_app, False)
@@ -73,18 +76,18 @@ async def verificar_token(peticion: Request, firebase_app, call_next, idioma = "
         )
 
 
-def ver_datos_token(peticion: Request, firebase_app, idioma: str) -> tuple[int, dict]:
+def ver_datos_token(token: str, firebase_app, idioma: str) -> tuple[int, dict]:
     """
     Obtiene los datos del token de Firebase.
     Args:
-        peticion (Request): La solicitud que contiene el token.
+        token (str): El token de autorización de la solicitud.
         firebase_app: La instancia de la aplicación Firebase.
         idioma (str): El idioma para los mensajes de error.
     Returns:
         tuple: (True, datos) si el token es válido, (False, error) si hay un error.
     """
     try:
-        token = peticion.headers["authorization"].split("Bearer ")[1]
+        token = token.split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
 
         if not reg_validacion:
@@ -127,9 +130,7 @@ async def ver_datos_usuarios(firebase_app, idioma: str) -> JSONResponse:
                         "uid": x.uid,
                         "nombre": x.display_name,
                         "rol": (
-                            ROLES[x.uid]
-                            if ver_si_existe_clave(ROLES, x.uid)
-                            else "N/A"
+                            ROLES[x.uid] if ver_si_existe_clave(ROLES, x.uid) else "N/A"
                         ),
                         "estado": not x.disabled,
                         "fecha_registro": convertir_datetime_str(
@@ -210,6 +211,7 @@ async def ver_datos_usuario(firebase_app, uid: str, idioma: str) -> JSONResponse
             media_type="application/json",
         )
 
+
 def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
     """
     Obtiene los datos de un usuario específico usando el UID.
@@ -220,13 +222,16 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
     """
     try:
-        return 1, firebase_admin.auth.get_user(uid, firebase_app)
+        return (1, firebase_admin.auth.get_user(uid, firebase_app))
     except UserNotFoundError:
-        return 0, None
+        return (0, None)
     except:
-        return -1, None
+        return (-1, None)
 
-def actualizar_estado_usuario(firebase_app, uid: str, estado: bool, idioma: str) -> JSONResponse:
+
+def actualizar_estado_usuario(
+    firebase_app, uid: str, estado: bool, idioma: str
+) -> JSONResponse:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:

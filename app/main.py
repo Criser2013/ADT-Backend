@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request, Response
+from fastapi import Request, Response, Header
 from routers.main_router import router as main_router
 from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
@@ -59,7 +59,11 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
     """
     RUTAS_NO_PROTEGIDAS = ("/recaptcha",)
     METODOS_RESTRINGIDOS = ("POST",)
+
+    token = peticion.headers["authorization"] if ver_si_existe_clave(peticion.headers, "authorization") else ""
+    idioma = peticion.headers["language"] if ver_si_existe_clave(peticion.headers, "language") else "es"
+
     if peticion.method in METODOS_RESTRINGIDOS and (peticion.url.path not in RUTAS_NO_PROTEGIDAS):
-        return await verificar_token(peticion, firebase_app, call_next)
+        return await verificar_token(peticion, firebase_app, call_next, token, idioma)
     else:
         return await call_next(peticion)

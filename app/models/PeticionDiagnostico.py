@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from numpy import array, float32
 
 class PeticionDiagnostico(BaseModel):
     """

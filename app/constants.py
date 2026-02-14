@@ -1,11 +1,8 @@
-from dotenv import load_dotenv
 from os import getenv
 from dill import load as dload
 from json import load as jload
 from pathlib import Path
 from utils.Dominios import obtener_lista_dominios
-
-load_dotenv()
 
 with open(f"{Path(__file__).resolve().parent}/bin/explicador.pkl", "rb") as archivo:
     EXPLAINER = dload(archivo)

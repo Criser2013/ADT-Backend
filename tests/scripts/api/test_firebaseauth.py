@@ -38,11 +38,10 @@ async def test_11(mocker: MockerFixture):
     es inválido
     """
     REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
 
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=False)
 
-    RES = await verificar_token(REQ, "firebase_app", None)
+    RES = await verificar_token(REQ, "firebase_app", None, "Bearer token_invalido", "es")
 
     assert RES.status_code == 403
     assert RES.body.decode("utf-8") == '{"error":"Token inválido"}'
@@ -56,12 +55,11 @@ async def test_12(mocker: MockerFixture):
     una excepción al procesar la solicitud
     """
     REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
 
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE_VAL = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=-1)
-
-    RES = await verificar_token(REQ, "firebase_app", None)
+    
+    RES = await verificar_token(REQ, "firebase_app", None, "Bearer token_invalido", "es")
 
     assert RES.status_code == 400
     assert RES.body.decode("utf-8") == '{"error":"Error al validar el token"}'
@@ -76,13 +74,12 @@ async def test_13(mocker: MockerFixture):
     errores inesperados al validar el token de Firebase.
     """
     REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
 
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
     FIREBASE_VAL = mocker.patch("app.apis.FirebaseAuth.validar_token")
     FIREBASE_VAL.side_effect = Exception("Excepción imprevista")
 
-    RES = await verificar_token(REQ, "firebase_app", None)
+    RES = await verificar_token(REQ, "firebase_app", None, "Bearer token_invalido", "es")
 
     assert RES.status_code == 500
     assert RES.body.decode("utf-8") == '{"error":"Error al procesar la solicitud: Excepción imprevista"}'
@@ -127,9 +124,6 @@ def test_22(mocker: MockerFixture):
     Test para validar que la función "validar_token" retorne los datos del token cuando este
     es válido
     """
-    REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_valido"}
-
     FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value={ "uid": "a1234H" })
 
     RES = validar_token("token_valido", "firebase_app", True)
@@ -142,13 +136,10 @@ def test_23(mocker: MockerFixture):
     Test para validar que la función "ver_datos_token" retorne los datos del token cuando este
     es válido
     """
-    REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_valido"}
-
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
     TOKEN = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=(1, {"uid": "a1234H"}))
 
-    RES = ver_datos_token(REQ, "firebase_app", "es")
+    RES = ver_datos_token("Bearer token_valido", "firebase_app", "es")
 
     assert RES == (1, {"uid": "a1234H"})
     VALIDADOR.assert_called_once_with("token_valido")
@@ -158,13 +149,10 @@ def test_24(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" cuando se provee un token inválido.
     """
-    REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
-
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=False)
     TOKEN = mocker.patch("apis.FirebaseAuth.validar_token")
 
-    RES = ver_datos_token(REQ, "firebase_app", "es")
+    RES = ver_datos_token("Bearer token_invalido", "firebase_app", "es")
 
     assert RES == (0, {"error": "Token inválido"})
     VALIDADOR.assert_called_once_with("token_invalido")
@@ -175,13 +163,10 @@ def test_25(mocker: MockerFixture):
     Test para validar que la función "ver_datos_token" maneje correctamente las
     excepciones.
     """
-    REQ = mocker.MagicMock(spec=Request)
-    REQ.headers = {"authorization": "Bearer token_invalido"}
-
     VALIDADOR = mocker.patch("app.apis.FirebaseAuth.validar_txt_token")
     VALIDADOR.side_effect = Exception("Error inesperado")
 
-    RES = ver_datos_token(REQ, "firebase_app", "es")
+    RES = ver_datos_token("Bearer token_invalido", "firebase_app", "es")
 
     assert RES == (-1, {"error": "Error al procesar el token: Error inesperado."})
     VALIDADOR.assert_called_once_with("token_invalido")
