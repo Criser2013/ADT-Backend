@@ -1,6 +1,6 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi import Request, Header
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str

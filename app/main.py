@@ -1,16 +1,63 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request, Response, Header
+from fastapi import Request, Response
+from dotenv import load_dotenv
 from routers.main_router import router as main_router
 from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
-from constants import CORS_ORIGINS, ALLOWED_HOSTS, ACTIVAR_DOCS, ORIGENES_AUTORIZADOS
+from constants import (
+    CORS_ORIGINS,
+    ALLOWED_HOSTS,
+    ACTIVAR_DOCS,
+    ORIGENES_AUTORIZADOS,
+    CREDS_FIREBASE_CLIENTE,
+)
 from utils.Validadores import validar_origen
 from utils.Diccionario import ver_si_existe_clave
-from firebase_admin_config import firebase_app
+from contextlib import asynccontextmanager
+from pathlib import Path
+from dill import load as dload
+from json import load as jload
+from onnxruntime import InferenceSession
+from firebase_admin_config import inicializar_firebase
 
-app = FastAPI(docs_url=None if not ACTIVAR_DOCS else "/docs", redoc_url=None if not ACTIVAR_DOCS else "/redoc")
+load_dotenv()
+
+
+@asynccontextmanager
+async def inicializar_modelos(app: FastAPI):
+    PATH_BASE = Path(__file__).resolve().parent
+    FIREBASE_APP = inicializar_firebase()
+
+    with open(f"{PATH_BASE}/bin/explicador.pkl", "rb") as archivo:
+        EXPLAINER = dload(archivo)
+
+    with open(f"{PATH_BASE}/bin/textos.json") as archivo:
+        TEXTOS = jload(archivo)
+
+    MODELO = InferenceSession(
+        f"{PATH_BASE}/bin/modelo_red_neuronal.onnx",
+        providers=["CPUExecutionProvider"],
+    )
+
+    yield {
+        "explicador": EXPLAINER,
+        "textos": TEXTOS,
+        "modelo": MODELO,
+        "firebase_app": FIREBASE_APP,
+        "credenciales": CREDS_FIREBASE_CLIENTE,
+    }
+
+    FIREBASE_APP._cleanup()
+    del EXPLAINER, TEXTOS, MODELO, FIREBASE_APP, CREDS_FIREBASE_CLIENTE
+
+
+app = FastAPI(
+    lifespan=inicializar_modelos,
+    docs_url=None if not ACTIVAR_DOCS else "/docs",
+    redoc_url=None if not ACTIVAR_DOCS else "/redoc",
+)
 
 app.include_router(main_router)
 app.include_router(usuarios_router, prefix="/admin")
@@ -25,10 +72,8 @@ app.add_middleware(
 )
 
 # Middleware que no permite peticiones de hosts no autorizados
-app.add_middleware(
-    TrustedHostMiddleware, 
-    allowed_hosts=ALLOWED_HOSTS
-)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+
 
 @app.middleware("http")
 async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
@@ -49,6 +94,7 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
     else:
         return await call_next(peticion)
 
+
 @app.middleware("http")
 async def verificar_credenciales(peticion: Request, call_next) -> Response:
     """
@@ -59,11 +105,22 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
     """
     RUTAS_NO_PROTEGIDAS = ("/recaptcha",)
     METODOS_RESTRINGIDOS = ("POST",)
+    firebase_app = peticion.app.state.firebase_app
 
-    token = peticion.headers["authorization"] if ver_si_existe_clave(peticion.headers, "authorization") else ""
-    idioma = peticion.headers["language"] if ver_si_existe_clave(peticion.headers, "language") else "es"
+    token = (
+        peticion.headers["authorization"]
+        if ver_si_existe_clave(peticion.headers, "authorization")
+        else ""
+    )
+    idioma = (
+        peticion.headers["language"]
+        if ver_si_existe_clave(peticion.headers, "language")
+        else "es"
+    )
 
-    if peticion.method in METODOS_RESTRINGIDOS and (peticion.url.path not in RUTAS_NO_PROTEGIDAS):
+    if peticion.method in METODOS_RESTRINGIDOS and (
+        peticion.url.path not in RUTAS_NO_PROTEGIDAS
+    ):
         return await verificar_token(peticion, firebase_app, call_next, token, idioma)
     else:
         return await call_next(peticion)

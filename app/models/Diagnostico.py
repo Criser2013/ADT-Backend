@@ -1,8 +1,9 @@
 from onnxruntime import InferenceSession
+from lime.lime_tabular import LimeTabularExplainer
 from pathlib import Path
 from numpy import ndarray, zeros, float32, array
 from utils.Preprocesamiento import preprocesar_instancia
-from constants import EXPLAINER
+#from constants import EXPLAINER
 
 
 class Diagnostico:
@@ -10,8 +11,10 @@ class Diagnostico:
     Clase que representa una instancia de diagnóstico usando el modelo
     de red neuronal en ONNX.
     """
-    def __init__(self, datos: dict):
+    def __init__(self, datos: dict, modelo: InferenceSession, explicador: LimeTabularExplainer):
         self.datos = datos
+        self.modelo = modelo
+        self.explicador = explicador
         self.BASE_PATH = Path(__file__).resolve().parent.parent
 
     def obtener_array_datos(self) -> ndarray:
@@ -74,22 +77,21 @@ class Diagnostico:
         return claves
 
     def obtener_probabilidades_predicciones(
-        self, instancias: ndarray, sesion: InferenceSession
+        self, instancias: ndarray
     ) -> ndarray:
         """
         Hace la clasificación de varias instancias empleando el modelo
 
         Args:
             instancias (ndarray): Las instancias a clasificar.
-            sesion (InferenceSession): La sesión de inferencia de ONNX.
 
         Returns:
             ndarray: Las probabilidades de pertenecer a una clase u otra según el modelo.
         """
-        input_name = [i.name for i in sesion.get_inputs()]
+        input_name = [i.name for i in self.modelo.get_inputs()]
         instancias = self.convertir_a_diccionario(instancias)
         instancias = preprocesar_instancia(instancias)
-        RES = sesion.run(None, {i: array(instancias[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        RES = self.modelo.run(None, {i: array(instancias[i], dtype=float32).reshape(-1, 1) for i in input_name})
         ARRAY = zeros((len(instancias["Edad"]), 2), dtype=float32)
 
         for i in range(len(instancias["Edad"])):
@@ -97,16 +99,13 @@ class Diagnostico:
 
         return ARRAY
 
-    def generar_explicacion(self, sesion):
+    def generar_explicacion(self):
         """
         Genera una explicación para la predicción de la instancia usando LIME (5000 muestras y máximo 10 atributos).
-
-        Args:
-            sesion (InferenceSession): La sesión de inferencia de ONNX.
         """
-        explicacion = EXPLAINER.explain_instance(
+        explicacion = self.explicador.explain_instance(
             self.obtener_array_datos(),
-            lambda x: self.obtener_probabilidades_predicciones(x, sesion),
+            lambda x: self.obtener_probabilidades_predicciones(x),
             num_features=10, num_samples=2000
         )
         SALIDA = []
@@ -127,14 +126,10 @@ class Diagnostico:
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
         """
-        sesion = InferenceSession(
-            f"{self.BASE_PATH}/bin/modelo_red_neuronal.onnx",
-            providers=["CPUExecutionProvider"],
-        )
-        input_name = [i.name for i in sesion.get_inputs()]
+        input_name = [i.name for i in self.modelo.get_inputs()]
         preprocesados = preprocesar_instancia(self.datos)
-        pred = sesion.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
-        self.generar_explicacion(sesion)
+        pred = await self.modelo.run_async(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        self.generar_explicacion()
         RES = pred[0][0]
 
         return {
