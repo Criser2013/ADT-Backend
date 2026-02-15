@@ -6,7 +6,6 @@ from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
 from utils.Diccionario import ver_si_existe_clave
 from apis.Firestore import obtener_roles_usuarios, obtener_rol_usuario
-from constants import TEXTOS
 import asyncio
 
 
@@ -34,7 +33,7 @@ def validar_token(
 
 
 async def verificar_token(
-    peticion: Request, firebase_app, call_next, authorization: str, idioma="es"
+    peticion: Request, firebase_app, call_next, authorization: str, textos: dict[str, str], idioma: str ="es"
 ) -> JSONResponse:
     """
     Verifica el token de Firebase en la solicitud.
@@ -58,31 +57,32 @@ async def verificar_token(
                 return await call_next(peticion)
             case 0:
                 return JSONResponse(
-                    {"error": TEXTOS[idioma]["errTokenInvalido"]},
+                    {"error": textos[idioma]["errTokenInvalido"]},
                     status_code=403,
                     media_type="application/json",
                 )
             case _:
                 return JSONResponse(
-                    {"error": TEXTOS[idioma]["errValidarToken"]},
+                    {"error": textos[idioma]["errValidarToken"]},
                     status_code=400,
                     media_type="application/json",
                 )
     except Exception as e:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {e}"},
+            {"error": f"{textos[idioma]['errTry']} {e}"},
             status_code=500,
             media_type="application/json",
         )
 
 
-def ver_datos_token(token: str, firebase_app, idioma: str) -> tuple[int, dict]:
+def ver_datos_token(token: str, firebase_app, idioma: str, textos: dict[str, str]) -> tuple[int, dict]:
     """
     Obtiene los datos del token de Firebase.
     Args:
         token (str): El token de autorización de la solicitud.
         firebase_app: La instancia de la aplicación Firebase.
         idioma (str): El idioma para los mensajes de error.
+        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
         tuple: (True, datos) si el token es válido, (False, error) si hay un error.
     """
@@ -91,7 +91,7 @@ def ver_datos_token(token: str, firebase_app, idioma: str) -> tuple[int, dict]:
         reg_validacion = validar_txt_token(token)
 
         if not reg_validacion:
-            return (0, {"error": f"{TEXTOS[idioma]['errTokenInvalido']}"})
+            return (0, {"error": f"{textos[idioma]['errTokenInvalido']}"})
 
         res_validacion = validar_token(token, firebase_app, True)
 
@@ -99,20 +99,21 @@ def ver_datos_token(token: str, firebase_app, idioma: str) -> tuple[int, dict]:
             case 1:
                 return res_validacion
             case 0:
-                return (0, {"error": f"{TEXTOS[idioma]['errTokenInvalido']}"})
+                return (0, {"error": f"{textos[idioma]['errTokenInvalido']}"})
             case _:
-                return (-1, {"error": f"{TEXTOS[idioma]['errValidarToken']}"})
+                return (-1, {"error": f"{textos[idioma]['errValidarToken']}"})
 
     except Exception as e:
-        return (-1, {"error": f"{TEXTOS[idioma]['errProcesarToken']}: {e}."})
+        return (-1, {"error": f"{textos[idioma]['errProcesarToken']}: {e}."})
 
 
-async def ver_datos_usuarios(firebase_app, idioma: str) -> JSONResponse:
+async def ver_datos_usuarios(firebase_app, idioma: str, textos: dict[str, str]) -> JSONResponse:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
         idioma (str): El idioma para los mensajes de error.
+        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
         JSONResponse: Los datos de los usuarios, o un error si ocurre un problema.
     """
@@ -155,19 +156,20 @@ async def ver_datos_usuarios(firebase_app, idioma: str) -> JSONResponse:
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errObtenerDatosUsuarios']}: {e}"},
+            {"error": f"{textos[idioma]['errObtenerDatosUsuarios']}: {e}"},
             status_code=400,
             media_type="application/json",
         )
 
 
-async def ver_datos_usuario(firebase_app, uid: str, idioma: str) -> JSONResponse:
+async def ver_datos_usuario(firebase_app, uid: str, idioma: str, textos: dict[str, str]) -> JSONResponse:
     """
     Obtiene los datos de un usuario específico usando el UID.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
         uid (str): El UID del usuario a buscar.
         idioma (str): El idioma para los mensajes de error.
+        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
         JSONResponse: Los datos del usuario, o un error si ocurre un problema.
     """
@@ -177,7 +179,7 @@ async def ver_datos_usuario(firebase_app, uid: str, idioma: str) -> JSONResponse
         ROL = await roles_task
 
         if ROL == -1:
-            raise UserNotFoundError(f"{TEXTOS[idioma]['errUsuarioNoEncontrado']}")
+            raise UserNotFoundError(f"{textos[idioma]['errUsuarioNoEncontrado']}")
 
         RES = {
             "correo": usuario.email,
@@ -200,13 +202,13 @@ async def ver_datos_usuario(firebase_app, uid: str, idioma: str) -> JSONResponse
         )
     except UserNotFoundError:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errUsuarioNoEncontrado']}"},
+            {"error": f"{textos[idioma]['errUsuarioNoEncontrado']}"},
             status_code=404,
             media_type="application/json",
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errObtenerDatosUsuarios']}: {e}"},
+            {"error": f"{textos[idioma]['errObtenerDatosUsuarios']}: {e}"},
             status_code=400,
             media_type="application/json",
         )
@@ -230,7 +232,7 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
 
 
 def actualizar_estado_usuario(
-    firebase_app, uid: str, estado: bool, idioma: str
+    firebase_app, uid: str, estado: bool, idioma: str, textos: dict[str, str]
 ) -> JSONResponse:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
@@ -239,6 +241,7 @@ def actualizar_estado_usuario(
         uid (str): El UID del usuario a actualizar.
         estado (bool): El nuevo estado del usuario (True para desactivado, False para activado).
         idioma (str): El idioma para los mensajes de error.
+        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
         JSONResponse | Response: Mensaje de éxito o error.
     """
@@ -246,19 +249,19 @@ def actualizar_estado_usuario(
         firebase_admin.auth.update_user(uid=uid, disabled=estado, app=firebase_app)
 
         return JSONResponse(
-            {"mensaje": f"{TEXTOS[idioma]['msgUsuarioActualizado']}"},
+            {"mensaje": f"{textos[idioma]['msgUsuarioActualizado']}"},
             status_code=200,
             media_type="application/json",
         )
     except ValueError:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errEstadoInvalido']}"},
+            {"error": f"{textos[idioma]['errEstadoInvalido']}"},
             status_code=401,
             media_type="application/json",
         )
     except Exception as e:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
+            {"error": f"{textos[idioma]['errTry']} {str(e)}"},
             status_code=500,
             media_type="application/json",
         )

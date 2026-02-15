@@ -3,7 +3,6 @@ from lime.lime_tabular import LimeTabularExplainer
 from pathlib import Path
 from numpy import ndarray, zeros, float32, array
 from utils.Preprocesamiento import preprocesar_instancia
-#from constants import EXPLAINER
 
 
 class Diagnostico:
@@ -128,7 +127,7 @@ class Diagnostico:
         """
         input_name = [i.name for i in self.modelo.get_inputs()]
         preprocesados = preprocesar_instancia(self.datos)
-        pred = await self.modelo.run_async(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        pred = self.modelo.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
         self.generar_explicacion()
         RES = pred[0][0]
 
