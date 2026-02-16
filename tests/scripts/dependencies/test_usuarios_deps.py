@@ -68,6 +68,7 @@ async def test_56(mocker: MockerFixture):
     """
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.headers = {"authorization": "Bearer token_valido"}
+    PETICION.state.textos = { "es":  { "errAccesoDenegado": "Acceso denegado." } }
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
@@ -89,6 +90,7 @@ async def test_57(mocker: MockerFixture):
     """
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.headers = {"authorization": "Bearer token_valido"}
+    PETICION.state.textos = { "es":  { "errTry": "Error al procesar la solicitud:" } }
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.side_effect = Exception("Error inesperado")
