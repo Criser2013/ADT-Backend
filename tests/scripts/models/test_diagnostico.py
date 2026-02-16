@@ -2,7 +2,26 @@ from app.models.Diagnostico import Diagnostico
 from onnxruntime import InferenceSession
 from numpy import array, float32
 from pathlib import Path
+from dill import load as dload
+from pytest_mock import MockerFixture
+from onnxruntime import InferenceSession
+from pathlib import Path
 import pytest
+
+@pytest.fixture(autouse=True)
+def setup_module(mocker: MockerFixture):
+    global EXPLAINER, TEXTOS, MODELO
+
+    PATH_BASE = f"{Path(__file__).resolve().parent.parent.parent.parent}/app"
+    with open(f"{PATH_BASE}/bin/explicador.pkl", "rb") as archivo:
+        EXPLAINER = dload(archivo)
+
+    MODELO = InferenceSession(
+        f"{PATH_BASE}/bin/modelo_red_neuronal.onnx",
+        providers=["CPUExecutionProvider"],
+    )
+    yield
+    mocker.resetall()
 
 @pytest.mark.asyncio
 async def test_7():
@@ -22,7 +41,7 @@ async def test_7():
             "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [0],
             "Gastrointestinal": [0], "Hematologica": [0], "Urológica": [0], "Vascular": [0],
         }
-    OBJ = Diagnostico(INSTANCIA)
+    OBJ = Diagnostico(INSTANCIA, MODELO, EXPLAINER)
     RES = await OBJ.generar_diagnostico()
 
     assert RES["prediccion"] == True
@@ -44,12 +63,8 @@ def test_87():
          13.8, 211100, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
          0, 0, 0, 0, 0, 0, 0], dtype=float32)
 
-    OBJ = Diagnostico(INSTANCIA)
-    sesion = InferenceSession(
-            f"{Path(__file__).resolve().parent.parent.parent.parent}/app/bin/modelo_red_neuronal.onnx",
-            providers=["CPUExecutionProvider"],
-        )
-    RES = OBJ.obtener_probabilidades_predicciones(array([INSTANCIA, INSTANCIA1]).reshape(2, -1), sesion)
+    OBJ = Diagnostico(INSTANCIA, MODELO, EXPLAINER)
+    RES = OBJ.obtener_probabilidades_predicciones(array([INSTANCIA, INSTANCIA1]).reshape(2, -1))
 
     assert round(RES[0][1], 0) == 0
     assert round(RES[1][1], 0) == 1
@@ -71,12 +86,8 @@ def test_88():
             "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [0],
             "Gastrointestinal": [0], "Hematologica": [0], "Urológica": [0], "Vascular": [0],
         }
-    OBJ = Diagnostico(INSTANCIA)
-    sesion = InferenceSession(
-            f"{Path(__file__).resolve().parent.parent.parent.parent}/app/bin/modelo_red_neuronal.onnx",
-            providers=["CPUExecutionProvider"],
-        )
-    OBJ.generar_explicacion(sesion)
+    OBJ = Diagnostico(INSTANCIA, MODELO, EXPLAINER)
+    OBJ.generar_explicacion()
 
     assert OBJ.explicacion is not None
     assert len(OBJ.explicacion) == 10
