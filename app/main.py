@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
 from routers.main_router import router as main_router
@@ -137,8 +138,23 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
     if peticion.method in METODOS_RESTRINGIDOS and (
         peticion.url.path not in RUTAS_NO_PROTEGIDAS
     ):
-        return await verificar_token(
-            peticion, firebase_app, call_next, token, TEXTOS, idioma
+        RES = await verificar_token(
+            firebase_app, token
         )
+
+        if RES == 1:
+            return await call_next(peticion)
+        elif RES == 0:
+            return JSONResponse(
+                {"error": TEXTOS[idioma]["errTokenInvalido"]},
+                status_code=403,
+                media_type="application/json",
+            )
+        else:
+            return JSONResponse(
+                {"error": TEXTOS[idioma]["errValidarToken"]},
+                status_code=400,
+                media_type="application/json",
+            )
     else:
         return await call_next(peticion)
