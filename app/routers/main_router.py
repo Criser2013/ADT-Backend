@@ -6,20 +6,18 @@ from fastapi.responses import JSONResponse
 from apis.Recaptcha import verificar_peticion_recaptcha
 from dependencies.general_dependencies import verificar_idioma
 
-router = APIRouter(dependencies=[Depends(verificar_idioma)])
+router = APIRouter()
 
 @router.get("/healthcheck")
 async def healthcheck():
-    return JSONResponse({"status": "ok"}, status_code=200, media_type="application/json")
+    return {"status": "ok"}
 
 @router.get("/credenciales")
 async def obtener_credenciales(peticion: Request, idioma: str = Depends(verificar_idioma)):
     try:
         TEXTOS = peticion.state.textos
         CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
-        return JSONResponse(
-            CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
-        )
+        return CREDS_FIREBASE_CLIENTE
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
@@ -35,10 +33,11 @@ async def diagnosticar(peticion: Request, req: PeticionDiagnostico, idioma: str 
         MODELO = peticion.state.modelo
         EXPLICADOR = peticion.state.explicador
         DATOS = req.obtener_diccionario_instancia()
-        DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
-        RES = await DIAGNOSTICO.generar_diagnostico()
 
-        return JSONResponse(RES, status_code=200, media_type="application/json")
+        DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
+        RES = DIAGNOSTICO.generar_diagnostico()
+
+        return RES
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
@@ -50,8 +49,8 @@ async def diagnosticar(peticion: Request, req: PeticionDiagnostico, idioma: str 
 async def verificar_recaptcha(peticion: Request, req: PeticionRecaptcha, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
-        resultado = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
-        return JSONResponse(resultado, status_code=200, media_type="application/json")
+        RES = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
+        return RES
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},

@@ -1,6 +1,6 @@
 import firebase_admin.auth
 from firebase_admin.auth import *
-from fastapi.responses import JSONResponse
+from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
 from utils.Diccionario import ver_si_existe_clave
@@ -24,11 +24,11 @@ def validar_token(
         datos = firebase_admin.auth.verify_id_token(
             token, firebase_app, check_revoked=True
         )
-        return (1, datos) if obtener_datos else 1
+        return (COD_EXITO, datos) if obtener_datos else COD_EXITO
     except (ExpiredIdTokenError, RevokedIdTokenError, UserDisabledError):
-        return (0, None) if obtener_datos else 0
+        return (COD_ERROR_ESPERADO, None) if obtener_datos else COD_ERROR_ESPERADO
     except (ValueError, CertificateFetchError, InvalidIdTokenError):
-        return (-1, None) if obtener_datos else -1
+        return (COD_ERROR_INESPERADO, None) if obtener_datos else COD_ERROR_INESPERADO
 
 
 async def verificar_token(firebase_app, token: str) -> int:
@@ -44,12 +44,14 @@ async def verificar_token(firebase_app, token: str) -> int:
         token = token.split("Bearer ")[1]
         reg_validacion = validar_txt_token(token)
         res_validacion = (
-            0 if (not reg_validacion) else validar_token(token, firebase_app, False)
+            COD_ERROR_ESPERADO
+            if (not reg_validacion)
+            else validar_token(token, firebase_app, False)
         )
 
         return res_validacion
     except Exception:
-        return -1
+        return COD_ERROR_INESPERADO
 
 
 def ver_datos_token(
@@ -70,28 +72,34 @@ def ver_datos_token(
         reg_validacion = validar_txt_token(token)
 
         if not reg_validacion:
-            return (0, {"error": f"{textos[idioma]['errTokenInvalido']}"})
+            return (
+                COD_ERROR_ESPERADO,
+                {"error": f"{textos[idioma]['errTokenInvalido']}"},
+            )
 
         CODIGO, RES = validar_token(token, firebase_app, True)
         error = (
             {"error": f"{textos[idioma]['errTokenInvalido']}"}
-            if CODIGO == 0
+            if CODIGO == COD_ERROR_ESPERADO
             else {"error": f"{textos[idioma]['errValidarToken']}"}
         )
 
-        return (CODIGO, RES if CODIGO == 1 else error)
+        return (CODIGO, RES if CODIGO == COD_EXITO else error)
 
     except Exception as e:
-        return (-1, {"error": f"{textos[idioma]['errProcesarToken']}: {e}."})
+        return (
+            COD_ERROR_INESPERADO,
+            {"error": f"{textos[idioma]['errProcesarToken']}: {e}."},
+        )
 
 
-async def ver_datos_usuarios(firebase_app) -> list[dict] | None:
+async def ver_datos_usuarios(firebase_app) -> tuple[int, list[dict] | None]:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
         firebase_app: La instancia de la aplicación Firebase.
     Returns:
-        list[dict] | None: Los datos de los usuarios, o None si ocurre un problema.
+        tuple[int, list[dict] | None]: Un código de estado y los datos de los usuarios si se obtuvieron correctamente, o None si hubo un error.
     """
     try:
         AUX = []
@@ -125,9 +133,9 @@ async def ver_datos_usuarios(firebase_app) -> list[dict] | None:
             else:
                 usuarios = usuarios.get_next_page()
 
-        return AUX
+        return (COD_EXITO, AUX)
     except Exception:
-        return None
+        return (COD_ERROR_INESPERADO, None)
 
 
 async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
@@ -139,7 +147,7 @@ async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
         idioma (str): El idioma para los mensajes de error.
         textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
-        tuple[int, dict]: Un código de estado y los datos del usuario si se encuentra.
+        tuple[int, dict | str | None]: Un código de estado y los datos del usuario si se encuentra.
     """
     try:
         roles_task = asyncio.create_task(obtener_rol_usuario(uid))
@@ -163,11 +171,11 @@ async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
             ),
         }
 
-        return (1, RES)
+        return (COD_EXITO, RES)
     except UserNotFoundError:
-        return (0, None)
+        return (COD_ERROR_ESPERADO, None)
     except Exception as e:
-        return (-1, e)
+        return (COD_ERROR_INESPERADO, e)
 
 
 def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
@@ -180,11 +188,12 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
     """
     try:
-        return (1, firebase_admin.auth.get_user(uid, firebase_app))
+        RES = firebase_admin.auth.get_user(uid, firebase_app)
+        return (COD_EXITO, RES)
     except UserNotFoundError:
-        return (0, None)
-    except:
-        return (-1, None)
+        return (COD_ERROR_ESPERADO, None)
+    except Exception:
+        return (COD_ERROR_INESPERADO, None)
 
 
 def actualizar_estado_usuario(
@@ -200,11 +209,25 @@ def actualizar_estado_usuario(
         tuple[int, dict | None]: Un código de estado y los datos del usuario actualizado si se actualiza correctamente.
     """
     try:
-        RES = firebase_admin.auth.update_user(
+        USUARIO = firebase_admin.auth.update_user(
             uid=uid, disabled=estado, app=firebase_app
         )
-        return (1, RES)
+
+        RES = {
+            "correo": USUARIO.email,
+            "uid": USUARIO.uid,
+            "nombre": USUARIO.display_name,
+            "estado": not USUARIO.disabled,
+            "fecha_registro": convertir_datetime_str(
+                USUARIO.user_metadata.creation_timestamp
+            ),
+            "ultima_conexion": convertir_datetime_str(
+                USUARIO.user_metadata.last_refresh_timestamp
+            ),
+        }
+
+        return (COD_EXITO, RES)
     except ValueError:
-        return (0, None)
+        return (COD_ERROR_ESPERADO, None)
     except Exception as e:
-        return (-1, None)
+        return (COD_ERROR_INESPERADO, e)

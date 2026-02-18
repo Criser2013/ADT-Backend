@@ -9,7 +9,7 @@ from routers.main_router import router as main_router
 from utils.Dominios import obtener_lista_dominios
 from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
-from constants import CORS_ORIGINS, ALLOWED_HOSTS, ACTIVAR_DOCS, ORIGENES_AUTORIZADOS
+from constants import *
 from utils.Validadores import validar_origen
 from utils.Diccionario import ver_si_existe_clave
 from contextlib import asynccontextmanager
@@ -142,9 +142,9 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
             firebase_app, token
         )
 
-        if RES == 1:
+        if RES == COD_EXITO:
             return await call_next(peticion)
-        elif RES == 0:
+        elif RES == COD_ERROR_ESPERADO:
             return JSONResponse(
                 {"error": TEXTOS[idioma]["errTokenInvalido"]},
                 status_code=403,

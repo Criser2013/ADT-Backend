@@ -2,6 +2,7 @@ from apis.FirebaseAuth import ver_datos_token
 from apis.Firestore import verificar_rol_usuario
 from fastapi import Header, Request
 from fastapi.responses import JSONResponse
+from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 
 
 async def verificar_usuario_administrador(
@@ -26,10 +27,10 @@ async def verificar_usuario_administrador(
     try:
         RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
 
-        if RES in (-1, 0):
+        if RES in (COD_ERROR_INESPERADO, COD_ERROR_ESPERADO):
             return False, JSONResponse(
                 DATOS,
-                status_code=403 if RES == 0 else 400,
+                status_code=403 if RES == COD_ERROR_ESPERADO else 400,
                 media_type="application/json",
             )
 
