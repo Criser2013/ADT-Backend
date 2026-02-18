@@ -46,33 +46,26 @@ async def verificar_token(
     Returns:
         JSONResponse: La respuesta de la solicitud, o un error si el token es inválido.
     """
-    try:
-        token = authorization.split("Bearer ")[1]
-        reg_validacion = validar_txt_token(token)
-        res_validacion = (
-            0 if (not reg_validacion) else validar_token(token, firebase_app, False)
-        )
-        match res_validacion:
-            case 1:
-                return await call_next(peticion)
-            case 0:
-                return JSONResponse(
-                    {"error": textos[idioma]["errTokenInvalido"]},
-                    status_code=403,
-                    media_type="application/json",
-                )
-            case _:
-                return JSONResponse(
-                    {"error": textos[idioma]["errValidarToken"]},
-                    status_code=400,
-                    media_type="application/json",
-                )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{textos[idioma]['errTry']} {e}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    token = authorization.split("Bearer ")[1]
+    reg_validacion = validar_txt_token(token)
+    res_validacion = (
+        0 if (not reg_validacion) else validar_token(token, firebase_app, False)
+    )
+    match res_validacion:
+        case 1:
+            return await call_next(peticion)
+        case 0:
+            return JSONResponse(
+                {"error": textos[idioma]["errTokenInvalido"]},
+                status_code=403,
+                media_type="application/json",
+            )
+        case _:
+            return JSONResponse(
+                {"error": textos[idioma]["errValidarToken"]},
+                status_code=400,
+                media_type="application/json",
+            )
 
 
 def ver_datos_token(token: str, firebase_app, idioma: str, textos: dict[str, str]) -> tuple[int, dict]:
@@ -257,11 +250,5 @@ def actualizar_estado_usuario(
         return JSONResponse(
             {"error": f"{textos[idioma]['errEstadoInvalido']}"},
             status_code=401,
-            media_type="application/json",
-        )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{textos[idioma]['errTry']} {str(e)}"},
-            status_code=500,
             media_type="application/json",
         )

@@ -17,20 +17,12 @@ async def ver_usuarios(
     res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(verificar_usuario_administrador),
     idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
-    try:
-        TEXTOS = peticion.state.textos
-        firebase_app = peticion.state.firebase_app
-        if not res_validacion_auth[0]:
-            return res_validacion_auth[1]
+    TEXTOS = peticion.state.textos
+    firebase_app = peticion.state.firebase_app
+    if not res_validacion_auth[0]:
+        return res_validacion_auth[1]
 
-        return await ver_datos_usuarios(firebase_app, idioma, TEXTOS)
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} Error al procesar la solicitud: {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
-
+    return await ver_datos_usuarios(firebase_app, idioma, TEXTOS)
 
 @router.get("/{uid}")
 async def ver_usuario(
@@ -55,12 +47,6 @@ async def ver_usuario(
         return JSONResponse(
             {"error": TEXTOS[idioma]['errUIDInvalido']},
             status_code=400,
-            media_type="application/json",
-        )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
             media_type="application/json",
         )
 
@@ -98,11 +84,5 @@ async def actualizar_usuario(
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errUIDInvalido']}"},
             status_code=400,
-            media_type="application/json",
-        )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
             media_type="application/json",
         )

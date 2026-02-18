@@ -14,47 +14,25 @@ async def healthcheck():
 
 @router.get("/credenciales")
 async def obtener_credenciales(peticion: Request, idioma: str = Depends(verificar_idioma)):
-    try:
-        TEXTOS = peticion.state.textos
-        CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
-        return JSONResponse(
-            CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
-        )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    TEXTOS = peticion.state.textos
+    CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
+    return JSONResponse(
+        CREDS_FIREBASE_CLIENTE, status_code=200, media_type="application/json"
+    )
 
 
 @router.post("/diagnosticar")
-async def diagnosticar(peticion: Request, req: PeticionDiagnostico, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
-    try:
-        TEXTOS = peticion.state.textos
-        MODELO = peticion.state.modelo
-        EXPLICADOR = peticion.state.explicador
-        DATOS = req.obtener_diccionario_instancia()
-        DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
-        RES = await DIAGNOSTICO.generar_diagnostico()
+async def diagnosticar(peticion: Request, req: PeticionDiagnostico) -> JSONResponse:
+    MODELO = peticion.state.modelo
+    EXPLICADOR = peticion.state.explicador
+    DATOS = req.obtener_diccionario_instancia()
+    DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
+    RES = await DIAGNOSTICO.generar_diagnostico()
 
-        return JSONResponse(RES, status_code=200, media_type="application/json")
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    return JSONResponse(RES, status_code=200, media_type="application/json")
     
 @router.post("/recaptcha")
 async def verificar_recaptcha(peticion: Request, req: PeticionRecaptcha, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
-    try:
-        TEXTOS = peticion.state.textos
-        resultado = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
-        return JSONResponse(resultado, status_code=200, media_type="application/json")
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    TEXTOS = peticion.state.textos
+    resultado = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
+    return JSONResponse(resultado, status_code=200, media_type="application/json")

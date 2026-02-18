@@ -23,29 +23,22 @@ async def verificar_usuario_administrador(
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
     idioma = language if language in ("es", "en") else "es"
-    try:
-        RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
+    RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
 
-        if RES in (-1, 0):
-            return False, JSONResponse(
-                DATOS,
-                status_code=403 if RES == 0 else 400,
-                media_type="application/json",
-            )
-
-        VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
-
-        if not VALIDAR_ROL:
-            return False, JSONResponse(
-                {"error": f"{TEXTOS[idioma]['errAccesoDenegado']}"},
-                status_code=403,
-                media_type="application/json",
-            )
-
-        return True, None
-    except Exception as e:
+    if RES in (-1, 0):
         return False, JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
+            DATOS,
+            status_code=403 if RES == 0 else 400,
             media_type="application/json",
         )
+
+    VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
+
+    if not VALIDAR_ROL:
+        return False, JSONResponse(
+            {"error": f"{TEXTOS[idioma]['errAccesoDenegado']}"},
+            status_code=403,
+            media_type="application/json",
+        )
+
+    return True, None

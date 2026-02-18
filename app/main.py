@@ -1,7 +1,7 @@
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request, Response
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
 from routers.main_router import router as main_router
@@ -142,3 +142,22 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
         )
     else:
         return await call_next(peticion)
+
+
+@app.exception_handler(500)
+async def manejar_error_interno(request: Request, exc: Exception) -> Response:
+    """
+    Manejador de errores para capturar excepciones no controladas y devolver una respuesta adecuada.
+    Args:
+        request (Request): La solicitud que causó el error.
+        exc (Exception): La excepción que se produjo.
+    Returns:
+        Response: Una respuesta con el mensaje de error y el código de estado 500.
+    """
+    IDIOMA = request.headers["language"] if ver_si_existe_clave(request.headers, "language") else "es"
+    TEXTOS = request.state.textos
+    return JSONResponse(
+        status_code=500,
+        content={"mensaje": f"{TEXTOS[IDIOMA]["errTry"]} {str(exc)}"},
+        media_type="application/json",
+    )
