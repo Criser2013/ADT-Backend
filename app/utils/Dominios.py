@@ -8,8 +8,10 @@ def obtener_lista_dominios(texto: str) -> list[str]:
         list[str]: Lista de dominios sin espacios en blanco.
     """
     RES = [dominio.strip() for dominio in texto.split(",")]
+    NUM_VACIOS = RES.count("")
 
-    if RES.count("") > 0:
-        RES.remove("")
+    if NUM_VACIOS > 0:
+        for i in range(NUM_VACIOS):
+            RES.remove("")
 
     return RES

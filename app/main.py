@@ -18,7 +18,7 @@ from dill import load as dload
 from json import load as jload
 from onnxruntime import InferenceSession
 from firebase_admin_config import inicializar_firebase
-from models.Excepciones import AccesoNoAutorizado, UIDInvalido
+from models.Excepciones import *
 
 load_dotenv()
 
@@ -172,6 +172,22 @@ async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAut
 
 @app.exception_handler(UIDInvalido)
 async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=400,
+        media_type="application/json",
+    )
+
+@app.exception_handler(UsuarioInexistente)
+async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexistente):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=404,
+        media_type="application/json",
+    )
+
+@app.exception_handler(ErrorInterno)
+async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
     return JSONResponse(
         excepcion.mensaje,
         status_code=400,

@@ -12,27 +12,19 @@ async def healthcheck():
     return {"status": "ok"}
 
 @router.get("/credenciales")
-async def obtener_credenciales(peticion: Request, idioma: str = Depends(verificar_idioma)):
-    try:
-        TEXTOS = peticion.state.textos
-        CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
-        return CREDS_FIREBASE_CLIENTE
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+async def obtener_credenciales(peticion: Request, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+    CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
+    return CREDS_FIREBASE_CLIENTE
 
 
 @router.post("/diagnosticar")
 async def diagnosticar(peticion: Request, req: InstanciaDiagnostico, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+    TEXTOS = peticion.state.textos
+    MODELO = peticion.state.modelo
+    EXPLICADOR = peticion.state.explicador
+    
     try:
-        TEXTOS = peticion.state.textos
-        MODELO = peticion.state.modelo
-        EXPLICADOR = peticion.state.explicador
         DATOS = req.obtener_diccionario_instancia()
-
         DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
         RES = DIAGNOSTICO.generar_diagnostico()
 
@@ -46,8 +38,8 @@ async def diagnosticar(peticion: Request, req: InstanciaDiagnostico, idioma: str
     
 @router.post("/recaptcha")
 async def verificar_recaptcha(peticion: Request, req: TokenRecaptcha, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+    TEXTOS = peticion.state.textos
     try:
-        TEXTOS = peticion.state.textos
         RES = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
         return RES
     except Exception as e:

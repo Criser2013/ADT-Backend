@@ -12,7 +12,7 @@ from dependencies.general_dependencies import verificar_idioma
 async def verificar_usuario_administrador(
     peticion: Request,
     authorization: str | None = Header(default=""),
-    idioma: str = Depends(verificar_idioma)
+    idioma: str = Depends(verificar_idioma),
 ) -> tuple[bool, JSONResponse | None]:
     """
     Verifica si el usuario está autenticado y es administrador antes de permitir el acceso a las rutas protegidas.
@@ -32,9 +32,12 @@ async def verificar_usuario_administrador(
     VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
 
     if not VALIDAR_ROL:
-        raise AccesoNoAutorizado(TEXTOS[idioma]['errAccesoDenegado'], 403)
-    
-async def validador_uid(peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)) -> str:
+        raise AccesoNoAutorizado(TEXTOS[idioma]["errAccesoDenegado"], 403)
+
+
+async def validador_uid(
+    peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)
+) -> str:
     """
     Valida el UID proporcionado en la solicitud. Si es inválido lanza una excepción.
 
@@ -42,7 +45,7 @@ async def validador_uid(peticion: Request, uid: str, idioma: str = Depends(verif
         peticion (Request): La solicitud HTTP entrante.
         uid (str): El UID a validar.
         idioma (str): El idioma preferido del usuario, obtenido a través de la dependencia `
-    
+
     Returns:
         str: El UID validado.
     """
