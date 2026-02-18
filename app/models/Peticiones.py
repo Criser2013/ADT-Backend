@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 
-class PeticionDiagnostico(BaseModel):
+class TokenRecaptcha(BaseModel):
+    """
+    Clase que representa una petición para validar un token de reCAPTCHA.
+    """
+    token: str
+
+class InstanciaDiagnostico(BaseModel):
     """
     Clase que representa una petición de diagnóstico con los datos necesarios.
     Esta clase solo valida que los datos sean del tipo correcto y los valores

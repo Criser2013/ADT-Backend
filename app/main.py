@@ -18,6 +18,7 @@ from dill import load as dload
 from json import load as jload
 from onnxruntime import InferenceSession
 from firebase_admin_config import inicializar_firebase
+from models.Excepciones import AccesoNoAutorizado
 
 load_dotenv()
 
@@ -158,3 +159,12 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
             )
     else:
         return await call_next(peticion)
+
+
+@app.exception_handler(AccesoNoAutorizado)
+async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=excepcion.codigo,
+        media_type="application/json",
+    )

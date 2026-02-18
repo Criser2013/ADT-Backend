@@ -1,6 +1,5 @@
 from models.Diagnostico import Diagnostico
-from models.PeticionDiagnostico import PeticionDiagnostico
-from models.PeticionRecaptcha import PeticionRecaptcha
+from models.Peticiones import *
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from apis.Recaptcha import verificar_peticion_recaptcha
@@ -27,7 +26,7 @@ async def obtener_credenciales(peticion: Request, idioma: str = Depends(verifica
 
 
 @router.post("/diagnosticar")
-async def diagnosticar(peticion: Request, req: PeticionDiagnostico, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+async def diagnosticar(peticion: Request, req: InstanciaDiagnostico, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         MODELO = peticion.state.modelo
@@ -46,7 +45,7 @@ async def diagnosticar(peticion: Request, req: PeticionDiagnostico, idioma: str 
         )
     
 @router.post("/recaptcha")
-async def verificar_recaptcha(peticion: Request, req: PeticionRecaptcha, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+async def verificar_recaptcha(peticion: Request, req: TokenRecaptcha, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         RES = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)

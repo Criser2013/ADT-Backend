@@ -7,23 +7,18 @@ from dependencies.usuarios_dependencies import verificar_usuario_administrador
 from dependencies.general_dependencies import verificar_idioma
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 
-router = APIRouter(prefix="/usuarios")
+router = APIRouter(
+    prefix="/usuarios", dependencies=[Depends(verificar_usuario_administrador)]
+)
 
 
 @router.get("")
 async def ver_usuarios(
-    peticion: Request,
-    res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(
-        verificar_usuario_administrador
-    ),
-    idioma: str = Depends(verificar_idioma),
+    peticion: Request, idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
+    TEXTOS = peticion.state.textos
+    firebase_app = peticion.state.firebase_app
     try:
-        TEXTOS = peticion.state.textos
-        firebase_app = peticion.state.firebase_app
-        if not res_validacion_auth[0]:
-            return res_validacion_auth[1]
-
         COD, RES = await ver_datos_usuarios(firebase_app)
         if COD in (COD_ERROR_ESPERADO, COD_ERROR_INESPERADO):
             return JSONResponse(
@@ -43,35 +38,32 @@ async def ver_usuarios(
 
 @router.get("/{uid}")
 async def ver_usuario(
-    peticion: Request,
-    uid: str,
-    res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(
-        verificar_usuario_administrador
-    ),
-    idioma: str = Depends(verificar_idioma),
+    peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         firebase_app = peticion.state.firebase_app
-        if not res_validacion_auth[0]:
-            return res_validacion_auth[1]
 
         uid = unquote(uid)
         VALIDACION = validar_uid(uid)
 
         if not VALIDACION:
-            raise ValueError(f"{TEXTOS[idioma]['errUIDInvalido']}")
+            raise ValueError(f"")
 
         CODIGO, RES = await ver_datos_usuario(firebase_app, uid)
         if CODIGO == COD_EXITO:
             return RES
         else:
-            TEXTO = "errUsuarioNoEncontrado" if CODIGO == COD_ERROR_ESPERADO else "errObtenerDatosUsuarios"
+            TEXTO = (
+                "errUsuarioNoEncontrado"
+                if CODIGO == COD_ERROR_ESPERADO
+                else "errObtenerDatosUsuarios"
+            )
             COD = 404 if CODIGO == COD_ERROR_ESPERADO else 400
             return JSONResponse(
                 {"error": f"{TEXTOS[idioma][TEXTO]}"},
                 status_code=COD,
-                media_type="application/json"
+                media_type="application/json",
             )
     except ValueError:
         return JSONResponse(
@@ -92,17 +84,11 @@ async def actualizar_usuario(
     peticion: Request,
     uid: str,
     desactivar: bool,
-    res_validacion_auth: tuple[bool, JSONResponse | None] = Depends(
-        verificar_usuario_administrador
-    ),
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         firebase_app = peticion.state.firebase_app
-
-        if not res_validacion_auth[0]:
-            return res_validacion_auth[1]
 
         uid = unquote(uid)
         VALIDACION = validar_uid(uid)
@@ -130,7 +116,7 @@ async def actualizar_usuario(
             return JSONResponse(
                 {"error": f"{TEXTOS[idioma][TEXTO]}"},
                 status_code=COD,
-                media_type="application/json"
+                media_type="application/json",
             )
     except ValueError:
         return JSONResponse(
