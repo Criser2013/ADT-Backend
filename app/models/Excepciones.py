@@ -5,3 +5,10 @@ class AccesoNoAutorizado(Exception):
         self.mensaje = mensaje
         self.codigo = codigo
         super().__init__(self.mensaje)
+
+class UIDInvalido(Exception):
+    """Excepción personalizada para indicar que el UID es inválido."""
+
+    def __init__(self, mensaje: str | dict):
+        self.mensaje = mensaje
+        super().__init__(self.mensaje)

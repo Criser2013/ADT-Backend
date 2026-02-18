@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from apis.FirebaseAuth import *
-from utils.Validadores import validar_uid
-from urllib.parse import unquote
-from dependencies.usuarios_dependencies import verificar_usuario_administrador
+from dependencies.usuarios_dependencies import *
 from dependencies.general_dependencies import verificar_idioma
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 
@@ -38,17 +36,11 @@ async def ver_usuarios(
 
 @router.get("/{uid}")
 async def ver_usuario(
-    peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)
+    peticion: Request, uid: str = Depends(validador_uid), idioma: str = Depends(verificar_idioma)
 ) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         firebase_app = peticion.state.firebase_app
-
-        uid = unquote(uid)
-        VALIDACION = validar_uid(uid)
-
-        if not VALIDACION:
-            raise ValueError(f"")
 
         CODIGO, RES = await ver_datos_usuario(firebase_app, uid)
         if CODIGO == COD_EXITO:
@@ -65,12 +57,6 @@ async def ver_usuario(
                 status_code=COD,
                 media_type="application/json",
             )
-    except ValueError:
-        return JSONResponse(
-            {"error": TEXTOS[idioma]["errUIDInvalido"]},
-            status_code=400,
-            media_type="application/json",
-        )
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
@@ -82,19 +68,13 @@ async def ver_usuario(
 @router.patch("/{uid}")
 async def actualizar_usuario(
     peticion: Request,
-    uid: str,
     desactivar: bool,
+    uid: str = Depends(validador_uid),
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
     try:
         TEXTOS = peticion.state.textos
         firebase_app = peticion.state.firebase_app
-
-        uid = unquote(uid)
-        VALIDACION = validar_uid(uid)
-
-        if not VALIDACION:
-            raise ValueError(f"{TEXTOS[idioma]['errUIDInvalido']}")
 
         COD, RES = ver_usuario_firebase(firebase_app, uid)
         if COD == COD_ERROR_ESPERADO:
@@ -118,12 +98,6 @@ async def actualizar_usuario(
                 status_code=COD,
                 media_type="application/json",
             )
-    except ValueError:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errUIDInvalido']}"},
-            status_code=400,
-            media_type="application/json",
-        )
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},

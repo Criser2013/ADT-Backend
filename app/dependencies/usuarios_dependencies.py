@@ -3,7 +3,9 @@ from apis.Firestore import verificar_rol_usuario
 from fastapi import Header, Request, Depends
 from fastapi.responses import JSONResponse
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
-from models.Excepciones import AccesoNoAutorizado
+from models.Excepciones import AccesoNoAutorizado, UIDInvalido
+from utils.Validadores import validar_uid
+from urllib.parse import unquote
 from dependencies.general_dependencies import verificar_idioma
 
 
@@ -22,7 +24,6 @@ async def verificar_usuario_administrador(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-
     RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
 
     if RES in (COD_ERROR_INESPERADO, COD_ERROR_ESPERADO):
@@ -32,3 +33,24 @@ async def verificar_usuario_administrador(
 
     if not VALIDAR_ROL:
         raise AccesoNoAutorizado(TEXTOS[idioma]['errAccesoDenegado'], 403)
+    
+async def validador_uid(peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)) -> str:
+    """
+    Valida el UID proporcionado en la solicitud. Si es inválido lanza una excepción.
+
+    Args:
+        peticion (Request): La solicitud HTTP entrante.
+        uid (str): El UID a validar.
+        idioma (str): El idioma preferido del usuario, obtenido a través de la dependencia `
+    
+    Returns:
+        str: El UID validado.
+    """
+    uid = unquote(uid)
+    TEXTOS = peticion.state.textos
+    VALIDACION = validar_uid(uid)
+
+    if not VALIDACION:
+        raise UIDInvalido({"error": f"{TEXTOS[idioma]['errUIDInvalido']}"})
+
+    return uid
