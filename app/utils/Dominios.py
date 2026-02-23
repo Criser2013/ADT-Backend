@@ -11,7 +11,7 @@ def obtener_lista_dominios(texto: str) -> list[str]:
     NUM_VACIOS = RES.count("")
 
     if NUM_VACIOS > 0:
-        for i in range(NUM_VACIOS):
+        for _ in range(NUM_VACIOS):
             RES.remove("")
 
     return RES

@@ -1,4 +1,3 @@
-import firebase_admin.auth
 from firebase_admin.auth import *
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from utils.Validadores import validar_txt_token
@@ -21,7 +20,7 @@ def validar_token(
         int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
     """
     try:
-        datos = firebase_admin.auth.verify_id_token(
+        datos = verify_id_token(
             token, firebase_app, check_revoked=True
         )
         return (COD_EXITO, datos) if obtener_datos else COD_EXITO
@@ -104,7 +103,7 @@ async def ver_datos_usuarios(firebase_app) -> tuple[int, list[dict] | None]:
     try:
         AUX = []
         roles_task = asyncio.create_task(obtener_roles_usuarios())
-        usuarios = firebase_admin.auth.list_users(app=firebase_app)
+        usuarios = list_users(app=firebase_app)
         ROLES = await roles_task
 
         while True:
@@ -151,7 +150,7 @@ async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
     """
     try:
         roles_task = asyncio.create_task(obtener_rol_usuario(uid))
-        usuario = firebase_admin.auth.get_user(uid, firebase_app)
+        usuario = get_user(uid, firebase_app)
         ROL = await roles_task
 
         if ROL == -1:
@@ -188,7 +187,7 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
     """
     try:
-        RES = firebase_admin.auth.get_user(uid, firebase_app)
+        RES = get_user(uid, firebase_app)
         return (COD_EXITO, RES)
     except UserNotFoundError:
         return (COD_ERROR_ESPERADO, None)
@@ -209,7 +208,7 @@ def actualizar_estado_usuario(
         tuple[int, dict | None]: Un código de estado y los datos del usuario actualizado si se actualiza correctamente.
     """
     try:
-        USUARIO = firebase_admin.auth.update_user(
+        USUARIO = update_user(
             uid=uid, disabled=estado, app=firebase_app
         )
 

@@ -12,7 +12,7 @@ async def healthcheck():
     return {"status": "ok"}
 
 @router.get("/credenciales")
-async def obtener_credenciales(peticion: Request, idioma: str = Depends(verificar_idioma)) -> JSONResponse:
+async def obtener_credenciales(peticion: Request) -> JSONResponse:
     CREDS_FIREBASE_CLIENTE = peticion.state.credenciales
     return CREDS_FIREBASE_CLIENTE
 

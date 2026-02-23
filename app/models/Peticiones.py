@@ -67,19 +67,23 @@ class InstanciaDiagnostico(BaseModel):
 
     @model_validator(mode="after")
     def validar_datos(self):
-        numericas = {"edad": self.edad, "wbc": self.wbc, "hb": self.hb, "plt": self.plt, "frecuencia_respiratoria": self.frecuencia_respiratoria, 
-                     "saturacion_de_la_sangre": self.saturacion_de_la_sangre, "frecuencia_cardiaca": self.frecuencia_cardiaca,
-                     "presion_sistolica": self.presion_sistolica, "presion_diastolica": self.presion_diastolica}
-        booleanas = {"sexo": self.sexo, "bebedor": self.bebedor, "fumador": self.fumador, "proc_quirurgico_traumatismo": self.proc_quirurgico_traumatismo,
-                     "inmovilidad_de_m_inferiores": self.inmovilidad_de_m_inferiores, "viaje_prolongado": self.viaje_prolongado, "TEP_TVP_previo": self.TEP_TVP_previo,
-                     "malignidad": self.malignidad, "disnea": self.disnea, "dolor_toracico": self.dolor_toracico, "tos": self.tos, "hemoptisis": self.hemoptisis,
-                     "sintomas_disautonomicos": self.sintomas_disautonomicos, "edema_de_m_inferiores": self.edema_de_m_inferiores, "fiebre": self.fiebre,
-                     "crepitaciones": self.crepitaciones, "sibilancias": self.sibilancias, "soplos": self.soplos, "derrame": self.derrame,
-                     "otra_enfermedad": self.otra_enfermedad, "hematologica": self.hematologica, "cardiaca": self.cardiaca,
-                     "enfermedad_coronaria": self.enfermedad_coronaria, "diabetes_mellitus": self.diabetes_mellitus, "endocrina": self.endocrina,
-                     "gastrointestinal": self.gastrointestinal, "hepatopatia_cronica":self.hepatopatia_cronica,"hipertension_arterial": self.hipertension_arterial,
-                     "neurologica" :self.neurologica,"pulmonar" :self.pulmonar,"renal" :self.renal,"trombofilia" :self.trombofilia,"urologica" :self.urologica,
-                     "vascular": self.vascular, "vih": self.vih}
+        numericas = {
+            "edad": self.edad, "wbc": self.wbc, "hb": self.hb, "plt": self.plt, "frecuencia_respiratoria": self.frecuencia_respiratoria, 
+            "saturacion_de_la_sangre": self.saturacion_de_la_sangre, "frecuencia_cardiaca": self.frecuencia_cardiaca,
+            "presion_sistolica": self.presion_sistolica, "presion_diastolica": self.presion_diastolica
+        }
+        booleanas = {
+            "sexo": self.sexo, "bebedor": self.bebedor, "fumador": self.fumador, "proc_quirurgico_traumatismo": self.proc_quirurgico_traumatismo,
+            "inmovilidad_de_m_inferiores": self.inmovilidad_de_m_inferiores, "viaje_prolongado": self.viaje_prolongado, "TEP_TVP_previo": self.TEP_TVP_previo,
+            "malignidad": self.malignidad, "disnea": self.disnea, "dolor_toracico": self.dolor_toracico, "tos": self.tos, "hemoptisis": self.hemoptisis,
+            "sintomas_disautonomicos": self.sintomas_disautonomicos, "edema_de_m_inferiores": self.edema_de_m_inferiores, "fiebre": self.fiebre,
+            "crepitaciones": self.crepitaciones, "sibilancias": self.sibilancias, "soplos": self.soplos, "derrame": self.derrame,
+            "otra_enfermedad": self.otra_enfermedad, "hematologica": self.hematologica, "cardiaca": self.cardiaca,
+            "enfermedad_coronaria": self.enfermedad_coronaria, "diabetes_mellitus": self.diabetes_mellitus, "endocrina": self.endocrina,
+            "gastrointestinal": self.gastrointestinal, "hepatopatia_cronica":self.hepatopatia_cronica,"hipertension_arterial": self.hipertension_arterial,
+            "neurologica" :self.neurologica,"pulmonar" :self.pulmonar,"renal" :self.renal,"trombofilia" :self.trombofilia,"urologica" :self.urologica,
+            "vascular": self.vascular, "vih": self.vih
+        }
 
         for i in booleanas.keys():
             if booleanas[i] not in (0, 1):
@@ -97,14 +101,20 @@ class InstanciaDiagnostico(BaseModel):
                 dict: Diccionario con los valores de la instancia
         """
         return {
-            "Inmovilidad_de_M_inferiores": [self.inmovilidad_de_m_inferiores], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [self.proc_quirurgico_traumatismo],
-            "Viaje_prolongado": [self.viaje_prolongado], "Síntomas_disautonomicos": [self.sintomas_disautonomicos], "Edema_de_M_inferiores": [self.edema_de_m_inferiores],
-            "Dolor_toracico": [self.dolor_toracico], "TEP___TVP_Previo": [self.TEP_TVP_previo], "Frecuencia_respiratoria": [self.frecuencia_respiratoria],
-            "Presión_sistólica": [self.presion_sistolica], "Presión_diastólica": [self.presion_diastolica], "Saturación_de_la_sangre": [self.saturacion_de_la_sangre], "Frecuencia_cardíaca": [self.frecuencia_cardiaca],
-            "WBC": [self.wbc], "HB": [self.hb], "PLT": [self.plt], "Género": [self.sexo], "Edad": [self.edad], "Fumador": [self.fumador], "Bebedor": [self.bebedor], "Malignidad": [self.malignidad],
-            "Disnea": [self.disnea], "Tos": [self.tos], "Hemoptisis": [self.hemoptisis], "Fiebre": [self.fiebre], "Crepitaciones": [self.crepitaciones], "Sibilancias": [self.sibilancias],
-            "Soplos": [self.soplos], "Derrame": [self.derrame], "Otra_Enfermedad": [self.otra_enfermedad], "Diabetes_Mellitus": [self.diabetes_mellitus],
-            "Hipertensión_arterial": [self.hipertension_arterial], "Enfermedad_coronaria": [self.enfermedad_coronaria], "Trombofilia": [self.trombofilia], "VIH": [self.vih],
-            "Hepatopatía_crónica": [self.hepatopatia_cronica], "Renal": [self.renal], "Cardíaca": [self.cardiaca], "Neurológica": [self.neurologica], "Pulmonar": [self.pulmonar], "Endocrina": [self.endocrina],
-            "Gastrointestinal": [self.gastrointestinal], "Hematologica": [self.hematologica], "Urológica": [self.urologica], "Vascular": [self.vascular],
+            "Edad": [self.edad], "Género": [self.sexo], "Bebedor": [self.bebedor], "Fumador": [self.fumador],
+            "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [self.proc_quirurgico_traumatismo],
+            "Inmovilidad_de_M_inferiores": [self.inmovilidad_de_m_inferiores], "Viaje_prolongado": [self.viaje_prolongado],
+            "TEP___TVP_Previo": [self.TEP_TVP_previo], "Malignidad": [self.malignidad], "Disnea": [self.disnea],
+            "Dolor_toracico": [self.dolor_toracico], "Tos": [self.tos], "Hemoptisis": [self.hemoptisis],
+            "Síntomas_disautonomicos": [self.sintomas_disautonomicos], "Edema_de_M_inferiores": [self.edema_de_m_inferiores],
+            "Frecuencia_respiratoria": [self.frecuencia_respiratoria], "Saturación_de_la_sangre": [self.saturacion_de_la_sangre],
+            "Frecuencia_cardíaca": [self.frecuencia_cardiaca], "Presión_sistólica": [self.presion_sistolica],
+            "Presión_diastólica": [self.presion_diastolica], "Fiebre": [self.fiebre], "Crepitaciones": [self.crepitaciones],
+            "Sibilancias": [self.sibilancias], "Soplos": [self.soplos], "WBC": [self.wbc], "HB": [self.hb], "PLT": [self.plt], 
+            "Derrame": [self.derrame], "Otra_Enfermedad": [self.otra_enfermedad], "Hematologica": [self.hematologica],
+            "Cardíaca": [self.cardiaca], "Enfermedad_coronaria": [self.enfermedad_coronaria], "Diabetes_Mellitus": [self.diabetes_mellitus],
+            "Endocrina": [self.endocrina], "Gastrointestinal": [self.gastrointestinal], "Hepatopatía_crónica": [self.hepatopatia_cronica],
+            "Hipertensión_arterial": [self.hipertension_arterial], "Neurológica": [self.neurologica], "Pulmonar": [self.pulmonar],
+            "Renal": [self.renal], "Trombofilia": [self.trombofilia], "Urológica": [self.urologica], "Vascular": [self.vascular],
+            "VIH": [self.vih],
         }
