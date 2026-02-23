@@ -136,29 +136,23 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
         else "es"
     )
 
-    if peticion.method in METODOS_RESTRINGIDOS and (
+    """if peticion.method in METODOS_RESTRINGIDOS and (
         peticion.url.path not in RUTAS_NO_PROTEGIDAS
     ):
         RES = await verificar_token(
             firebase_app, token
         )
 
-        if RES == COD_EXITO:
-            return await call_next(peticion)
-        elif RES == COD_ERROR_ESPERADO:
+        if RES != COD_EXITO:
+            TEXTO = "errValidarToken" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
+            CODIGO = 403 if RES == COD_ERROR_ESPERADO else 400
             return JSONResponse(
-                {"error": TEXTOS[idioma]["errTokenInvalido"]},
-                status_code=403,
+                {"error": TEXTOS[idioma][TEXTO]},
+                status_code=CODIGO,
                 media_type="application/json",
-            )
-        else:
-            return JSONResponse(
-                {"error": TEXTOS[idioma]["errValidarToken"]},
-                status_code=400,
-                media_type="application/json",
-            )
-    else:
-        return await call_next(peticion)
+            )"""
+        
+    return await call_next(peticion)
 
 # Manejadores globales de excepciones personalizadas
 @app.exception_handler(AccesoNoAutorizado)

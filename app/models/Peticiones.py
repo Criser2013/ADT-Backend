@@ -1,10 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+from utils.Validadores import validar_txt_token
 
 class TokenRecaptcha(BaseModel):
     """
     Clase que representa una petición para validar un token de reCAPTCHA.
     """
     token: str
+
+    @model_validator(mode="after")
+    def validar_token(self):
+        if not validar_txt_token(self.token):
+            raise ValueError("El token de reCAPTCHA no es válido")
+        return self
+
 
 class InstanciaDiagnostico(BaseModel):
     """
@@ -56,6 +64,30 @@ class InstanciaDiagnostico(BaseModel):
     urologica: int
     vascular: int
     vih: int
+
+    @model_validator(mode="after")
+    def validar_datos(self):
+        numericas = {"edad": self.edad, "wbc": self.wbc, "hb": self.hb, "plt": self.plt, "frecuencia_respiratoria": self.frecuencia_respiratoria, 
+                     "saturacion_de_la_sangre": self.saturacion_de_la_sangre, "frecuencia_cardiaca": self.frecuencia_cardiaca,
+                     "presion_sistolica": self.presion_sistolica, "presion_diastolica": self.presion_diastolica}
+        booleanas = {"sexo": self.sexo, "bebedor": self.bebedor, "fumador": self.fumador, "proc_quirurgico_traumatismo": self.proc_quirurgico_traumatismo,
+                     "inmovilidad_de_m_inferiores": self.inmovilidad_de_m_inferiores, "viaje_prolongado": self.viaje_prolongado, "TEP_TVP_previo": self.TEP_TVP_previo,
+                     "malignidad": self.malignidad, "disnea": self.disnea, "dolor_toracico": self.dolor_toracico, "tos": self.tos, "hemoptisis": self.hemoptisis,
+                     "sintomas_disautonomicos": self.sintomas_disautonomicos, "edema_de_m_inferiores": self.edema_de_m_inferiores, "fiebre": self.fiebre,
+                     "crepitaciones": self.crepitaciones, "sibilancias": self.sibilancias, "soplos": self.soplos, "derrame": self.derrame,
+                     "otra_enfermedad": self.otra_enfermedad, "hematologica": self.hematologica, "cardiaca": self.cardiaca,
+                     "enfermedad_coronaria": self.enfermedad_coronaria, "diabetes_mellitus": self.diabetes_mellitus, "endocrina": self.endocrina,
+                     "gastrointestinal": self.gastrointestinal, "hepatopatia_cronica":self.hepatopatia_cronica,"hipertension_arterial": self.hipertension_arterial,
+                     "neurologica" :self.neurologica,"pulmonar" :self.pulmonar,"renal" :self.renal,"trombofilia" :self.trombofilia,"urologica" :self.urologica,
+                     "vascular": self.vascular, "vih": self.vih}
+
+        for i in booleanas.keys():
+            if booleanas[i] not in (0, 1):
+                raise ValueError(f"El valor {i} no es válido para un campo booleano")
+        for i in numericas.keys():
+            if numericas[i] < 0:
+                raise ValueError(f"El valor {i} no puede ser negativo")
+        return self
 
     def obtener_diccionario_instancia(self):
         """
