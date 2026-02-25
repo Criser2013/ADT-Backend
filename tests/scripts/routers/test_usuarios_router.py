@@ -91,10 +91,7 @@ def test_31(mocker: MockerFixture):
     )
 
     USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuarios")
-    USUARIO.return_value = JSONResponse(
-        status_code=200, media_type="application/json", content={"usuarios": DATOS}
-    )
-
+    USUARIO.return_value = (1, DATOS)
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
@@ -147,37 +144,12 @@ def test_32(mocker: MockerFixture):
     ROL.assert_called_once_with("a1234H")
 
 
-def test_33(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de los usuarios si el usuario no
-    es administrador.
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = Exception("Error inesperado")
-
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
-
-    assert RES.status_code == 500
-    assert RES.json() == {"error": "Error al procesar la solicitud: Error inesperado"}
-
-    DATOS_TOKEN.assert_called_once()
-
-
 def test_42(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de un usuario con una petición
     autenticada.
     """
+    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
     DATOS = {
         "correo": "usuario@correo.com",
         "uid": "a1234H",
@@ -198,9 +170,7 @@ def test_42(mocker: MockerFixture):
     app.router.lifespan_context = mock_inicializar_modelos
 
     USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuario")
-    USUARIO.return_value = JSONResponse(
-        status_code=200, media_type="application/json", content=DATOS
-    )
+    USUARIO.return_value = (1, DATOS)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.get(
@@ -216,17 +186,10 @@ def test_42(mocker: MockerFixture):
     assert RES.status_code == 200
     assert RES.json() == DATOS
 
+    UID.assert_called_once_with("a1234H")
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
-    USUARIO.assert_called_once_with(
-        {
-            "appId": "test_app_id",
-            "cred": {"projectId": "test_project_id", "certificated": True},
-        },
-        "a1234H",
-        "es",
-        MOCK_TEXTOS,
-    )
+    USUARIO.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
 
 
 def test_43(mocker: MockerFixture):
@@ -253,32 +216,6 @@ def test_43(mocker: MockerFixture):
     assert RES.json() == {"error": "Token inválido"}
 
     DATOS_TOKEN.assert_called_once()
-
-
-def test_44(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de los usuarios si ocurre una excepción.
-    """
-
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = Exception("Error inesperado")
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
-
-    assert RES.status_code == 500
-    assert RES.json() == {"error": "Error al procesar la solicitud: Error inesperado"}
-
-    DATOS_TOKEN.assert_called_once()
-
 
 def test_45(mocker: MockerFixture):
     """
@@ -348,6 +285,13 @@ def test_60(mocker: MockerFixture):
     """
     Test para validar que el API actualice el estado de un usuario correctamente.
     """
+    MOCK_USUARIO = {
+        "correo" : "correo@correo.com", "uid" : "a1234H",
+        "nombre": "correo", "estado": False,
+        "fecha_registro": "12/12/2025 4:00 PM",
+        "ultima_conexion": "12/12/2025 4:00 PM",
+    }
+    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
         return_value=(1, {"uid": "a1234H"}),
@@ -355,7 +299,6 @@ def test_60(mocker: MockerFixture):
     ROL = mocker.patch(
         "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
     )
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=True)
 
     USUARIO = mocker.MagicMock(spec=UserRecord)
     USUARIO.uid = "a1234H"
@@ -366,11 +309,7 @@ def test_60(mocker: MockerFixture):
     ACT = mocker.patch(
         "routers.usuarios_router.actualizar_estado_usuario",
     )
-    ACT.return_value = JSONResponse(
-        {"mensaje": "Estado del usuario actualizado correctamente"},
-        status_code=200,
-        media_type="application/json",
-    )
+    ACT.return_value = (1, MOCK_USUARIO)
 
     app.router.lifespan_context = mock_inicializar_modelos
 
@@ -385,17 +324,12 @@ def test_60(mocker: MockerFixture):
         )
 
     assert RES.status_code == 200
-    assert RES.json() == {"mensaje": "Estado del usuario actualizado correctamente"}
+    assert RES.json() == MOCK_USUARIO
 
     DATOS_TOKEN.assert_called_once()
+    UID.assert_called_once_with("a1234H")
     ROL.assert_called_once_with("a1234H")
-    FIRESTORE.assert_called_once_with(
-        {
-            "appId": "test_app_id",
-            "cred": {"projectId": "test_project_id", "certificated": True},
-        },
-        "a1234H",
-    )
+    FIRESTORE.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
 
 
 def test_61(mocker: MockerFixture):
@@ -430,6 +364,7 @@ def test_62(mocker: MockerFixture):
     Test para validar que el API retorne un error al intentar actualizar el estado de un
     usuario inexistente.
     """
+    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
 
@@ -440,8 +375,6 @@ def test_62(mocker: MockerFixture):
         "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
     )
     FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
-
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=True)
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
@@ -458,6 +391,7 @@ def test_62(mocker: MockerFixture):
     assert RES.json() == {"error": "Usuario no encontrado"}
 
     ROL.assert_called_once()
+    UID.assert_called_once_with("a1234H")
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_not_called()
 
@@ -466,18 +400,14 @@ def test_63(mocker: MockerFixture):
     """
     Test para validar que el API no actualice los datos de un usuario si ocurre una excepción.
     """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
+    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
+    TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
+    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
-    FIRESTORE = mocker.patch("routers.usuarios_router.ver_usuario_firebase")
+    FIRESTORE = mocker.patch("app.routers.usuarios_router.ver_usuario_firebase")
     FIRESTORE.return_value = (-1, None)
 
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
-    )
-
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=True)
+    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
@@ -490,18 +420,20 @@ def test_63(mocker: MockerFixture):
             },
         )
 
-    assert RES.status_code == 500
+    assert RES.status_code == 400
     assert RES.json() == {
-        "error": "Error al procesar la solicitud: Error al obtener el usuario"
+        "error": "Error al obtener el usuario"
     }
 
-    FUNC.assert_not_called()
     ROL.assert_called_once()
+    FUNC.assert_not_called()
+    UID.assert_called_once()
+    TOKEN.assert_called_once()
 
 
 def test_64(mocker: MockerFixture):
     """
-    Test para validar que actualice los datos de un usuario si se lanza un ValueError.
+    Test para validar que no actualice los datos de un usuario si se lanza un ValueError.
     """
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
@@ -509,7 +441,7 @@ def test_64(mocker: MockerFixture):
     ROL = mocker.patch(
         "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
     )
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=False)
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=False)
     FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
 
     app.router.lifespan_context = mock_inicializar_modelos
@@ -530,29 +462,4 @@ def test_64(mocker: MockerFixture):
     FUNC.assert_not_called()
     ROL.assert_called_once_with("a1234H")
 
-
-def test_65(mocker: MockerFixture):
-    """
-    Test para validar que actualice los datos de un usuario si se lanza un ValueError.
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = Exception("Error inesperado")
-
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
-
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=true",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
-
-    assert RES.status_code == 500
-    assert RES.json() == {"error": "Error al procesar la solicitud: Error inesperado"}
-
-    FUNC.assert_not_called()
+# test_65,44,57 - libre

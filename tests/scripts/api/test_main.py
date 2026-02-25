@@ -68,8 +68,7 @@ def test_9(mocker: MockerFixture):
     deje pasar un token válido con una petición POST proveniente de un host autorizado
     """
     app.router.lifespan_context = mock_inicializar_modelos
-    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
-    FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
+    mocker.patch("app.main.verificar_token", return_value=1)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.post(
@@ -83,9 +82,6 @@ def test_9(mocker: MockerFixture):
 
     assert RES.status_code == 405
     assert RES.json() == { "detail": "Method Not Allowed" }
-            
-    VALIDADOR.assert_called_once_with("token_valido")
-    FIREBASE.assert_called_once_with("token_valido", MOCK_FIREBASE_APP, check_revoked=True)
 
 @pytest.mark.asyncio
 async def test_10(mocker: MockerFixture):

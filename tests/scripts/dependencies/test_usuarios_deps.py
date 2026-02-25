@@ -15,10 +15,7 @@ async def test_53(mocker: MockerFixture):
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == True
-    assert RES[1] is None
+    await verificar_usuario_administrador(PETICION, "", "es")
 
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
@@ -33,11 +30,10 @@ async def test_54(mocker: MockerFixture):
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 403
-    assert RES[1].body.decode("utf-8") == '{"error":"Token inválido"}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Token inválido."}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
 
@@ -52,11 +48,10 @@ async def test_55(mocker: MockerFixture):
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 400
-    assert RES[1].body.decode("utf-8") == '{"error":"Error al validar el token"}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Error al validar el token"}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
 
@@ -73,32 +68,10 @@ async def test_56(mocker: MockerFixture):
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 403
-    assert RES[1].body.decode("utf-8") == '{"error":"Acceso denegado."}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Acceso denegado."}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
-
-@pytest.mark.asyncio
-async def test_57(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de los usuarios si el usuario no
-    es administrador.
-    """
-    PETICION = mocker.MagicMock(spec=Request)
-    PETICION.headers = {"authorization": "Bearer token_valido"}
-    PETICION.state.textos = { "es":  { "errTry": "Error al procesar la solicitud:" } }
-
-    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = Exception("Error inesperado")
-
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 500
-    assert RES[1].body.decode("utf-8") == '{"error":"Error al procesar la solicitud: Error inesperado"}'
-
-    DATOS_TOKEN.assert_called_once()

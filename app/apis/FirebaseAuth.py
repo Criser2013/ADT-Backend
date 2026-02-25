@@ -77,18 +77,19 @@ def ver_datos_token(
             )
 
         CODIGO, RES = validar_token(token, firebase_app, True)
-        error = (
-            {"error": f"{textos[idioma]['errTokenInvalido']}"}
-            if CODIGO == COD_ERROR_ESPERADO
-            else {"error": f"{textos[idioma]['errValidarToken']}"}
-        )
+        if CODIGO != COD_EXITO:
+            error = (
+                {"error": f"{textos[idioma]['errTokenInvalido']}"}
+                if CODIGO == COD_ERROR_ESPERADO
+                else {"error": f"{textos[idioma]['errValidarToken']}"}
+            )
 
         return (CODIGO, RES if CODIGO == COD_EXITO else error)
 
     except Exception as e:
         return (
             COD_ERROR_INESPERADO,
-            {"error": f"{textos[idioma]['errProcesarToken']}: {e}."},
+            {"error": f"{textos[idioma]['errProcesarToken']}: {str(e)}."},
         )
 
 
@@ -174,7 +175,7 @@ async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
     except UserNotFoundError:
         return (COD_ERROR_ESPERADO, None)
     except Exception as e:
-        return (COD_ERROR_INESPERADO, e)
+        return (COD_ERROR_INESPERADO, str(e))
 
 
 def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
@@ -229,4 +230,4 @@ def actualizar_estado_usuario(
     except ValueError:
         return (COD_ERROR_ESPERADO, None)
     except Exception as e:
-        return (COD_ERROR_INESPERADO, e)
+        return (COD_ERROR_INESPERADO, str(e))

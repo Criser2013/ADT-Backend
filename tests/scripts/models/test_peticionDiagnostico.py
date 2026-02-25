@@ -1,4 +1,4 @@
-from app.models.PeticionDiagnostico import PeticionDiagnostico
+from app.models.Peticiones import InstanciaDiagnostico
 from numpy import array
 from pydantic import ValidationError
 import pytest
@@ -54,7 +54,7 @@ def test_5():
         "vascular": 0,
         "vih": 0,
     }
-    OBJ = PeticionDiagnostico(**DATOS)
+    OBJ = InstanciaDiagnostico(**DATOS)
     RES = OBJ.obtener_diccionario_instancia()
     assert RES == {
             "Inmovilidad_de_M_inferiores": [0], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [0],
@@ -120,4 +120,4 @@ def test_6():
                 "vascular": "0",
                 "vih": "0",
             }
-        PeticionDiagnostico(**DATOS)
+        InstanciaDiagnostico(**DATOS)

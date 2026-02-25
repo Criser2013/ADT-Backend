@@ -32,7 +32,7 @@ async def verificar_usuario_administrador(
     VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
 
     if not VALIDAR_ROL:
-        raise AccesoNoAutorizado(TEXTOS[idioma]["errAccesoDenegado"], 403)
+        raise AccesoNoAutorizado({ "error": TEXTOS[idioma]["errAccesoDenegado"] }, 403)
 
 
 async def validador_uid(

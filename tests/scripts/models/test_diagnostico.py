@@ -42,7 +42,7 @@ async def test_7():
             "Gastrointestinal": [0], "Hematologica": [0], "Urológica": [0], "Vascular": [0],
         }
     OBJ = Diagnostico(INSTANCIA, MODELO, EXPLAINER)
-    RES = await OBJ.generar_diagnostico()
+    RES = OBJ.generar_diagnostico()
 
     assert RES["prediccion"] == True
     assert round(RES["probabilidad"],0) == 1.0

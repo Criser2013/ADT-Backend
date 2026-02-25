@@ -72,7 +72,7 @@ class Diagnostico:
         RES = self.modelo.run(None, {i: array(instancias[i], dtype=float32).reshape(-1, 1) for i in input_name})
         ARRAY = zeros((len(instancias["Edad"]), 2), dtype=float32)
 
-        for i in range(2000):
+        for i in range(len(instancias["Edad"])):
             ARRAY[i] = array([RES[1][i][0], RES[1][i][1]])
 
         return ARRAY
