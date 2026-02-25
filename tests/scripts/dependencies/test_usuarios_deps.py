@@ -75,3 +75,33 @@ async def test_56(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
+
+@pytest.mark.asyncio
+async def test_57(mocker: MockerFixture):
+    """
+    Test para validar que la dependencia "validador_uid" retorne el uid si es válido.
+    """
+    PETICION = mocker.MagicMock(spec=Request)
+    PETICION.state.textos = {}
+    VALIDAR_UID = mocker.patch("app.dependencies.usuarios_dependencies.validar_uid", return_value=True)
+
+    RES = await validador_uid(PETICION, "a1234H", "es")
+
+    assert RES == "a1234H"
+    VALIDAR_UID.assert_called_once_with("a1234H")
+
+@pytest.mark.asyncio
+async def test_44(mocker: MockerFixture):
+    """
+    Test para validar que la dependencia "validador_uid" arroje una excepción si el uid es inválido.
+    """
+    PETICION = mocker.MagicMock(spec=Request)
+    PETICION.state.textos = { "es":  { "errUIDInvalido": "UID inválido." } }
+
+    VALIDAR_UID = mocker.patch("app.dependencies.usuarios_dependencies.validar_uid", return_value=False)
+
+    with pytest.raises(UIDInvalido) as exc_info:
+        await validador_uid(PETICION, "a1234H", "es")
+        assert exc_info.value.detail == {"error": "UID inválido."}
+
+    VALIDAR_UID.assert_called_once_with("a1234H")

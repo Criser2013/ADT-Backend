@@ -1,6 +1,9 @@
 import pytest
 from pytest_mock import MockerFixture
 from fastapi.testclient import TestClient
+from app.firebase_admin_config import inicializar_firebase
+from firebase_admin import App
+from firebase_admin.credentials import Certificate
 from app.main import app
 from contextlib import asynccontextmanager
 
@@ -150,3 +153,18 @@ def test_82(mocker: MockerFixture):
 
     assert RES.status_code == 200
     assert RES.json() == TEST_CREDS
+
+def test_65(mocker: MockerFixture):
+    """
+    Test para validar que la función que inicializa Firebase sea llamada
+    """
+    APP = mocker.MagicMock(spec=App)
+    CERT = mocker.MagicMock(spec=Certificate)
+
+    FUNC = mocker.patch("app.firebase_admin_config.initialize_app", return_value=APP)
+    mocker.patch("app.firebase_admin_config.Certificate", return_value=CERT)
+    RES = inicializar_firebase()
+
+    assert RES == APP
+
+    FUNC.assert_called_once_with(CERT)

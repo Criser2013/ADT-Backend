@@ -461,5 +461,3 @@ def test_64(mocker: MockerFixture):
 
     FUNC.assert_not_called()
     ROL.assert_called_once_with("a1234H")
-
-# test_65,44,57 - libre

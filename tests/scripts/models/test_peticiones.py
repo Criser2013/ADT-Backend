@@ -1,5 +1,4 @@
-from app.models.Peticiones import InstanciaDiagnostico
-from numpy import array
+from app.models.Peticiones import *
 from pydantic import ValidationError
 import pytest
 
@@ -77,7 +76,7 @@ def test_6():
         DATOS = {
                 "edad": "4",
                 "sexo": True,
-                "bebedor": "0",
+                "bebedor": -1,
                 "fumador": "0",
                 "proc_quirurgico_traumatismo": "0",
                 "inmovilidad_de_m_inferiores": [],
@@ -121,3 +120,17 @@ def test_6():
                 "vih": "0",
             }
         InstanciaDiagnostico(**DATOS)
+
+def test_66():
+    """
+    Test para validar que la clase reconoce correctamente una instancia.
+    """
+    instancia = TokenRecaptcha(**{"token": "a"*829})
+    assert instancia.token == "a"*829
+
+def test_67():
+    """
+    Test para validar que la clase lanza un error con datos inválidos.
+    """
+    with pytest.raises(ValidationError):
+        TokenRecaptcha(**{"token": 123})

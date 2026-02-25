@@ -1,5 +1,4 @@
 import pytest
-from pytest_mock import MockerFixture
 from app.dependencies.general_dependencies import verificar_idioma
 
 @pytest.mark.asyncio

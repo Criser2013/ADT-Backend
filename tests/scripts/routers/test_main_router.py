@@ -251,7 +251,7 @@ def test_74(mocker: MockerFixture):
 
     FUNC.assert_called_once_with("token_valido"*80, "es", TEXTOS)
 
-def test_91():
+def test_33():
     """
     Test para validar que el endpoint de healthcheck retorne la respuesta correcta.
     """
