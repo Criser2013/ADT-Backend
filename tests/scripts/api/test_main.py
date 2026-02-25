@@ -1,6 +1,9 @@
 import pytest
 from pytest_mock import MockerFixture
 from fastapi.testclient import TestClient
+from app.firebase_admin_config import inicializar_firebase
+from firebase_admin import App
+from firebase_admin.credentials import Certificate
 from app.main import app
 from contextlib import asynccontextmanager
 
@@ -68,8 +71,7 @@ def test_9(mocker: MockerFixture):
     deje pasar un token válido con una petición POST proveniente de un host autorizado
     """
     app.router.lifespan_context = mock_inicializar_modelos
-    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
-    FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
+    mocker.patch("app.main.verificar_token", return_value=1)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.post(
@@ -83,9 +85,6 @@ def test_9(mocker: MockerFixture):
 
     assert RES.status_code == 405
     assert RES.json() == { "detail": "Method Not Allowed" }
-            
-    VALIDADOR.assert_called_once_with("token_valido")
-    FIREBASE.assert_called_once_with("token_valido", MOCK_FIREBASE_APP, check_revoked=True)
 
 @pytest.mark.asyncio
 async def test_10(mocker: MockerFixture):
@@ -154,3 +153,18 @@ def test_82(mocker: MockerFixture):
 
     assert RES.status_code == 200
     assert RES.json() == TEST_CREDS
+
+def test_65(mocker: MockerFixture):
+    """
+    Test para validar que la función que inicializa Firebase sea llamada
+    """
+    APP = mocker.MagicMock(spec=App)
+    CERT = mocker.MagicMock(spec=Certificate)
+
+    FUNC = mocker.patch("app.firebase_admin_config.initialize_app", return_value=APP)
+    mocker.patch("app.firebase_admin_config.Certificate", return_value=CERT)
+    RES = inicializar_firebase()
+
+    assert RES == APP
+
+    FUNC.assert_called_once_with(CERT)

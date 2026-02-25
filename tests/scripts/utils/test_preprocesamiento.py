@@ -12,14 +12,14 @@ def test_84():
     Validar que la función retorne correctamente el número de intervalo al
     que pertenece un valor cuando este solo está acotado a su derecha
     """
-    assert evaluar_intervalo(12, [[None, 15, 3], [15, 20, 2], [21, None, 1]]) == 3
+    assert evaluar_intervalo(12, [[-float("inf"), 15, 3], [15, 20, 2], [21, float("inf"), 1]]) == 3
 
 def test_85():
     """
     Validar que la función retorne correctamente el número de intervalo al
     que pertenece un valor cuando este solo está acotado a su izquierda
     """
-    assert evaluar_intervalo(20, [[19, None, 4], [10, 19, 1]]) == 4
+    assert evaluar_intervalo(20, [[19, float("inf"), 4], [10, 19, 1]]) == 4
 
 def test_86():
     """

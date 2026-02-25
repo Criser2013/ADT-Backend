@@ -11,7 +11,8 @@ def convertir_hora(hora: int, minuto: int) -> str:
     Returns:
         str: La hora en formato HH:MM.
     """
-    AUXHORA = 12 if (hora == 0 or hora == 12) else (hora % 12)
+    HORA = hora % 12
+    AUXHORA = 12 if (HORA == 0) else HORA
     momento = "PM" if hora >= 12 else "AM"
 
 

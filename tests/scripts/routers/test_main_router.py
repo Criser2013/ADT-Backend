@@ -29,7 +29,8 @@ MOCK_FIREBASE_APP = {
 }
 
 TEXTOS = {
-    "es": { "errTry": "Error al procesar la solicitud:"},
+    "es": { "errTry": "Error al procesar la solicitud:",
+           "errTokenInvalido": "Token inválido o expirado." },
 }
 
 
@@ -114,7 +115,7 @@ def test_16(mocker: MockerFixture):
     app.router.lifespan_context = mock_inicializar_modelos
 
     VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
-    FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
+    FIREBASE = mocker.patch("apis.FirebaseAuth.verify_id_token", return_value=1)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.post(
@@ -131,10 +132,7 @@ def test_16(mocker: MockerFixture):
     assert len(JSON["lime"]) == 10
 
     VALIDADOR.assert_called_once_with("token_valido")
-    FIREBASE.assert_called_once_with("token_valido", {
-        "appId": "test_app_id",
-        "cred": {"projectId": "test_project_id", "certificated": True},
-    }, check_revoked=True)
+    FIREBASE.assert_called_once_with("token_valido", MOCK_FIREBASE_APP, check_revoked=True)
 
 def test_17(mocker: MockerFixture):
     """
@@ -191,7 +189,7 @@ def test_17(mocker: MockerFixture):
 
     app.router.lifespan_context = mock_inicializar_modelos
     VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
-    FIREBASE = mocker.patch("firebase_admin.auth.verify_id_token", return_value=1)
+    FIREBASE = mocker.patch("apis.FirebaseAuth.verify_id_token", return_value=1)
     DIAGNOSTICO = mocker.patch("models.Diagnostico.Diagnostico.generar_diagnostico")
 
     DIAGNOSTICO.side_effect = Exception("Error al generar el diagnóstico")
@@ -208,10 +206,7 @@ def test_17(mocker: MockerFixture):
     assert RES.json() == {"error": "Error al procesar la solicitud: Error al generar el diagnóstico"}
 
     VALIDADOR.assert_called_once_with("token_valido")
-    FIREBASE.assert_called_once_with("token_valido", {
-        "appId": "test_app_id",
-        "cred": {"projectId": "test_project_id", "certificated": True},
-    }, check_revoked=True)
+    FIREBASE.assert_called_once_with("token_valido", MOCK_FIREBASE_APP, check_revoked=True)
     DIAGNOSTICO.assert_called_once()
 
 def test_73(mocker: MockerFixture):
@@ -227,13 +222,13 @@ def test_73(mocker: MockerFixture):
             "/recaptcha",
             headers={"Origin": "http://localhost:5178", "Host": "localhost",
                     "Authorization": "Bearer token_valido"},
-            json={"token": "token_valido"}
+            json={"token": "token_valido"*80}
         )
 
     assert RES.status_code == 200
     assert RES.json() == {"success": True, "hostname": "0.0.0.0"}
 
-    FUNC.assert_called_once_with("token_valido", "es", TEXTOS)
+    FUNC.assert_called_once_with("token_valido"*80, "es", TEXTOS)
 
 def test_74(mocker: MockerFixture):
     """
@@ -248,15 +243,15 @@ def test_74(mocker: MockerFixture):
             "/recaptcha",
             headers={"Origin": "http://localhost:5178", "Host": "localhost",
                     "Authorization": "Bearer token_valido"},
-            json={"token": "token_valido"}
+            json={"token": "token_valido"*80}
         )
 
     assert RES.status_code == 500
     assert RES.json() == {"error": "Error al procesar la solicitud: Error de verificación"}
 
-    FUNC.assert_called_once_with("token_valido", "es", TEXTOS)
+    FUNC.assert_called_once_with("token_valido"*80, "es", TEXTOS)
 
-def test_91():
+def test_33():
     """
     Test para validar que el endpoint de healthcheck retorne la respuesta correcta.
     """

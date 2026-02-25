@@ -15,10 +15,7 @@ async def test_53(mocker: MockerFixture):
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == True
-    assert RES[1] is None
+    await verificar_usuario_administrador(PETICION, "", "es")
 
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
@@ -33,11 +30,10 @@ async def test_54(mocker: MockerFixture):
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(0, {"error": "Token inválido"}))
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 403
-    assert RES[1].body.decode("utf-8") == '{"error":"Token inválido"}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Token inválido."}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
 
@@ -52,11 +48,10 @@ async def test_55(mocker: MockerFixture):
 
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(-1, {"error": "Error al validar el token"}))
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 400
-    assert RES[1].body.decode("utf-8") == '{"error":"Error al validar el token"}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Error al validar el token"}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
 
@@ -73,11 +68,10 @@ async def test_56(mocker: MockerFixture):
     DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("app.dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False)
 
-    RES = await verificar_usuario_administrador(PETICION)
-
-    assert RES[0] == False
-    assert RES[1].status_code == 403
-    assert RES[1].body.decode("utf-8") == '{"error":"Acceso denegado."}'
+    with pytest.raises(AccesoNoAutorizado) as exc_info:
+        await verificar_usuario_administrador(PETICION, "", "es")
+        assert exc_info.value.detail == {"error": "Acceso denegado."}
+        assert exc_info.value.status_code == 403
 
     DATOS_TOKEN.assert_called_once()
     ROL.assert_called_once_with("a1234H")
@@ -85,20 +79,29 @@ async def test_56(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_57(mocker: MockerFixture):
     """
-    Test para validar que el API no retorne los datos de los usuarios si el usuario no
-    es administrador.
+    Test para validar que la dependencia "validador_uid" retorne el uid si es válido.
     """
     PETICION = mocker.MagicMock(spec=Request)
-    PETICION.headers = {"authorization": "Bearer token_valido"}
-    PETICION.state.textos = { "es":  { "errTry": "Error al procesar la solicitud:" } }
+    PETICION.state.textos = {}
+    VALIDAR_UID = mocker.patch("app.dependencies.usuarios_dependencies.validar_uid", return_value=True)
 
-    DATOS_TOKEN = mocker.patch("app.dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.side_effect = Exception("Error inesperado")
+    RES = await validador_uid(PETICION, "a1234H", "es")
 
-    RES = await verificar_usuario_administrador(PETICION)
+    assert RES == "a1234H"
+    VALIDAR_UID.assert_called_once_with("a1234H")
 
-    assert RES[0] == False
-    assert RES[1].status_code == 500
-    assert RES[1].body.decode("utf-8") == '{"error":"Error al procesar la solicitud: Error inesperado"}'
+@pytest.mark.asyncio
+async def test_44(mocker: MockerFixture):
+    """
+    Test para validar que la dependencia "validador_uid" arroje una excepción si el uid es inválido.
+    """
+    PETICION = mocker.MagicMock(spec=Request)
+    PETICION.state.textos = { "es":  { "errUIDInvalido": "UID inválido." } }
 
-    DATOS_TOKEN.assert_called_once()
+    VALIDAR_UID = mocker.patch("app.dependencies.usuarios_dependencies.validar_uid", return_value=False)
+
+    with pytest.raises(UIDInvalido) as exc_info:
+        await validador_uid(PETICION, "a1234H", "es")
+        assert exc_info.value.detail == {"error": "UID inválido."}
+
+    VALIDAR_UID.assert_called_once_with("a1234H")

@@ -1,5 +1,4 @@
-from app.models.PeticionDiagnostico import PeticionDiagnostico
-from numpy import array
+from app.models.Peticiones import *
 from pydantic import ValidationError
 import pytest
 
@@ -54,7 +53,7 @@ def test_5():
         "vascular": 0,
         "vih": 0,
     }
-    OBJ = PeticionDiagnostico(**DATOS)
+    OBJ = InstanciaDiagnostico(**DATOS)
     RES = OBJ.obtener_diccionario_instancia()
     assert RES == {
             "Inmovilidad_de_M_inferiores": [0], "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [0],
@@ -77,7 +76,7 @@ def test_6():
         DATOS = {
                 "edad": "4",
                 "sexo": True,
-                "bebedor": "0",
+                "bebedor": -1,
                 "fumador": "0",
                 "proc_quirurgico_traumatismo": "0",
                 "inmovilidad_de_m_inferiores": [],
@@ -120,4 +119,18 @@ def test_6():
                 "vascular": "0",
                 "vih": "0",
             }
-        PeticionDiagnostico(**DATOS)
+        InstanciaDiagnostico(**DATOS)
+
+def test_66():
+    """
+    Test para validar que la clase reconoce correctamente una instancia.
+    """
+    instancia = TokenRecaptcha(**{"token": "a"*829})
+    assert instancia.token == "a"*829
+
+def test_67():
+    """
+    Test para validar que la clase lanza un error con datos inválidos.
+    """
+    with pytest.raises(ValidationError):
+        TokenRecaptcha(**{"token": 123})

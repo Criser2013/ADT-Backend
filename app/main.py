@@ -2,13 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
 from routers.main_router import router as main_router
 from utils.Dominios import obtener_lista_dominios
 from routers.usuarios_router import router as usuarios_router
 from apis.FirebaseAuth import verificar_token
-from constants import CORS_ORIGINS, ALLOWED_HOSTS, ACTIVAR_DOCS, ORIGENES_AUTORIZADOS
+from constants import *
 from utils.Validadores import validar_origen
 from utils.Diccionario import ver_si_existe_clave
 from contextlib import asynccontextmanager
@@ -17,6 +18,7 @@ from dill import load as dload
 from json import load as jload
 from onnxruntime import InferenceSession
 from firebase_admin_config import inicializar_firebase
+from models.Excepciones import *
 
 load_dotenv()
 
@@ -137,8 +139,51 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
     if peticion.method in METODOS_RESTRINGIDOS and (
         peticion.url.path not in RUTAS_NO_PROTEGIDAS
     ):
-        return await verificar_token(
-            peticion, firebase_app, call_next, token, TEXTOS, idioma
+        RES = await verificar_token(
+            firebase_app, token
         )
-    else:
-        return await call_next(peticion)
+
+        if RES != COD_EXITO:
+            TEXTO = "errValidarToken" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
+            CODIGO = 403 if RES == COD_ERROR_ESPERADO else 400
+            return JSONResponse(
+                {"error": TEXTOS[idioma][TEXTO]},
+                status_code=CODIGO,
+                media_type="application/json",
+            )
+        
+    return await call_next(peticion)
+
+# Manejadores globales de excepciones personalizadas
+@app.exception_handler(AccesoNoAutorizado)
+async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=excepcion.codigo,
+        media_type="application/json",
+    )
+
+
+@app.exception_handler(UIDInvalido)
+async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=400,
+        media_type="application/json",
+    )
+
+@app.exception_handler(UsuarioInexistente)
+async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexistente):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=404,
+        media_type="application/json",
+    )
+
+@app.exception_handler(ErrorInterno)
+async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
+    return JSONResponse(
+        excepcion.mensaje,
+        status_code=400,
+        media_type="application/json",
+    )

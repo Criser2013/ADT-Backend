@@ -23,22 +23,10 @@ class Diagnostico:
         Returns:
             ndarray: Los datos convertidos en un array de numpy.
         """
-        return array([self.datos["Edad"][0], self.datos["Género"][0], self.datos["Bebedor"][0], self.datos["Fumador"][0],
-            self.datos["Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias"][0], self.datos["Inmovilidad_de_M_inferiores"][0],
-            self.datos["Viaje_prolongado"][0], self.datos["TEP___TVP_Previo"][0], self.datos["Malignidad"][0],
-            self.datos["Disnea"][0], self.datos["Dolor_toracico"][0], self.datos["Tos"][0],
-            self.datos["Hemoptisis"][0], self.datos["Síntomas_disautonomicos"][0],
-            self.datos["Edema_de_M_inferiores"][0], self.datos["Frecuencia_respiratoria"][0],
-            self.datos["Saturación_de_la_sangre"][0], self.datos["Frecuencia_cardíaca"][0],
-            self.datos["Presión_sistólica"][0], self.datos["Presión_diastólica"][0],
-            self.datos["Fiebre"][0], self.datos["Crepitaciones"][0], self.datos["Sibilancias"][0],
-            self.datos["Soplos"][0], self.datos["WBC"][0], self.datos["HB"][0], self.datos["PLT"][0],
-            self.datos["Derrame"][0], self.datos["Otra_Enfermedad"][0], self.datos["Hematologica"][0],
-            self.datos["Cardíaca"][0], self.datos["Enfermedad_coronaria"][0], self.datos["Diabetes_Mellitus"][0],
-            self.datos["Endocrina"][0], self.datos["Gastrointestinal"][0], self.datos["Hepatopatía_crónica"][0],
-            self.datos["Hipertensión_arterial"][0], self.datos["Neurológica"][0], self.datos["Pulmonar"][0],
-            self.datos["Renal"][0], self.datos["Trombofilia"][0], self.datos["Urológica"][0], self.datos["Vascular"][0],
-            self.datos["VIH"][0]], dtype=float32)
+        AUX = []
+        for i in self.datos.keys():
+            AUX.append(self.datos[i][0])
+        return array(AUX, dtype=float32)
 
     def convertir_a_diccionario(self, array_datos: ndarray) -> dict:
         """
@@ -50,29 +38,20 @@ class Diagnostico:
         Returns:
             dict: El diccionario con los datos del diagnóstico.
         """
-        claves = {
-            "Edad": [], "Género": [], "Bebedor": [], "Fumador": [],
-            "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias": [], "Inmovilidad_de_M_inferiores": [],
-            "Viaje_prolongado": [], "TEP___TVP_Previo": [], "Malignidad": [],
-            "Disnea": [], "Dolor_toracico": [], "Tos": [],
-            "Hemoptisis": [], "Síntomas_disautonomicos": [],
-            "Edema_de_M_inferiores": [], "Frecuencia_respiratoria": [],
-            "Saturación_de_la_sangre": [], "Frecuencia_cardíaca": [],
-            "Presión_sistólica": [], "Presión_diastólica": [],
-            "Fiebre": [], "Crepitaciones": [], "Sibilancias": [],
-            "Soplos": [], "WBC": [], "HB": [], "PLT": [],
-            "Derrame": [], "Otra_Enfermedad": [], "Hematologica": [],
-            "Cardíaca": [], "Enfermedad_coronaria": [], "Diabetes_Mellitus": [],
-            "Endocrina": [], "Gastrointestinal": [], "Hepatopatía_crónica": [],
-            "Hipertensión_arterial": [], "Neurológica": [], "Pulmonar": [],
-            "Renal": [], "Trombofilia": [], "Urológica": [], "Vascular": [],
-            "VIH": []
-        }
+        campos = (
+            "Edad", "Género", "Bebedor", "Fumador", "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias",
+            "Inmovilidad_de_M_inferiores", "Viaje_prolongado", "TEP___TVP_Previo", "Malignidad", "Disnea", "Dolor_toracico",
+            "Tos", "Hemoptisis", "Síntomas_disautonomicos", "Edema_de_M_inferiores", "Frecuencia_respiratoria",
+            "Saturación_de_la_sangre", "Frecuencia_cardíaca", "Presión_sistólica","Presión_diastólica", "Fiebre",
+            "Crepitaciones", "Sibilancias", "Soplos", "WBC", "HB", "PLT", "Derrame", "Otra_Enfermedad", "Hematologica",
+            "Cardíaca", "Enfermedad_coronaria", "Diabetes_Mellitus", "Endocrina", "Gastrointestinal", "Hepatopatía_crónica",
+            "Hipertensión_arterial", "Neurológica", "Pulmonar", "Renal", "Trombofilia", "Urológica", "Vascular","VIH"
+        )
+        claves = { i: [] for i in campos }
         
         for i in array_datos:
             for j, clave in enumerate(claves.keys()):
                 claves[clave].append(i[j])
-
         return claves
 
     def obtener_probabilidades_predicciones(
@@ -120,7 +99,7 @@ class Diagnostico:
 
         self.explicacion = SALIDA
 
-    async def generar_diagnostico(self):
+    def generar_diagnostico(self):
         """
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
