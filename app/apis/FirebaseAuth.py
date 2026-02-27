@@ -1,4 +1,5 @@
 from firebase_admin.auth import *
+from firebase_admin.exceptions import NotFoundError
 from firebase_admin import App
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from utils.Validadores import validar_txt_token
@@ -135,7 +136,7 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
                 usuarios = usuarios.get_next_page()
 
         return (COD_EXITO, AUX)
-    except Exception:
+    except:
         return (COD_ERROR_INESPERADO, None)
 
 
@@ -175,8 +176,8 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
         return (COD_EXITO, RES)
     except UserNotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except Exception as e:
-        return (COD_ERROR_INESPERADO, str(e))
+    except Exception:
+        return (COD_ERROR_INESPERADO, None)
 
 
 def ver_usuario_firebase(firebase_app: App, uid: str) -> tuple[int, UserRecord | None]:
@@ -228,7 +229,7 @@ def actualizar_estado_usuario(
         }
 
         return (COD_EXITO, RES)
-    except ValueError:
+    except NotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except Exception as e:
-        return (COD_ERROR_INESPERADO, str(e))
+    except:
+        return (COD_ERROR_INESPERADO, None)

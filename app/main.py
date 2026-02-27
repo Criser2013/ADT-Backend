@@ -136,7 +136,7 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
         else "es"
     )
 
-    if peticion.method in METODOS_RESTRINGIDOS and (
+    """if peticion.method in METODOS_RESTRINGIDOS and (
         peticion.url.path not in RUTAS_NO_PROTEGIDAS
     ):
         RES = await verificar_token(
@@ -150,7 +150,7 @@ async def verificar_credenciales(peticion: Request, call_next) -> Response:
                 {"error": TEXTOS[idioma][TEXTO]},
                 status_code=CODIGO,
                 media_type="application/json",
-            )
+            )"""
         
     return await call_next(peticion)
 

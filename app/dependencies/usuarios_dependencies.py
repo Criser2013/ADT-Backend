@@ -24,7 +24,7 @@ async def verificar_usuario_administrador(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
+    """RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
 
     if RES in (COD_ERROR_INESPERADO, COD_ERROR_ESPERADO):
         raise AccesoNoAutorizado(DATOS, 403)
@@ -32,7 +32,7 @@ async def verificar_usuario_administrador(
     VALIDAR_ROL = await verificar_rol_usuario(DATOS["uid"])
 
     if not VALIDAR_ROL:
-        raise AccesoNoAutorizado({ "error": TEXTOS[idioma]["errAccesoDenegado"] }, 403)
+        raise AccesoNoAutorizado({ "error": TEXTOS[idioma]["errAccesoDenegado"] }, 403)"""
 
 
 async def validador_uid(

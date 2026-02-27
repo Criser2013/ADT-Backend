@@ -55,23 +55,17 @@ async def actualizar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     firebase_app = peticion.state.firebase_app
-    COD, RES = ver_usuario_firebase(firebase_app, uid)
-
-    if COD == COD_ERROR_ESPERADO:
-        raise UsuarioInexistente(
-            {"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]}
-        )
-    elif COD == COD_ERROR_INESPERADO:
-        raise ErrorInterno({"error": TEXTOS[idioma]["errObtenerUsuario"]})
 
     CODIGO, RES = actualizar_estado_usuario(firebase_app, uid, desactivar)
 
-    if CODIGO != COD_EXITO:
-        TEXTO = "errEstadoInvalido" if CODIGO == COD_ERROR_ESPERADO else "errTry"
-        COD = 401 if CODIGO == COD_ERROR_ESPERADO else 500
+    if CODIGO == COD_ERROR_ESPERADO:
+        raise UsuarioInexistente(
+            {"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]}
+        )
+    elif CODIGO == COD_ERROR_INESPERADO:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma][TEXTO]}"},
-            status_code=COD,
+            {"error": f"{TEXTOS[idioma]['errTry']}"},
+            status_code=500,
             media_type="application/json",
         )
 
