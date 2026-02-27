@@ -1,4 +1,5 @@
 from firebase_admin.auth import *
+from firebase_admin import App
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
@@ -8,13 +9,13 @@ import asyncio
 
 
 def validar_token(
-    token: str, firebase_app, obtener_datos: bool
+    token: str, firebase_app: App, obtener_datos: bool
 ) -> int | tuple[int, dict | None]:
     """
     Verifica si el token de Firebase es válido.
     Args:
         token (str): El token de Firebase a verificar.
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
         obtener_datos (bool): Si True, retorna los datos del token si es válido.
     Returns:
         int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
@@ -30,12 +31,12 @@ def validar_token(
         return (COD_ERROR_INESPERADO, None) if obtener_datos else COD_ERROR_INESPERADO
 
 
-async def verificar_token(firebase_app, token: str) -> int:
+async def verificar_token(firebase_app: App, token: str) -> int:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
         token (str | None): El token de autorización de la solicitud.
-        firebase_app (object): La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
     Returns:
         int: Código de estado: 1 si el token es válido, 0 si es inválido, -1 si hay un error.
     """
@@ -54,13 +55,13 @@ async def verificar_token(firebase_app, token: str) -> int:
 
 
 def ver_datos_token(
-    token: str, firebase_app, idioma: str, textos: dict[str, str]
+    token: str, firebase_app: App, idioma: str, textos: dict[str, str]
 ) -> tuple[int, dict]:
     """
     Obtiene los datos del token de Firebase.
     Args:
         token (str): El token de autorización de la solicitud.
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
         idioma (str): El idioma para los mensajes de error.
         textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
@@ -93,11 +94,11 @@ def ver_datos_token(
         )
 
 
-async def ver_datos_usuarios(firebase_app) -> tuple[int, list[dict] | None]:
+async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
     Returns:
         tuple[int, list[dict] | None]: Un código de estado y los datos de los usuarios si se obtuvieron correctamente, o None si hubo un error.
     """
@@ -138,11 +139,11 @@ async def ver_datos_usuarios(firebase_app) -> tuple[int, list[dict] | None]:
         return (COD_ERROR_INESPERADO, None)
 
 
-async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
+async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | None]:
     """
     Obtiene los datos de un usuario específico usando el UID.
     Args:
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
         uid (str): El UID del usuario a buscar.
         idioma (str): El idioma para los mensajes de error.
         textos (dict[str, str]): El diccionario de textos para los mensajes de error.
@@ -178,11 +179,11 @@ async def ver_datos_usuario(firebase_app, uid: str) -> tuple[int, dict | None]:
         return (COD_ERROR_INESPERADO, str(e))
 
 
-def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None]:
+def ver_usuario_firebase(firebase_app: App, uid: str) -> tuple[int, UserRecord | None]:
     """
     Obtiene los datos de un usuario específico usando el UID.
     Args:
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
         uid (str): El UID del usuario a buscar.
     Returns:
         tuple[int, UserRecord | None]: Un código de estado y el registro del usuario si se encuentra.
@@ -197,12 +198,12 @@ def ver_usuario_firebase(firebase_app, uid: str) -> tuple[int, UserRecord | None
 
 
 def actualizar_estado_usuario(
-    firebase_app, uid: str, estado: bool
+    firebase_app: App, uid: str, estado: bool
 ) -> tuple[int, dict | None]:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:
-        firebase_app: La instancia de la aplicación Firebase.
+        firebase_app (App): La instancia de la aplicación Firebase.
         uid (str): El UID del usuario a actualizar.
         estado (bool): El nuevo estado del usuario (True para desactivado, False para activado).
     Returns:
