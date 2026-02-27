@@ -2,8 +2,7 @@ from pytest_mock import MockerFixture
 from fastapi import Request
 import pytest
 from app.apis.FirebaseAuth import *
-from firebase_admin.auth import ExpiredIdTokenError, CertificateFetchError, ListUsersPage, ExportedUserRecord, UserMetadata
-
+from firebase_admin.auth import ExpiredIdTokenError, CertificateFetchError, ListUsersPage, ExportedUserRecord, UserMetadata, UserNotFoundError
 @pytest.fixture(autouse=True)
 def setup_module(mocker: MockerFixture):
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
@@ -285,7 +284,7 @@ async def test_41(mocker: MockerFixture):
 
     RES = await ver_datos_usuario("firebase_app", "a1234H")
 
-    assert RES == (-1, "Error inesperado")
+    assert RES == (-1, None)
 
 def test_47(mocker: MockerFixture):
     """
@@ -357,11 +356,11 @@ def test_50(mocker: MockerFixture):
 
 def test_51(mocker: MockerFixture):
     """
-    Test para validar que la función "actualizar_estado_usuario" retorne un error cuando los valores
-    de actualización son inválidos
+    Test para validar que la función "actualizar_estado_usuario" retorne un error cuando el UID
+    proveído no corresponde a un usuario existente.
     """
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
-    FIREBASE.side_effect = ValueError("Estado inválido")
+    FIREBASE.side_effect = UserNotFoundError("Estado inválido")
     RES = actualizar_estado_usuario("firebase_app", "1234", False)
 
     assert RES == (0, None)

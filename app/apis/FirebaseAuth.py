@@ -231,5 +231,5 @@ def actualizar_estado_usuario(
         return (COD_EXITO, RES)
     except NotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except:
-        return (COD_ERROR_INESPERADO, None)
+    except Exception as e:
+        return (COD_ERROR_INESPERADO, str(e))

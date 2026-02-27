@@ -303,9 +303,6 @@ def test_60(mocker: MockerFixture):
     USUARIO = mocker.MagicMock(spec=UserRecord)
     USUARIO.uid = "a1234H"
 
-    FIRESTORE = mocker.patch("routers.usuarios_router.ver_usuario_firebase")
-    FIRESTORE.return_value = (1, USUARIO)
-
     ACT = mocker.patch(
         "routers.usuarios_router.actualizar_estado_usuario",
     )
@@ -329,7 +326,6 @@ def test_60(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     UID.assert_called_once_with("a1234H")
     ROL.assert_called_once_with("a1234H")
-    FIRESTORE.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
 
 
 def test_61(mocker: MockerFixture):
@@ -368,13 +364,10 @@ def test_62(mocker: MockerFixture):
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
     DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
 
-    FIRESTORE = mocker.patch("routers.usuarios_router.ver_usuario_firebase")
-    FIRESTORE.return_value = (0, None)
-
     ROL = mocker.patch(
         "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
     )
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
+    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario", return_value=(0, None))
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
@@ -393,7 +386,7 @@ def test_62(mocker: MockerFixture):
     ROL.assert_called_once()
     UID.assert_called_once_with("a1234H")
     DATOS_TOKEN.assert_called_once()
-    FUNC.assert_not_called()
+    FUNC.assert_called_once()
 
 
 def test_63(mocker: MockerFixture):
@@ -404,10 +397,7 @@ def test_63(mocker: MockerFixture):
     TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
     ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
 
-    FIRESTORE = mocker.patch("app.routers.usuarios_router.ver_usuario_firebase")
-    FIRESTORE.return_value = (-1, None)
-
-    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
+    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario", return_value=(-1, "Error inesperado"))
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
@@ -420,9 +410,9 @@ def test_63(mocker: MockerFixture):
             },
         )
 
-    assert RES.status_code == 400
+    assert RES.status_code ==500
     assert RES.json() == {
-        "error": "Error al obtener el usuario"
+        "error": "Error al procesar la solicitud:"
     }
 
     ROL.assert_called_once()
