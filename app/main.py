@@ -18,6 +18,7 @@ from json import load as jload
 from onnxruntime import InferenceSession
 from firebase_admin_config import inicializar_firebase
 from models.Excepciones import *
+import uvicorn
 
 load_dotenv()
 

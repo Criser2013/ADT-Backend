@@ -2,11 +2,10 @@ from firebase_admin.auth import *
 from firebase_admin.exceptions import NotFoundError
 from firebase_admin import App
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
+from models.Peticiones import UsuarioActualizar
 from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
-from utils.Diccionario import ver_si_existe_clave
-from apis.Firestore import obtener_roles_usuarios, obtener_rol_usuario
-import asyncio
+
 
 
 def validar_token(
@@ -103,9 +102,7 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
     """
     try:
         AUX = []
-        roles_task = asyncio.create_task(obtener_roles_usuarios())
         usuarios = list_users(app=firebase_app)
-        ROLES = await roles_task
 
         while True:
             AUX.extend(
@@ -114,9 +111,7 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
                         "correo": x.email,
                         "uid": x.uid,
                         "nombre": x.display_name,
-                        "rol": (
-                            ROLES[x.uid] if ver_si_existe_clave(ROLES, x.uid) else "N/A"
-                        ),
+                        "rol": x.custom_claims["admin"],
                         "estado": not x.disabled,
                         "fecha_registro": convertir_datetime_str(
                             x.user_metadata.creation_timestamp
@@ -150,18 +145,13 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
         tuple[int, dict | str | None]: Un código de estado y los datos del usuario si se encuentra.
     """
     try:
-        roles_task = asyncio.create_task(obtener_rol_usuario(uid))
         usuario = get_user(uid, firebase_app)
-        ROL = await roles_task
-
-        if ROL == -1:
-            raise UserNotFoundError("")
 
         RES = {
             "correo": usuario.email,
             "uid": usuario.uid,
             "nombre": usuario.display_name,
-            "rol": ROL,
+            "rol": usuario.custom_claims["admin"],
             "estado": not usuario.disabled,
             "fecha_registro": convertir_datetime_str(
                 usuario.user_metadata.creation_timestamp
@@ -197,25 +187,31 @@ def ver_usuario_firebase(firebase_app: App, uid: str) -> tuple[int, UserRecord |
 
 
 def actualizar_estado_usuario(
-    firebase_app: App, uid: str, estado: bool
+    firebase_app: App, uid: str, usuario: UsuarioActualizar
 ) -> tuple[int, dict | None]:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:
         firebase_app (App): La instancia de la aplicación Firebase.
         uid (str): El UID del usuario a actualizar.
-        estado (bool): El nuevo estado del usuario (True para desactivado, False para activado).
+        usuario (UsuarioActualizar): La instancia de usuario a actualizar con los nuevos valores de estado y administrador.
     Returns:
         tuple[int, dict | None]: Un código de estado y los datos del usuario actualizado si se actualiza correctamente.
     """
     try:
-        USUARIO = update_user(uid=uid, disabled=estado, app=firebase_app)
+        USUARIO = update_user(
+            uid=uid,
+            disabled=usuario.desactivar,
+            app=firebase_app,
+            custom_claims={"admin": usuario.administrador},
+        )
 
         RES = {
             "correo": USUARIO.email,
             "uid": USUARIO.uid,
             "nombre": USUARIO.display_name,
             "estado": not USUARIO.disabled,
+            "administrador": USUARIO.custom_claims["admin"],
             "fecha_registro": convertir_datetime_str(
                 USUARIO.user_metadata.creation_timestamp
             ),
