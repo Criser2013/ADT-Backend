@@ -1,6 +1,5 @@
 from pytest_mock import MockerFixture
 from fastapi.testclient import TestClient
-from fastapi.responses import JSONResponse
 from firebase_admin.auth import UserRecord
 from app.main import app
 import pytest
@@ -84,10 +83,7 @@ def test_31(mocker: MockerFixture):
     ]
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
+        return_value=(1, {"uid": "a1234H", "admin": True}),
     )
 
     USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuarios")
@@ -108,7 +104,6 @@ def test_31(mocker: MockerFixture):
     assert RES.json() == {"usuarios": DATOS}
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("a1234H")
     USUARIO.assert_called_once()
 
 
@@ -119,10 +114,7 @@ def test_32(mocker: MockerFixture):
     """
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=False
+        return_value=(1, {"uid": "a1234H", "admin": False}),
     )
 
     app.router.lifespan_context = mock_inicializar_modelos
@@ -141,7 +133,6 @@ def test_32(mocker: MockerFixture):
     assert RES.json() == {"error": "Acceso denegado."}
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("a1234H")
 
 
 def test_42(mocker: MockerFixture):
@@ -160,10 +151,7 @@ def test_42(mocker: MockerFixture):
     }
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
+        return_value=(1, {"uid": "a1234H", "admin": True}),
     )
     mocker.patch("routers.usuarios_router.validar_uid", return_value=True)
 
@@ -188,7 +176,6 @@ def test_42(mocker: MockerFixture):
 
     UID.assert_called_once_with("a1234H")
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("a1234H")
     USUARIO.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
 
 
@@ -224,10 +211,7 @@ def test_45(mocker: MockerFixture):
     """
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
+        return_value=(1, {"uid": "a1234H", "admin": True}),
     )
     mocker.patch("routers.usuarios_router.validar_uid", return_value=False)
     app.router.lifespan_context = mock_inicializar_modelos
@@ -246,7 +230,6 @@ def test_45(mocker: MockerFixture):
     assert RES.json() == {"error": "UID inválido"}
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("a1234H")
 
 
 def test_46(mocker: MockerFixture):
@@ -255,10 +238,7 @@ def test_46(mocker: MockerFixture):
     """
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
+        return_value=(1, {"uid": "a1234H", "admin": True}),
     )
     MOCK = mocker.patch("routers.usuarios_router.validar_uid")
     MOCK.side_effect = ValueError("UID inválido")
@@ -278,7 +258,6 @@ def test_46(mocker: MockerFixture):
     assert RES.json() == {"error": "UID inválido"}
 
     DATOS_TOKEN.assert_called_once()
-    ROL.assert_called_once_with("a1234H")
 
 
 def test_60(mocker: MockerFixture):
@@ -294,10 +273,7 @@ def test_60(mocker: MockerFixture):
     UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H"}),
-    )
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
+        return_value=(1, {"uid": "a1234H", "admin": True}),
     )
 
     USUARIO = mocker.MagicMock(spec=UserRecord)
@@ -312,12 +288,13 @@ def test_60(mocker: MockerFixture):
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=false",
+            "/admin/usuarios/a1234H",
             headers={
                 "Origin": "http://localhost:5178",
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
+            json={"desactivar": False, "administrador": False},
         )
 
     assert RES.status_code == 200
@@ -325,7 +302,6 @@ def test_60(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
     UID.assert_called_once_with("a1234H")
-    ROL.assert_called_once_with("a1234H")
 
 
 def test_61(mocker: MockerFixture):
@@ -340,12 +316,13 @@ def test_61(mocker: MockerFixture):
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=true",
+            "/admin/usuarios/a1234H",
             headers={
                 "Origin": "http://localhost:5178",
                 "Host": "localhost",
                 "Authorization": "Bearer token_invalido",
             },
+            json={"desactivar": True, "administrador": False},
         )
 
     assert RES.status_code == 403
@@ -362,28 +339,25 @@ def test_62(mocker: MockerFixture):
     """
     UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
+    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
 
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
-    )
     FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario", return_value=(0, None))
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=true",
+            "/admin/usuarios/a1234H",
             headers={
                 "Origin": "http://localhost:5178",
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
+            json={"desactivar": True, "administrador": False},
         )
 
     assert RES.status_code == 404
     assert RES.json() == {"error": "Usuario no encontrado"}
 
-    ROL.assert_called_once()
     UID.assert_called_once_with("a1234H")
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_called_once()
@@ -394,28 +368,27 @@ def test_63(mocker: MockerFixture):
     Test para validar que el API no actualice los datos de un usuario si ocurre una excepción.
     """
     UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
-    TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H"}))
-    ROL = mocker.patch("dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True)
+    TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H", "admin": True}))
 
     FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario", return_value=(-1, "Error inesperado"))
     app.router.lifespan_context = mock_inicializar_modelos
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=true",
+            "/admin/usuarios/a1234H",
             headers={
                 "Origin": "http://localhost:5178",
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
+            json={"desactivar": True, "administrador": False},
         )
 
-    assert RES.status_code ==500
+    assert RES.status_code == 500
     assert RES.json() == {
         "error": "Error al procesar la solicitud:"
     }
 
-    ROL.assert_called_once()
     FUNC.assert_not_called()
     UID.assert_called_once()
     TOKEN.assert_called_once()
@@ -426,11 +399,8 @@ def test_64(mocker: MockerFixture):
     Test para validar que no actualice los datos de un usuario si se lanza un ValueError.
     """
     DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H"})
+    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
 
-    ROL = mocker.patch(
-        "dependencies.usuarios_dependencies.verificar_rol_usuario", return_value=True
-    )
     mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=False)
     FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
 
@@ -450,4 +420,3 @@ def test_64(mocker: MockerFixture):
     assert RES.json() == {"error": "UID inválido"}
 
     FUNC.assert_not_called()
-    ROL.assert_called_once_with("a1234H")

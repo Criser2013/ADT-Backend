@@ -3,6 +3,8 @@ from fastapi import Request
 import pytest
 from app.apis.FirebaseAuth import *
 from firebase_admin.auth import ExpiredIdTokenError, CertificateFetchError, ListUsersPage, ExportedUserRecord, UserMetadata, UserNotFoundError
+from app.models.Peticiones import UsuarioActualizar
+
 @pytest.fixture(autouse=True)
 def setup_module(mocker: MockerFixture):
     mocker.patch("app.main.CORS_ORIGINS", ["http://localhost:5178",])
@@ -158,22 +160,19 @@ async def test_26(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
+    USUARIO.custom_claims = { "admin": False }
 
     LISTA.users = [USUARIO]
     LISTA.has_next_page = False
 
-    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_roles_usuarios")
-    FIRESTORE.return_value = { "12345": 0 }
-
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.list_users", return_value=LISTA)
 
     RES = await ver_datos_usuarios("firebase_app")
-    USUARIOS = [{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]
+    USUARIOS = [{"administrador": False,"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}]
 
     assert RES == (1, USUARIOS)
 
     FIREBASE.assert_called_once_with(app="firebase_app")
-    FIRESTORE.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_27(mocker: MockerFixture):
@@ -193,6 +192,7 @@ async def test_27(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
+    USUARIO.custom_claims = { "admin": False }
 
     LISTA2.users = [USUARIO]
     LISTA2.has_next_page = False
@@ -201,12 +201,9 @@ async def test_27(mocker: MockerFixture):
     LISTA.has_next_page = True
     LISTA.get_next_page.side_effect = lambda: LISTA2
 
-    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_roles_usuarios")
-    FIRESTORE.return_value = { "12345": 0 }
-
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.list_users", return_value=LISTA)
     USUARIOS = [
-        {"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"},{"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","rol":0,"estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}
+        {"administrador": False,"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"},{"administrador": False,"correo":"usuario@correo.com","uid":"12345","nombre":"usuario","estado":True,"fecha_registro":"26/07/2025 11:56 AM","ultima_conexion":"26/07/2025 11:56 AM"}
     ]
     RES = await ver_datos_usuarios("firebase_app")
 
@@ -243,18 +240,15 @@ async def test_39(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
-
-    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
-    FIRESTORE.return_value = 0
+    USUARIO.custom_claims = { "admin": False }
 
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user", return_value=USUARIO)
 
     RES = await ver_datos_usuario("firebase_app", "12345")
 
-    assert RES == (1, {"correo": "usuario@correo.com", "uid": "12345", "nombre": "usuario", "rol": 0, "estado": True, "fecha_registro": "26/07/2025 11:56 AM", "ultima_conexion": "26/07/2025 11:56 AM"})
+    assert RES == (1, {"correo": "usuario@correo.com", "uid": "12345", "nombre": "usuario", "administrador": False, "estado": True, "fecha_registro": "26/07/2025 11:56 AM", "ultima_conexion": "26/07/2025 11:56 AM"})
 
     FIREBASE.assert_called_once_with("12345", "firebase_app")
-    FIRESTORE.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_40(mocker: MockerFixture):
@@ -262,10 +256,9 @@ async def test_40(mocker: MockerFixture):
     Test para validar que la función "ver_datos_usuario" arroje una excepción al no
     encontrar el usuario.
     """
-    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
-    FIRESTORE.return_value = -1
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user")
+    FIREBASE.side_effect = UserNotFoundError("Usuario no encontrado")
 
-    FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user", return_value=None)
     RES = await ver_datos_usuario("firebase_app", "a1234H")
 
     assert RES == (0, None)
@@ -277,14 +270,14 @@ async def test_41(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_usuario" maneje correctamente las excepciones.
     """
-    FIRESTORE = mocker.patch("app.apis.FirebaseAuth.obtener_rol_usuario")
-    FIRESTORE.side_effect = Exception("Error inesperado")
-
-    mocker.patch("app.apis.FirebaseAuth.get_user", return_value=None)
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user")
+    FIREBASE.side_effect = Exception("Error inesperado")
 
     RES = await ver_datos_usuario("firebase_app", "a1234H")
 
     assert RES == (-1, None)
+
+    FIREBASE.assert_called_once_with("a1234H", "firebase_app")
 
 def test_47(mocker: MockerFixture):
     """
@@ -294,6 +287,7 @@ def test_47(mocker: MockerFixture):
     USUARIO.uid = "12345"
     USUARIO.disabled = False
     USUARIO.email = "correo@correo.com"
+    USUARIO.custom_claims = { "admin": False }
 
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user", return_value=USUARIO)
 
@@ -340,41 +334,46 @@ def test_50(mocker: MockerFixture):
     USUARIO.disabled = False
     USUARIO.email = "correo@correo.com"
     USUARIO.display_name = "usuario"
+    USUARIO.custom_claims = { "admin": False }
 
     METADATOS = mocker.MagicMock(spec=UserMetadata)
     METADATOS.creation_timestamp = 175354900609
     METADATOS.last_refresh_timestamp = 175354900809
     USUARIO.user_metadata = METADATOS
 
-    INSTANCIA = {"correo": "correo@correo.com", "uid": "1234", "nombre": "usuario", "estado": True, "fecha_registro": "23/07/1975 08:41 AM", "ultima_conexion": "23/07/1975 08:41 AM"}
+    INST = UsuarioActualizar(desactivar=True, administrador=False)
+
+    INSTANCIA = {"correo": "correo@correo.com", "uid": "1234", "nombre": "usuario", "administrador": False, "estado": True, "fecha_registro": "23/07/1975 08:41 AM", "ultima_conexion": "23/07/1975 08:41 AM"}
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user", return_value=USUARIO)
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
 
     assert RES == (1, INSTANCIA)
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")
+    FIREBASE.assert_called_once_with(uid="1234", disabled=True, app="firebase_app", custom_claims={"admin": False})
 
 def test_51(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" retorne un error cuando el UID
     proveído no corresponde a un usuario existente.
     """
+    INST = UsuarioActualizar(desactivar=False, administrador=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = UserNotFoundError("Estado inválido")
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
 
     assert RES == (0, None)
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False})
 
 def test_52(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" maneje correctamente las excepciones
     """
+    INST = UsuarioActualizar(desactivar=False, administrador=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = Exception("Error inesperado")
-    RES = actualizar_estado_usuario("firebase_app", "1234", False)
+    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
 
     assert RES == (-1, "Error inesperado")
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app")
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False})

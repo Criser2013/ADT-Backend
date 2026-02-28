@@ -111,7 +111,7 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
                         "correo": x.email,
                         "uid": x.uid,
                         "nombre": x.display_name,
-                        "rol": x.custom_claims["admin"],
+                        "administrador": x.custom_claims["admin"],
                         "estado": not x.disabled,
                         "fecha_registro": convertir_datetime_str(
                             x.user_metadata.creation_timestamp
@@ -151,7 +151,7 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
             "correo": usuario.email,
             "uid": usuario.uid,
             "nombre": usuario.display_name,
-            "rol": usuario.custom_claims["admin"],
+            "administrador": usuario.custom_claims["admin"],
             "estado": not usuario.disabled,
             "fecha_registro": convertir_datetime_str(
                 usuario.user_metadata.creation_timestamp
