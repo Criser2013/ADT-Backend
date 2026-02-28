@@ -30,6 +30,7 @@ MOCK_FIREBASE_APP = {
 
 TEXTOS = {
     "es": { "errTry": "Error al procesar la solicitud:",
+           "errUsuarioNoEncontrado": "Usuario no encontrado.",
            "errTokenInvalido": "Token inválido o expirado." },
 }
 
@@ -66,49 +67,16 @@ def test_16(mocker: MockerFixture):
     """
 
     INSTANCIA = {
-        "edad": 68,
-        "sexo": 1,
-        "bebedor": 0,
-        "fumador": 0,
-        "proc_quirurgico_traumatismo": 0,
-        "inmovilidad_de_m_inferiores": 0,
-        "viaje_prolongado": 0,
-        "TEP_TVP_previo": 0,
-        "malignidad": 1,
-        "disnea": 0,
-        "dolor_toracico": 1,
-        "tos": 0,
-        "hemoptisis": 0,
-        "sintomas_disautonomicos": 0,
-        "edema_de_m_inferiores": 1,
-        "frecuencia_respiratoria": 18,
-        "saturacion_de_la_sangre": 91,
-        "frecuencia_cardiaca": 112,
-        "presion_sistolica": 110,
-        "presion_diastolica": 70,
-        "fiebre": 0,
-        "crepitaciones": 0,
-        "sibilancias": 0,
-        "soplos": 0,
-        "wbc": 6800,
-        "hb": 13,
-        "plt": 313400,
-        "derrame": 0,
-        "otra_enfermedad": 1,
-        "hematologica": 1,
-        "cardiaca": 0,
-        "enfermedad_coronaria": 0,
-        "diabetes_mellitus": 0,
-        "endocrina": 1,
-        "gastrointestinal": 1,
-        "hepatopatia_cronica": 0,
-        "hipertension_arterial": 1,
-        "neurologica": 0,
-        "pulmonar": 0,
-        "renal": 0,
-        "trombofilia": 0,
-        "urologica": 0,
-        "vascular": 0,
+        "edad": 68, "sexo": 1, "bebedor": 0, "fumador": 0, "proc_quirurgico_traumatismo": 0,
+        "inmovilidad_de_m_inferiores": 0, "viaje_prolongado": 0, "TEP_TVP_previo": 0,
+        "malignidad": 1, "disnea": 0, "dolor_toracico": 1, "tos": 0, "hemoptisis": 0,
+        "sintomas_disautonomicos": 0, "edema_de_m_inferiores": 1, "frecuencia_respiratoria": 18,
+        "saturacion_de_la_sangre": 91, "frecuencia_cardiaca": 112, "presion_sistolica": 110,
+        "presion_diastolica": 70, "fiebre": 0, "crepitaciones": 0, "sibilancias": 0,
+        "soplos": 0, "wbc": 6800, "hb": 13, "plt": 313400, "derrame": 0, "otra_enfermedad": 1,
+        "hematologica": 1, "cardiaca": 0, "enfermedad_coronaria": 0, "diabetes_mellitus": 0,
+        "endocrina": 1, "gastrointestinal": 1, "hepatopatia_cronica": 0, "hipertension_arterial": 1,
+        "neurologica": 0, "pulmonar": 0, "renal": 0, "trombofilia": 0, "urologica": 0, "vascular": 0,
         "vih": 0,
     }
 
@@ -141,49 +109,16 @@ def test_17(mocker: MockerFixture):
     """
 
     INSTANCIA = {
-        "edad": 68,
-        "sexo": 1,
-        "bebedor": 0,
-        "fumador": 0,
-        "proc_quirurgico_traumatismo": 0,
-        "inmovilidad_de_m_inferiores": 0,
-        "viaje_prolongado": 0,
-        "TEP_TVP_previo": 0,
-        "malignidad": 1,
-        "disnea": 0,
-        "dolor_toracico": 1,
-        "tos": 0,
-        "hemoptisis": 0,
-        "sintomas_disautonomicos": 0,
-        "edema_de_m_inferiores": 1,
-        "frecuencia_respiratoria": 18,
-        "saturacion_de_la_sangre": 91,
-        "frecuencia_cardiaca": 112,
-        "presion_sistolica": 110,
-        "presion_diastolica": 70,
-        "fiebre": 0,
-        "crepitaciones": 0,
-        "sibilancias": 0,
-        "soplos": 0,
-        "wbc": 6800,
-        "hb": 13,
-        "plt": 313400,
-        "derrame": 0,
-        "otra_enfermedad": 1,
-        "hematologica": 1,
-        "cardiaca": 0,
-        "enfermedad_coronaria": 0,
-        "diabetes_mellitus": 0,
-        "endocrina": 1,
-        "gastrointestinal": 1,
-        "hepatopatia_cronica": 0,
-        "hipertension_arterial": 1,
-        "neurologica": 0,
-        "pulmonar": 0,
-        "renal": 0,
-        "trombofilia": 0,
-        "urologica": 0,
-        "vascular": 0,
+        "edad": 68, "sexo": 1, "bebedor": 0, "fumador": 0, "proc_quirurgico_traumatismo": 0,
+        "inmovilidad_de_m_inferiores": 0, "viaje_prolongado": 0, "TEP_TVP_previo": 0,
+        "malignidad": 1, "disnea": 0, "dolor_toracico": 1, "tos": 0, "hemoptisis": 0,
+        "sintomas_disautonomicos": 0, "edema_de_m_inferiores": 1, "frecuencia_respiratoria": 18,
+        "saturacion_de_la_sangre": 91, "frecuencia_cardiaca": 112, "presion_sistolica": 110,
+        "presion_diastolica": 70, "fiebre": 0, "crepitaciones": 0, "sibilancias": 0,
+        "soplos": 0, "wbc": 6800, "hb": 13, "plt": 313400, "derrame": 0,"otra_enfermedad": 1,
+        "hematologica": 1, "cardiaca": 0, "enfermedad_coronaria": 0, "diabetes_mellitus": 0,
+        "endocrina": 1, "gastrointestinal": 1, "hepatopatia_cronica": 0, "hipertension_arterial": 1,
+        "neurologica": 0, "pulmonar": 0, "renal": 0, "trombofilia": 0, "urologica": 0, "vascular": 0,
         "vih": 0,
     }
 
@@ -261,3 +196,61 @@ def test_33():
 
     assert RES.status_code == 200
     assert RES.json() == {"status": "ok"}
+
+def test_34(mocker: MockerFixture):
+    """
+    Test para validar que el endpoint de registro de usuarios funcione correctamente
+    """
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    FUNC = mocker.patch("routers.main_router.establecer_rol_usuario", return_value=(1, None))
+
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+    mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=1)
+
+    with TestClient(app) as CLIENTE:
+        UID = "a1234H"
+        RES = CLIENTE.post(f"/registrar", headers={"Origin": "http://localhost:5178", "Host": "localhost"}, params={"uid": UID})
+
+    assert RES.status_code == 200
+    assert RES.json() == {"resultado": "ok"}
+
+    FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)
+
+def test_37(mocker: MockerFixture):
+    """
+    Test para validar que el endpoint de registro de usuarios arroje un error cuando un usuario
+    no se cuentra registrado en la base de datos.
+    """
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+    FUNC = mocker.patch("routers.main_router.establecer_rol_usuario", return_value=(0, None))
+
+    with TestClient(app) as CLIENTE:
+        UID = "a1234H"
+        RES = CLIENTE.post("/registrar", headers={"Origin": "http://localhost:5178", "Host": "localhost"}, params={"uid": UID})
+
+    assert RES.status_code == 404
+    assert RES.json() == {"error": "Usuario no encontrado."}
+
+    FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)
+
+def test_38(mocker: MockerFixture):
+    """
+    Test para validar que el endpoint de registro de usuarios arroje un error cuando se produce
+    un error inesperado al tratar de validar el token
+    """
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+    FUNC = mocker.patch("routers.main_router.establecer_rol_usuario", return_value=(-1, "Token inválido."))
+
+    with TestClient(app) as CLIENTE:
+        UID = "a1234H"
+        RES = CLIENTE.post("/registrar", headers={"Origin": "http://localhost:5178", "Host": "localhost"}, params={"uid": UID})
+
+    assert RES.status_code == 500
+    assert RES.json() == {"error": "Error al procesar la solicitud: Token inválido."}
+
+    FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)

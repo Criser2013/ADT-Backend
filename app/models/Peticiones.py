@@ -118,3 +118,10 @@ class InstanciaDiagnostico(BaseModel):
             "Renal": [self.renal], "Trombofilia": [self.trombofilia], "Urológica": [self.urologica], "Vascular": [self.vascular],
             "VIH": [self.vih],
         }
+    
+class UsuarioActualizar(BaseModel):
+    """
+    Clase que representa una petición para actualizar el estado de un usuario.
+    """
+    desactivar: bool
+    administrador: bool

@@ -5,6 +5,7 @@ from dependencies.usuarios_dependencies import *
 from dependencies.general_dependencies import verificar_idioma
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from models.Excepciones import UsuarioInexistente, ErrorInterno
+from models.Peticiones import UsuarioActualizar
 
 router = APIRouter(
     prefix="/usuarios", dependencies=[Depends(verificar_usuario_administrador)]
@@ -41,7 +42,7 @@ async def ver_usuario(
             {"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]}
         )
     elif CODIGO == COD_ERROR_INESPERADO:
-        raise ErrorInterno({"error": TEXTOS[idioma]["errObtenerDatosUsuario"]})
+        raise ErrorInterno({"error": TEXTOS[idioma]["errObtenerDatosUsuarios"]})
 
     return RES
 
@@ -49,29 +50,23 @@ async def ver_usuario(
 @router.patch("/{uid}")
 async def actualizar_usuario(
     peticion: Request,
-    desactivar: bool,
+    instancia_usuario: UsuarioActualizar,
     uid: str = Depends(validador_uid),
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     firebase_app = peticion.state.firebase_app
-    COD, RES = ver_usuario_firebase(firebase_app, uid)
 
-    if COD == COD_ERROR_ESPERADO:
+    CODIGO, RES = actualizar_estado_usuario(firebase_app, uid, instancia_usuario)
+
+    if CODIGO == COD_ERROR_ESPERADO:
         raise UsuarioInexistente(
             {"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]}
         )
-    elif COD == COD_ERROR_INESPERADO:
-        raise ErrorInterno({"error": TEXTOS[idioma]["errObtenerUsuario"]})
-
-    CODIGO, RES = actualizar_estado_usuario(firebase_app, uid, desactivar)
-
-    if CODIGO != COD_EXITO:
-        TEXTO = "errEstadoInvalido" if CODIGO == COD_ERROR_ESPERADO else "errTry"
-        COD = 401 if CODIGO == COD_ERROR_ESPERADO else 500
+    elif CODIGO == COD_ERROR_INESPERADO:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma][TEXTO]}"},
-            status_code=COD,
+            {"error": f"{TEXTOS[idioma]['errTry']}"},
+            status_code=500,
             media_type="application/json",
         )
 

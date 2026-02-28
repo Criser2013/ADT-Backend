@@ -71,7 +71,6 @@ def test_9(mocker: MockerFixture):
     deje pasar un token válido con una petición POST proveniente de un host autorizado
     """
     app.router.lifespan_context = mock_inicializar_modelos
-    mocker.patch("app.main.verificar_token", return_value=1)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.post(
