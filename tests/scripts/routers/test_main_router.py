@@ -197,7 +197,7 @@ def test_33():
     assert RES.status_code == 200
     assert RES.json() == {"status": "ok"}
 
-def test_94(mocker: MockerFixture):
+def test_34(mocker: MockerFixture):
     """
     Test para validar que el endpoint de registro de usuarios funcione correctamente
     """
@@ -217,7 +217,7 @@ def test_94(mocker: MockerFixture):
 
     FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)
 
-def test_95(mocker: MockerFixture):
+def test_37(mocker: MockerFixture):
     """
     Test para validar que el endpoint de registro de usuarios arroje un error cuando un usuario
     no se cuentra registrado en la base de datos.
@@ -236,7 +236,7 @@ def test_95(mocker: MockerFixture):
 
     FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)
 
-def test_96(mocker: MockerFixture):
+def test_38(mocker: MockerFixture):
     """
     Test para validar que el endpoint de registro de usuarios arroje un error cuando se produce
     un error inesperado al tratar de validar el token
