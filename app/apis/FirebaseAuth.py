@@ -22,9 +22,7 @@ def validar_token(
         int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
     """
     try:
-        datos = verify_id_token(
-            token, firebase_app, check_revoked=True
-        )
+        datos = verify_id_token(token, firebase_app, check_revoked=True)
         return (COD_EXITO, datos) if obtener_datos else COD_EXITO
     except (ExpiredIdTokenError, RevokedIdTokenError, UserDisabledError):
         return (COD_ERROR_ESPERADO, None) if obtener_datos else COD_ERROR_ESPERADO
@@ -211,9 +209,7 @@ def actualizar_estado_usuario(
         tuple[int, dict | None]: Un código de estado y los datos del usuario actualizado si se actualiza correctamente.
     """
     try:
-        USUARIO = update_user(
-            uid=uid, disabled=estado, app=firebase_app
-        )
+        USUARIO = update_user(uid=uid, disabled=estado, app=firebase_app)
 
         RES = {
             "correo": USUARIO.email,
@@ -229,6 +225,24 @@ def actualizar_estado_usuario(
         }
 
         return (COD_EXITO, RES)
+    except NotFoundError:
+        return (COD_ERROR_ESPERADO, None)
+    except Exception as e:
+        return (COD_ERROR_INESPERADO, str(e))
+
+
+def establecer_rol_usuario(firebase_app: App, uid: str) -> tuple[int, str | None]:
+    """
+    Establece el rol de un usuario específico cuando este se registra.
+    Args:
+        firebase_app (App): La instancia de la aplicación Firebase.
+        uid (str): El UID del usuario al que se le asignará el rol.
+    Returns:
+        tuple[int, str | None]: Un código de estado indicando el resultado de la operación.
+    """
+    try:
+        set_custom_user_claims(uid, {"admin": False}, app=firebase_app)
+        return (COD_EXITO, None)
     except NotFoundError:
         return (COD_ERROR_ESPERADO, None)
     except Exception as e:

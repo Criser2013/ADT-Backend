@@ -8,7 +8,6 @@ from os import getenv
 from routers.main_router import router as main_router
 from utils.Dominios import obtener_lista_dominios
 from routers.usuarios_router import router as usuarios_router
-from apis.FirebaseAuth import verificar_token
 from constants import *
 from utils.Validadores import validar_origen
 from utils.Diccionario import ver_si_existe_clave
@@ -111,48 +110,6 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
     else:
         return await call_next(peticion)
 
-
-@app.middleware("http")
-async def verificar_credenciales(peticion: Request, call_next) -> Response:
-    """
-    Middleware para verificar las credenciales de Firebase en cada solicitud de diagnóstico.
-    Args:
-        peticion (Diagnostico): La solicitud que contiene el token.
-        call_next: La función para pasar al siguiente middleware o ruta.
-    """
-    RUTAS_NO_PROTEGIDAS = ("/recaptcha",)
-    METODOS_RESTRINGIDOS = ("POST",)
-    firebase_app = peticion.state.firebase_app
-    TEXTOS = peticion.state.textos
-
-    token = (
-        peticion.headers["authorization"]
-        if ver_si_existe_clave(peticion.headers, "authorization")
-        else ""
-    )
-    idioma = (
-        peticion.headers["language"]
-        if ver_si_existe_clave(peticion.headers, "language")
-        else "es"
-    )
-
-    if peticion.method in METODOS_RESTRINGIDOS and (
-        peticion.url.path not in RUTAS_NO_PROTEGIDAS
-    ):
-        RES = await verificar_token(
-            firebase_app, token
-        )
-
-        if RES != COD_EXITO:
-            TEXTO = "errValidarToken" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
-            CODIGO = 403 if RES == COD_ERROR_ESPERADO else 400
-            return JSONResponse(
-                {"error": TEXTOS[idioma][TEXTO]},
-                status_code=CODIGO,
-                media_type="application/json",
-            )
-        
-    return await call_next(peticion)
 
 # Manejadores globales de excepciones personalizadas
 @app.exception_handler(AccesoNoAutorizado)
