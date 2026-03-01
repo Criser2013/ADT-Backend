@@ -105,9 +105,10 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
         usuarios = list_users(app=firebase_app)
 
         while True:
-            AUX.extend(
-                [
-                    {
+            lista = []
+            for x in usuarios.users:
+                if x.custom_claims["eliminado"] == False:
+                    lista.append({
                         "correo": x.email,
                         "uid": x.uid,
                         "nombre": x.display_name,
@@ -118,11 +119,9 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
                         ),
                         "ultima_conexion": convertir_datetime_str(
                             x.user_metadata.last_refresh_timestamp
-                        ),
-                    }
-                    for x in usuarios.users
-                ]
-            )
+                        )
+                    })
+            AUX.extend(lista)
             if not usuarios.has_next_page:
                 break
             else:
@@ -146,6 +145,9 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
     """
     try:
         usuario = get_user(uid, firebase_app)
+
+        if usuario.custom_claims["eliminado"] == True:
+            raise UserNotFoundError("")
 
         RES = {
             "correo": usuario.email,
@@ -203,7 +205,7 @@ def actualizar_estado_usuario(
             uid=uid,
             disabled=usuario.desactivar,
             app=firebase_app,
-            custom_claims={"admin": usuario.administrador},
+            custom_claims={"admin": usuario.administrador, "eliminado": usuario.eliminado},
         )
 
         RES = {
@@ -237,7 +239,7 @@ def establecer_rol_usuario(firebase_app: App, uid: str) -> tuple[int, str | None
         tuple[int, str | None]: Un código de estado indicando el resultado de la operación.
     """
     try:
-        set_custom_user_claims(uid, {"admin": False}, app=firebase_app)
+        set_custom_user_claims(uid, {"admin": False, "eliminado": False}, app=firebase_app)
         return (COD_EXITO, None)
     except NotFoundError:
         return (COD_ERROR_ESPERADO, None)

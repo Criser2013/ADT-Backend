@@ -294,7 +294,7 @@ def test_60(mocker: MockerFixture):
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
-            json={"desactivar": False, "administrador": False},
+            json={"desactivar": False, "administrador": False, "eliminado": False},
         )
 
     assert RES.status_code == 200
@@ -322,7 +322,7 @@ def test_61(mocker: MockerFixture):
                 "Host": "localhost",
                 "Authorization": "Bearer token_invalido",
             },
-            json={"desactivar": True, "administrador": False},
+            json={"desactivar": True, "administrador": False, "eliminado": False},
         )
 
     assert RES.status_code == 403
@@ -352,7 +352,7 @@ def test_62(mocker: MockerFixture):
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
-            json={"desactivar": True, "administrador": False},
+            json={"desactivar": True, "administrador": False, "eliminado": False},
         )
 
     assert RES.status_code == 404
@@ -381,7 +381,7 @@ def test_63(mocker: MockerFixture):
                 "Host": "localhost",
                 "Authorization": "Bearer token_valido",
             },
-            json={"desactivar": True, "administrador": False},
+            json={"desactivar": True, "administrador": False, "eliminado": False},
         )
 
     assert RES.status_code == 500

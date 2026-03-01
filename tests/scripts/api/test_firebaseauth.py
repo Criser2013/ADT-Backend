@@ -160,7 +160,7 @@ async def test_26(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
-    USUARIO.custom_claims = { "admin": False }
+    USUARIO.custom_claims = { "admin": False, "eliminado": False }
 
     LISTA.users = [USUARIO]
     LISTA.has_next_page = False
@@ -192,7 +192,7 @@ async def test_27(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
-    USUARIO.custom_claims = { "admin": False }
+    USUARIO.custom_claims = { "admin": False, "eliminado": False }
 
     LISTA2.users = [USUARIO]
     LISTA2.has_next_page = False
@@ -240,7 +240,7 @@ async def test_39(mocker: MockerFixture):
     USUARIO.display_name = "usuario"
     USUARIO.user_metadata =  METADATOS
     USUARIO.disabled = False
-    USUARIO.custom_claims = { "admin": False }
+    USUARIO.custom_claims = { "admin": False, "eliminado": False }
 
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user", return_value=USUARIO)
 
@@ -341,7 +341,7 @@ def test_50(mocker: MockerFixture):
     METADATOS.last_refresh_timestamp = 175354900809
     USUARIO.user_metadata = METADATOS
 
-    INST = UsuarioActualizar(desactivar=True, administrador=False)
+    INST = UsuarioActualizar(desactivar=True, administrador=False, eliminado=False)
 
     INSTANCIA = {"correo": "correo@correo.com", "uid": "1234", "nombre": "usuario", "administrador": False, "estado": True, "fecha_registro": "23/07/1975 08:41 AM", "ultima_conexion": "23/07/1975 08:41 AM"}
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user", return_value=USUARIO)
@@ -349,31 +349,31 @@ def test_50(mocker: MockerFixture):
 
     assert RES == (1, INSTANCIA)
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=True, app="firebase_app", custom_claims={"admin": False})
+    FIREBASE.assert_called_once_with(uid="1234", disabled=True, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
 
 def test_51(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" retorne un error cuando el UID
     proveído no corresponde a un usuario existente.
     """
-    INST = UsuarioActualizar(desactivar=False, administrador=False)
+    INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = UserNotFoundError("Estado inválido")
     RES = actualizar_estado_usuario("firebase_app", "1234", INST)
 
     assert RES == (0, None)
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False})
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
 
 def test_52(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" maneje correctamente las excepciones
     """
-    INST = UsuarioActualizar(desactivar=False, administrador=False)
+    INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = Exception("Error inesperado")
     RES = actualizar_estado_usuario("firebase_app", "1234", INST)
 
     assert RES == (-1, "Error inesperado")
 
-    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False})
+    FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
