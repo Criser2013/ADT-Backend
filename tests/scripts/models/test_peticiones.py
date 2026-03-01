@@ -72,7 +72,7 @@ def test_29():
     """
     Test para validar que la clase reconoce correctamente una instancia.
     """
-    instancia = UsuarioActualizar(**{"desactivar": False, "administrador": True})
+    instancia = UsuarioActualizar(**{"desactivar": False, "administrador": True, "eliminado": False})
     assert instancia.desactivar == False
     assert instancia.administrador == True
 
