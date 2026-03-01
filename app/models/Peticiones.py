@@ -125,3 +125,4 @@ class UsuarioActualizar(BaseModel):
     """
     desactivar: bool
     administrador: bool
+    eliminado: bool
