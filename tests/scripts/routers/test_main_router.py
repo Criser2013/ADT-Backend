@@ -254,3 +254,19 @@ def test_38(mocker: MockerFixture):
     assert RES.json() == {"error": "Error al procesar la solicitud: Token inválido."}
 
     FUNC.assert_called_once_with(MOCK_FIREBASE_APP, UID)
+
+def test_94(mocker: MockerFixture):
+    """
+    Test para validar que el endpoint para ver el rol de un usuario funcione correctamente
+    """
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    FUNC = mocker.patch("dependencies.general_dependencies.verificar_token", return_value=(1, {"uid": "usuario123", "admin": False }))
+
+    with TestClient(app) as CLIENTE:
+        RES = CLIENTE.get("/ver-rol", headers={"Origin": "http://localhost:5178", "Host": "localhost", "Authorization": "Bearer token_valido"})
+
+    assert RES.status_code == 200
+    assert RES.json() == {"administrador": False}
+
+    FUNC.assert_called_once_with(MOCK_FIREBASE_APP, "Bearer token_valido", True)
