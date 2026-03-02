@@ -31,11 +31,14 @@ async def test_91(mocker: MockerFixture):
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.state.firebase_app = "FIREBASE_APP"
     PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_EXITO)
+    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token")
+    FUNC.return_value = (COD_EXITO, {"uid": "usuario123", "admin": False })
 
-    await verificar_autenticado(PETICION, "Bearer token_valido", "es")
+    RES = await verificar_autenticado(PETICION, "Bearer token_valido", "es")
 
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_valido")
+    assert RES == {"uid": "usuario123", "admin": False }
+
+    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_valido", True)
 
 @pytest.mark.asyncio
 async def test_92(mocker: MockerFixture):
@@ -46,13 +49,14 @@ async def test_92(mocker: MockerFixture):
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.state.firebase_app = "FIREBASE_APP"
     PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_ERROR_ESPERADO)
+    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token")
+    FUNC.return_value = (COD_ERROR_ESPERADO, None)
 
     with pytest.raises(AccesoNoAutorizado) as EXC:
         await verificar_autenticado(PETICION, "Bearer token_invalido", "es")
         assert EXC.mensaje == {"error": "Acceso denegado"}
 
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido")
+    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido", True)
 
 @pytest.mark.asyncio
 async def test_93(mocker: MockerFixture):
@@ -63,10 +67,11 @@ async def test_93(mocker: MockerFixture):
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.state.firebase_app = "FIREBASE_APP"
     PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_ERROR_ESPERADO)
+    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token")
+    FUNC.return_value = (COD_ERROR_ESPERADO, None)
 
     with pytest.raises(AccesoNoAutorizado) as EXC:
         await verificar_autenticado(PETICION, "Bearer token_invalido", "es")
         assert EXC.mensaje == {"error": "Token inválido"}
 
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido")
+    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido", True)
