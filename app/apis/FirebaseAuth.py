@@ -29,12 +29,13 @@ def validar_token(
         return (COD_ERROR_INESPERADO, None) if obtener_datos else COD_ERROR_INESPERADO
 
 
-async def verificar_token(firebase_app: App, token: str) -> int:
+async def verificar_token(firebase_app: App, token: str, obtener_datos: bool = False) -> int|tuple[int, dict | None]:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
         token (str | None): El token de autorización de la solicitud.
         firebase_app (App): La instancia de la aplicación Firebase.
+        obtener_datos (bool): Si True, retorna los datos del token si es válido.
     Returns:
         int: Código de estado: 1 si el token es válido, 0 si es inválido, -1 si hay un error.
     """
@@ -44,12 +45,12 @@ async def verificar_token(firebase_app: App, token: str) -> int:
         res_validacion = (
             COD_ERROR_ESPERADO
             if (not reg_validacion)
-            else validar_token(token, firebase_app, False)
+            else validar_token(token, firebase_app, obtener_datos)
         )
 
         return res_validacion
     except Exception:
-        return COD_ERROR_INESPERADO
+        return COD_ERROR_INESPERADO if not obtener_datos else (COD_ERROR_INESPERADO, None)
 
 
 def ver_datos_token(

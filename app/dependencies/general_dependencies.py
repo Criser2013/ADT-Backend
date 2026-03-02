@@ -19,7 +19,7 @@ async def verificar_autenticado(
     peticion: Request,
     authorization: str | None = Header(default=""),
     language: str = Header(default="es"),
-) -> bool:
+) -> dict | None:
     """
     Verifica si el usuario está autenticado.
     Args:
@@ -29,8 +29,10 @@ async def verificar_autenticado(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES = await verificar_token(firebase_app, authorization)
+    RES, DATOS = await verificar_token(firebase_app, authorization, True)
 
     if RES != COD_EXITO:
         texto = "errAccesoDenegado" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
         raise AccesoNoAutorizado({"error": f"{TEXTOS[language][texto]}"}, 403)
+
+    return DATOS

@@ -1,13 +1,14 @@
 from models.Diagnostico import Diagnostico
 from models.Peticiones import *
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Header
 from fastapi.responses import JSONResponse
 from apis.Recaptcha import verificar_peticion_recaptcha
-from apis.FirebaseAuth import establecer_rol_usuario
+from apis.FirebaseAuth import establecer_rol_usuario, ver_datos_usuario
 from dependencies.general_dependencies import verificar_idioma, verificar_autenticado
 from dependencies.usuarios_dependencies import validador_uid
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
-from models.Excepciones import UsuarioInexistente
+from models.Excepciones import UsuarioInexistente, AccesoNoAutorizado
+from firebase_admin.auth import verify_id_token
 
 router = APIRouter()
 
@@ -84,3 +85,11 @@ async def registrar_usuario(
         )
 
     return {"resultado": "ok"}
+
+
+@router.get("/ver-rol")
+async def ver_rol_usuario(
+    usuario: dict = Depends(verificar_autenticado),
+) -> JSONResponse:
+
+    return {"administrador": usuario["admin"]}
