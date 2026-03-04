@@ -1,13 +1,13 @@
 import pytest
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.firebase_admin_config import inicializar_firebase
 from firebase_admin import App
 from firebase_admin.credentials import Certificate
-from app.main import app, inicializar_modelos
+from app.main import app
 from contextlib import asynccontextmanager
+from app.constants import cargar_credenciales_cliente_firebase, inicializar_modelos
 
 # Constantes de prueba
 TEST_CREDS = {
@@ -21,6 +21,7 @@ TEST_CREDS = {
     "driveScopes": [
         "https://www.googleapis.com/auth/drive",
     ],
+    "reCAPTCHA": "test_captcha",
 }
 
 MOCK_FIREBASE_APP = {
@@ -169,3 +170,39 @@ def test_65(mocker: MockerFixture):
     assert RES == APP
 
     FUNC.assert_called_once_with(CERT)
+
+def test_106(monkeypatch: MonkeyPatch):
+    """
+    Test para validar que la función cargue correctamente las credenciales desde
+    las variables de entorno
+    """
+
+    monkeypatch.setenv("CLIENTE_FIREBASE_API_KEY", "test_api_key")
+    monkeypatch.setenv("CLIENTE_FIREBASE_AUTH_DOMAIN", "test_auth_domain")
+    monkeypatch.setenv("CLIENTE_FIREBASE_PROJECT_ID", "test_project_id")
+    monkeypatch.setenv("CLIENTE_FIREBASE_STORAGE_BUCKET", "test_storage_bucket")
+    monkeypatch.setenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID", "test_messaging_sender_id")
+    monkeypatch.setenv("CLIENTE_FIREBASE_APP_ID", "test_app_id")
+    monkeypatch.setenv("CLIENTE_FIREBASE_MEASUREMENT_ID", "test_measurement_id")
+    monkeypatch.setenv("CLIENTE_DRIVE_SCOPES", "https://www.googleapis.com/auth/drive,")
+    monkeypatch.setenv("CLIENTE_CAPTCHA", "test_captcha")
+
+    RES = cargar_credenciales_cliente_firebase()
+
+    assert RES == TEST_CREDS
+
+def test_107(mocker: MockerFixture):
+
+    def mock_sesion(x, providers):
+        return "modelo_mock"
+
+    mocker.mock_open(read_data="datos")
+    mocker.patch("app.constants.dload", return_value="explicador_mock")
+    mocker.patch("app.constants.jload", return_value=MOCK_TEXTOS)
+    mocker.patch("app.constants.InferenceSession", side_effect=mock_sesion)
+
+    RES = inicializar_modelos()
+
+    assert RES["explicador"] == "explicador_mock"
+    assert RES["textos"] == MOCK_TEXTOS
+    assert RES["modelo"] == "modelo_mock"
