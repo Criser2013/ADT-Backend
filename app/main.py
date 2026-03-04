@@ -4,21 +4,14 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from os import getenv
 from routers.main_router import router as main_router
-from utils.Dominios import obtener_lista_dominios
 from routers.usuarios_router import router as usuarios_router
 from constants import *
 from utils.Validadores import validar_origen
 from utils.Diccionario import ver_si_existe_clave
 from contextlib import asynccontextmanager
-from pathlib import Path
-from dill import load as dload
-from json import load as jload
-from onnxruntime import InferenceSession
 from firebase_admin_config import inicializar_firebase
 from models.Excepciones import *
-import uvicorn
 
 load_dotenv()
 
@@ -27,36 +20,14 @@ load_dotenv()
 @asynccontextmanager
 async def inicializar_modelos(app: FastAPI):
     # Esto se ejecuta al iniciar el backend
-    PATH_BASE = Path(__file__).resolve().parent
     FIREBASE_APP = inicializar_firebase()
-
-    CREDS_FIREBASE_CLIENTE = {
-        "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
-        "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),
-        "projectId": getenv("CLIENTE_FIREBASE_PROJECT_ID"),
-        "storageBucket": getenv("CLIENTE_FIREBASE_STORAGE_BUCKET"),
-        "messagingSenderId": getenv("CLIENTE_FIREBASE_MESSAGING_SENDER_ID"),
-        "appId": getenv("CLIENTE_FIREBASE_APP_ID"),
-        "measurementId": getenv("CLIENTE_FIREBASE_MEASUREMENT_ID"),
-        "driveScopes": obtener_lista_dominios(getenv("CLIENTE_DRIVE_SCOPES", "")),
-        "reCAPTCHA": getenv("CLIENTE_CAPTCHA"),
-    }
-
-    with open(f"{PATH_BASE}/bin/explicador.pkl", "rb") as archivo:
-        EXPLAINER = dload(archivo)
-
-    with open(f"{PATH_BASE}/bin/textos.json") as archivo:
-        TEXTOS = jload(archivo)
-
-    MODELO = InferenceSession(
-        f"{PATH_BASE}/bin/modelo_red_neuronal.onnx",
-        providers=["CPUExecutionProvider"],
-    )
+    MODELOS = inicializar_modelos()
+    CREDS_FIREBASE_CLIENTE = cargar_credenciales_cliente_firebase()
 
     yield {
-        "explicador": EXPLAINER,
-        "textos": TEXTOS,
-        "modelo": MODELO,
+        "explicador": MODELOS["explicador"],
+        "textos": MODELOS["textos"],
+        "modelo": MODELOS["modelo"],
         "firebase_app": FIREBASE_APP,
         "credenciales": CREDS_FIREBASE_CLIENTE,
     }
@@ -64,7 +35,12 @@ async def inicializar_modelos(app: FastAPI):
     # Esto se ejecuta después de cerrar el backend
 
     FIREBASE_APP._cleanup()
-    del EXPLAINER, TEXTOS, MODELO, FIREBASE_APP, CREDS_FIREBASE_CLIENTE
+
+    del MODELOS["explicador"]
+    del MODELOS["textos"]
+    del MODELOS["modelo"]
+    del FIREBASE_APP
+    del CREDS_FIREBASE_CLIENTE
 
 
 # Inicialización de la aplicación FastAPI

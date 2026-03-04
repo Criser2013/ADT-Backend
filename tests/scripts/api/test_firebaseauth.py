@@ -455,7 +455,7 @@ def test_99(mocker: MockerFixture):
     excepción al tratar de asignar el rol a un usuario recién registrado
     """
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
-    FIREBASE.side_effect = Exception("Error inexperado")
+    FIREBASE.side_effect = Exception("Error inesperado")
 
     RES = establecer_rol_usuario("firebase_app", "a1234h")
 

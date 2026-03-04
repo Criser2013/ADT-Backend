@@ -1,10 +1,12 @@
 import pytest
+from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.firebase_admin_config import inicializar_firebase
 from firebase_admin import App
 from firebase_admin.credentials import Certificate
-from app.main import app
+from app.main import app, inicializar_modelos
 from contextlib import asynccontextmanager
 
 # Constantes de prueba
