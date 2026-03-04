@@ -32,6 +32,7 @@ MOCK_TEXTOS = {
         "errUIDInvalido": "UID inválido",
         "errObtenerUsuario": "Error al obtener el usuario",
         "errUsuarioNoEncontrado": "Usuario no encontrado",
+        "errObtenerDatosUsuarios": "Error al obtener los datos de los usuarios",
     }
 }
 
@@ -420,3 +421,80 @@ def test_64(mocker: MockerFixture):
     assert RES.json() == {"error": "UID inválido"}
 
     FUNC.assert_not_called()
+
+def test_101(mocker: MockerFixture):
+    """
+    Test para validar que el API retorne un error cuando ocurre alguna excepción en el
+    endpoint de ver usuarios
+    """
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
+    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
+
+    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuarios", return_value=(-1, None))
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    with TestClient(app) as CLIENTE:
+        RES = CLIENTE.get(
+            "/admin/usuarios",
+            headers={
+                "Origin": "http://localhost:5178",
+                "Host": "localhost",
+            },
+        )
+
+    assert RES.status_code == 400
+    assert RES.json() == {"error": "Error al obtener los datos de los usuarios"}
+
+    FIREBASE.assert_called_once()
+
+def test_102(mocker: MockerFixture):
+    """
+    Test para validar que el API retorne un error cuando se quieren obtener los datos
+    de un usuario inexistente
+    """
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
+    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+
+    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuario", return_value=(0, None))
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    with TestClient(app) as CLIENTE:
+        RES = CLIENTE.get(
+            "/admin/usuarios/a1234H",
+            headers={
+                "Origin": "http://localhost:5178",
+                "Host": "localhost",
+            }
+        )
+
+    assert RES.status_code == 404
+    assert RES.json() == {"error": "Usuario no encontrado"}
+
+    FIREBASE.assert_called_once()
+
+def test_103(mocker: MockerFixture):
+    """
+    Test para validar que el API retorne un error cuando se quieren obtener los datos
+    de un usuario inexistente
+    """
+    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
+    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+
+    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuario", return_value=(-1, None))
+    app.router.lifespan_context = mock_inicializar_modelos
+
+    with TestClient(app) as CLIENTE:
+        RES = CLIENTE.get(
+            "/admin/usuarios/a1234H",
+            headers={
+                "Origin": "http://localhost:5178",
+                "Host": "localhost",
+            }
+        )
+
+    assert RES.status_code == 400
+    assert RES.json() == {"error": "Error al obtener los datos de los usuarios"}
+
+    FIREBASE.assert_called_once()

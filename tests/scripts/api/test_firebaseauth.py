@@ -377,3 +377,88 @@ def test_52(mocker: MockerFixture):
     assert RES == (-1, "Error inesperado")
 
     FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
+
+def test_94(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_datos_token" retorne un error cuando el token
+    es inválido
+    """
+    FUNC = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=(0, None))
+    RES = ver_datos_token("Bearer token_invalido", "firebase_app", "es", {"es": { "errTokenInvalido": "Token inválido" }})
+
+    assert (0, { "error": "Token inválido" }) == RES
+
+    FUNC.assert_called_once_with("token_invalido")
+    FIREBASE.assert_called_once_with("token_invalido", "firebase_app", True)
+
+def test_95(mocker: MockerFixture):
+    """
+    Test para validar que la función "ver_datos_token" retorne un error se produce un error
+    al tratar de validar el token
+    """
+    FUNC = mocker.patch("app.apis.FirebaseAuth.validar_txt_token", return_value=True)
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.validar_token", return_value=(-1, None))
+    RES = ver_datos_token("Bearer token_invalido", "firebase_app", "es", {"es": { "errValidarToken": "Error al validar el token" }})
+
+    assert (-1, { "error": "Error al validar el token" }) == RES
+
+    FUNC.assert_called_once_with("token_invalido")
+    FIREBASE.assert_called_once_with("token_invalido", "firebase_app", True)
+
+@pytest.mark.asyncio
+async def test_96(mocker: MockerFixture):
+    """
+    Tests para validar que la función "ver_datos_usuario" no retorne los datos de un usuario
+    eliminado
+    """
+    USUARIO = mocker.MagicMock(spec=ExportedUserRecord)
+    USUARIO.custom_claims = { "admin": False, "eliminado": True}
+
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.get_user", return_value=USUARIO)
+    RES = await ver_datos_usuario("firebase_app", "12345")
+
+    assert RES == (0, None)
+
+    FIREBASE.assert_called_once_with("12345", "firebase_app")
+
+def test_97(mocker: MockerFixture):
+    """
+    Test para validar que la función "establecer_rol_usuario" asigne correctamente el
+    rol de un usuario recién registrado en las reclamaciones personalizadas de un usuario en Firebase Auth
+    """
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
+
+    RES = establecer_rol_usuario("firebase_app", "a1234h")
+
+    assert RES == (1, None)
+
+    FIREBASE.assert_called_once_with("a1234h", { "admin": False, "eliminado": False}, app="firebase_app")
+
+def test_98(mocker: MockerFixture):
+    """
+    Test para validar que la función "establecer_rol_usuario" retorne un error cuando se intenta
+    colocar el rol a un usuario inexistente
+    """
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
+    FIREBASE.side_effect = UserNotFoundError("Usuario inexistente")
+
+    RES = establecer_rol_usuario("firebase_app", "a1234h")
+
+    assert RES == (0, None)
+
+    FIREBASE.assert_called_once_with("a1234h", { "admin": False, "eliminado": False}, app="firebase_app")
+
+def test_99(mocker: MockerFixture):
+    """
+    Test para validar que la función "establecer_rol_usuario" retorne un error cuando se lanza una
+    excepción al tratar de asignar el rol a un usuario recién registrado
+    """
+    FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
+    FIREBASE.side_effect = Exception("Error inexperado")
+
+    RES = establecer_rol_usuario("firebase_app", "a1234h")
+
+    assert RES == (-1, "Error inesperado")
+
+    FIREBASE.assert_called_once_with("a1234h", { "admin": False, "eliminado": False}, app="firebase_app")

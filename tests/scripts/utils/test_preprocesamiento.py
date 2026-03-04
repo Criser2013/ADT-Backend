@@ -51,3 +51,10 @@ def test_86():
         }
     
     assert preprocesar_instancia(INSTANCIA) == RES
+
+def test_100():
+    """
+    Validar que la función "evaluar_intervalo" retorne -1 cuando no se pasan intervalos
+    a evaluar sobre los atributos de la instancia
+    """
+    assert evaluar_intervalo(18, []) == -1
