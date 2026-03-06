@@ -7,7 +7,7 @@ from firebase_admin import App
 from firebase_admin.credentials import Certificate
 from app.main import app
 from contextlib import asynccontextmanager
-from app.constants import cargar_credenciales_cliente_firebase, inicializar_modelos
+from app.constants import cargar_credenciales_cliente_firebase, inicializar_modelos_ml
 
 # Constantes de prueba
 TEST_CREDS = {
@@ -201,7 +201,7 @@ def test_107(mocker: MockerFixture):
     mocker.patch("app.constants.jload", return_value=MOCK_TEXTOS)
     mocker.patch("app.constants.InferenceSession", side_effect=mock_sesion)
 
-    RES = inicializar_modelos()
+    RES = inicializar_modelos_ml()
 
     assert RES["explicador"] == "explicador_mock"
     assert RES["textos"] == MOCK_TEXTOS

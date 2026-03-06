@@ -21,7 +21,7 @@ load_dotenv()
 async def inicializar_modelos(app: FastAPI):
     # Esto se ejecuta al iniciar el backend
     FIREBASE_APP = inicializar_firebase()
-    MODELOS = inicializar_modelos()
+    MODELOS = inicializar_modelos_ml()
     CREDS_FIREBASE_CLIENTE = cargar_credenciales_cliente_firebase()
 
     yield {

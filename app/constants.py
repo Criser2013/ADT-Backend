@@ -15,7 +15,7 @@ ALLOWED_HOSTS = obtener_lista_dominios(getenv("ALLOWED_HOSTS", "localhost,"))
 RECAPTCHA_SECRET = getenv("CAPTCHA_SECRET")
 RECAPTCHA_API_URL = getenv("API_RECAPTCHA_URL", "https://www.google.com/recaptcha/api/siteverify")
 
-def inicializar_modelos() -> dict:
+def inicializar_modelos_ml() -> dict:
     PATH_BASE = Path(__file__).resolve().parent
 
     with open(f"{PATH_BASE}/bin/explicador.pkl", "rb") as archivo:
