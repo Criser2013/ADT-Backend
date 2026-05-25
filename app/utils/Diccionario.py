@@ -7,8 +7,4 @@ def ver_si_existe_clave(diccionario: dict, clave: str) -> bool:
     Returns:
         bool: True si la clave existe, False en caso contrario.
     """
-    try:
-        diccionario[clave]
-        return True
-    except KeyError:
-        return False
+    return clave in diccionario.keys()
