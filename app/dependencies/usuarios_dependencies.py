@@ -1,4 +1,4 @@
-from apis.FirebaseAuth import ver_datos_token
+from apis.FirebaseAuth import verificar_token
 from fastapi import Header, Request, Depends
 from fastapi.responses import JSONResponse
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
@@ -23,12 +23,9 @@ async def verificar_usuario_administrador(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
-    
-    if RES in (COD_ERROR_INESPERADO, COD_ERROR_ESPERADO):
-        raise AccesoNoAutorizado(DATOS, 403)
+    DATOS = verificar_token(firebase_app, authorization, TEXTOS, idioma) or {}
 
-    if DATOS["admin"] != True:
+    if not DATOS.get("admin"):
         raise AccesoNoAutorizado({ "error": TEXTOS[idioma]["errAccesoDenegado"] }, 403)
 
 

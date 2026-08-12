@@ -92,23 +92,27 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
 async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
     return JSONResponse(
         excepcion.mensaje,
-        status_code=excepcion.codigo,
+        status_code=403,
         media_type="application/json",
     )
 
 
 @app.exception_handler(UIDInvalido)
 async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        TEXTOS[IDIOMA]["errUIDInvalido"],
         status_code=400,
         media_type="application/json",
     )
 
 @app.exception_handler(UsuarioInexistente)
 async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexistente):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        TEXTOS[IDIOMA]["errusuarioNoEncontrado"],
         status_code=404,
         media_type="application/json",
     )
@@ -116,7 +120,7 @@ async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexi
 @app.exception_handler(ErrorInterno)
 async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
     return JSONResponse(
-        excepcion.mensaje,
-        status_code=400,
+        {"error": excepcion.mensaje},
+        status_code=500,
         media_type="application/json",
     )

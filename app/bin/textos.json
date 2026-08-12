@@ -13,7 +13,8 @@
         "errCaptchaTokenInvalido": "The token has expired or has already been used.",
         "errAccesoDenegado": "Access denied.",
         "errAsignarRol": "Error at user sign up, try again.",
-        "errActualizarUsuario": "An error ocurred when updating user information."
+        "errActualizarUsuario": "An error ocurred when updating user information.",
+        "errTokenExpirado": "Token has expired"
     },
     "es": {
         "errValidarToken": "Error al validar el token",
@@ -29,6 +30,7 @@
         "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
         "errAccesoDenegado": "Acceso denegado.",
         "errAsignarRol": "Error al registrar el usuario, reintente nuevamente.",
-        "errActualizarUsuario": "Error al actualizar los datos del usuario."
+        "errActualizarUsuario": "Error al actualizar los datos del usuario.",
+        "errTokenExpirado": "El token proveído ya ha expirado"
     }
 }

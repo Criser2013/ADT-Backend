@@ -1,4 +1,4 @@
-from apis.FirebaseAuth import establecer_rol_usuario
+from apis.FirebaseAuth import registrar_usuario
 from apis.Recaptcha import verificar_peticion_recaptcha
 from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
 from dependencies.general_dependencies import verificar_idioma, verificar_autenticado
@@ -54,7 +54,7 @@ async def registrar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
-    COD = establecer_rol_usuario(FIREBASE_APP, uid)
+    COD = registrar_usuario(FIREBASE_APP, uid)
 
     if COD == COD_ERROR_ESPERADO:
         raise UsuarioInexistente({"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]})

@@ -429,7 +429,7 @@ def test_97(mocker: MockerFixture):
     """
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
 
-    RES = establecer_rol_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario("firebase_app", "a1234h")
 
     assert RES == (1, None)
 
@@ -443,7 +443,7 @@ def test_98(mocker: MockerFixture):
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
     FIREBASE.side_effect = UserNotFoundError("Usuario inexistente")
 
-    RES = establecer_rol_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario("firebase_app", "a1234h")
 
     assert RES == (0, None)
 
@@ -457,7 +457,7 @@ def test_99(mocker: MockerFixture):
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
     FIREBASE.side_effect = Exception("Error inesperado")
 
-    RES = establecer_rol_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario("firebase_app", "a1234h")
 
     assert RES == (-1, "Error inesperado")
 

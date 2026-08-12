@@ -46,7 +46,7 @@ def ver_usuario(
     CODIGO, RES = ver_datos_usuario(firebase_app, uid)
 
     if CODIGO == COD_ERROR_ESPERADO:
-        raise UsuarioInexistente({"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]})
+        raise UsuarioInexistente()
     elif CODIGO == COD_ERROR_INESPERADO:
         raise ErrorInterno({"error": {TEXTOS[idioma]["errObtenerUsuario"]}})
     else:

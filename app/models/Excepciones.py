@@ -1,9 +1,8 @@
 class AccesoNoAutorizado(Exception):
     """Excepción personalizada para indicar que el acceso no está autorizado."""
 
-    def __init__(self, mensaje: str | dict, codigo: int):
+    def __init__(self, mensaje: str | dict):
         self.mensaje = mensaje
-        self.codigo = codigo
         super().__init__(self.mensaje)
 
 class UIDInvalido(Exception):
@@ -16,13 +15,12 @@ class UIDInvalido(Exception):
 class UsuarioInexistente(Exception):
     """Excepción personalizada para indicar que el usuario no existe."""
 
-    def __init__(self, mensaje: str | dict):
-        self.mensaje = mensaje
-        super().__init__(self.mensaje)
+    def __init__(self):
+        super().__init__("")
 
 class ErrorInterno(Exception):
     """Excepción personalizada para indicar que ocurrió un error interno."""
 
-    def __init__(self, mensaje: str | dict):
+    def __init__(self, mensaje: str):
         self.mensaje = mensaje
         super().__init__(self.mensaje)
