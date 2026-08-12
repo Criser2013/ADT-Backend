@@ -225,8 +225,8 @@ def actualizar_estado_usuario(
         return (COD_EXITO, RES)
     except NotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except Exception as e:
-        return (COD_ERROR_INESPERADO, str(e))
+    except:
+        return (COD_ERROR_INESPERADO, None)
 
 
 def establecer_rol_usuario(firebase_app: App, uid: str) -> tuple[int, str | None]:
