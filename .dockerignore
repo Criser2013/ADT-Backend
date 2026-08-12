@@ -1,4 +1,4 @@
-ejecutar.tests.sh
+ejecutar-tests.sh
 pytest.ini
 conftest.py
 tests
