@@ -33,7 +33,6 @@ async def inicializar_modelos(app: FastAPI):
     }
 
     # Esto se ejecuta después de cerrar el backend
-
     FIREBASE_APP._cleanup()
 
     del MODELOS["explicador"]

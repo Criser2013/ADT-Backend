@@ -16,6 +16,5 @@ def inicializar_firebase() -> App:
     BASE_DIR = Path(__file__).resolve().parent.parent
     PATH = join(BASE_DIR, "firebase_token.json") if (ALT_PATH != "" and (not exists(ALT_PATH))) else ALT_PATH
 
-    # Inicialización del servicio de Firebase
     cred = Certificate(PATH)
     return initialize_app(cred)

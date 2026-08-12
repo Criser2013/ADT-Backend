@@ -17,9 +17,9 @@ async def verificar_idioma(language: str | None = Header(default="es")) -> str:
 
 async def verificar_autenticado(
     peticion: Request,
-    authorization: str | None = Header(default=""),
+    authorization: str = Header(default=""),
     language: str = Header(default="es"),
-) -> bool:
+):
     """
     Verifica si el usuario está autenticado.
     Args:

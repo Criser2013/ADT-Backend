@@ -31,7 +31,7 @@ def inicializar_modelos_ml() -> dict:
 
     return { "explicador": EXPLAINER, "textos": TEXTOS, "modelo": MODELO }
 
-def cargar_credenciales_cliente_firebase() -> dict[str, str]:
+def cargar_credenciales_cliente_firebase() -> dict:
     return {
         "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
         "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),

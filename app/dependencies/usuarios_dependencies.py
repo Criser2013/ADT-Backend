@@ -10,9 +10,9 @@ from dependencies.general_dependencies import verificar_idioma
 
 async def verificar_usuario_administrador(
     peticion: Request,
-    authorization: str | None = Header(default=""),
+    authorization: str = Header(default=""),
     idioma: str = Depends(verificar_idioma),
-) -> tuple[bool, JSONResponse | None]:
+):
     """
     Verifica si el usuario está autenticado y es administrador antes de permitir el acceso a las rutas protegidas.
 
