@@ -11,7 +11,9 @@
         "errProcesarToken": "Error processing the token",
         "errCaptchaTokenErroneo": "The provided token contains errors.",
         "errCaptchaTokenInvalido": "The token has expired or has already been used.",
-        "errAccesoDenegado": "Access denied."
+        "errAccesoDenegado": "Access denied.",
+        "errAsignarRol": "Error at user sign up, try again.",
+        "errActualizarUsuario": "An error ocurred when updating user information."
     },
     "es": {
         "errValidarToken": "Error al validar el token",
@@ -25,6 +27,8 @@
         "errProcesarToken": "Error al procesar el token",
         "errCaptchaTokenErroneo": "El token proveído tiene errores.",
         "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
-        "errAccesoDenegado": "Acceso denegado."
+        "errAccesoDenegado": "Acceso denegado.",
+        "errAsignarRol": "Error al registrar el usuario, reintente nuevamente.",
+        "errActualizarUsuario": "Error al actualizar los datos del usuario."
     }
 }

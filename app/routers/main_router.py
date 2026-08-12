@@ -54,13 +54,13 @@ async def registrar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
-    COD, RES = establecer_rol_usuario(FIREBASE_APP, uid)
+    COD = establecer_rol_usuario(FIREBASE_APP, uid)
 
     if COD == COD_ERROR_ESPERADO:
         raise UsuarioInexistente({"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]})
     elif COD == COD_ERROR_INESPERADO:
         return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {RES}"},
+            {"error": {TEXTOS[idioma]["errAsignarRol"]}},
             status_code=500,
             media_type="application/json",
         )

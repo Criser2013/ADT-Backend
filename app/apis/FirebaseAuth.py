@@ -1,10 +1,10 @@
+from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
+from firebase_admin import App
 from firebase_admin.auth import *
 from firebase_admin.exceptions import NotFoundError
-from firebase_admin import App
-from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO, COD_EXITO
 from models.Peticiones import UsuarioActualizar
-from utils.Validadores import validar_txt_token
 from utils.Fechas import convertir_datetime_str
+from utils.Validadores import validar_txt_token
 
 
 
@@ -16,9 +16,11 @@ def validar_token(
     Args:
         token (str): El token de Firebase a verificar.
         firebase_app (App): La instancia de la aplicación Firebase.
-        obtener_datos (bool): Si True, retorna los datos del token si es válido.
+        obtener_datos (bool): Si es `True`, retorna los datos del token si es válido.
     Returns:
-        int: 1 si el token es válido, 0 en caso contrario y -1 si hay un error de validación.
+        int | tuple[int, dict | None]: Código de éxito (`1`) o error (`0` o `-1`), si el parámetro
+        "obtener_datos" es `True`, retorna una tupla con el primer elemento siendo el código y 
+        el segundo los datos del token.
     """
     try:
         datos = verify_id_token(token, firebase_app, check_revoked=True)
@@ -29,7 +31,7 @@ def validar_token(
         return (COD_ERROR_INESPERADO, None) if obtener_datos else COD_ERROR_INESPERADO
 
 
-async def verificar_token(firebase_app: App, token: str) -> int:
+def verificar_token(firebase_app: App, token: str) -> int:
     """
     Verifica el token de Firebase en la solicitud.
     Args:
@@ -72,15 +74,15 @@ def ver_datos_token(
         if not reg_validacion:
             return (
                 COD_ERROR_ESPERADO,
-                {"error": f"{textos[idioma]['errTokenInvalido']}"},
+                {"error": textos[idioma]["errTokenInvalido"]},
             )
 
         CODIGO, RES = validar_token(token, firebase_app, True)
         if CODIGO != COD_EXITO:
             error = (
-                {"error": f"{textos[idioma]['errTokenInvalido']}"}
+                {"error": textos[idioma]["errTokenInvalido"]}
                 if CODIGO == COD_ERROR_ESPERADO
-                else {"error": f"{textos[idioma]['errValidarToken']}"}
+                else {"error": textos[idioma]["errValidarToken"]}
             )
 
         return (CODIGO, RES if CODIGO == COD_EXITO else error)
@@ -88,11 +90,11 @@ def ver_datos_token(
     except Exception as e:
         return (
             COD_ERROR_INESPERADO,
-            {"error": f"{textos[idioma]['errProcesarToken']}: {str(e)}."},
+            {"error": f"{textos[idioma]["errProcesarToken"]}: {str(e)}."},
         )
 
 
-async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]:
+def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
@@ -107,7 +109,8 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
         while True:
             lista = []
             for x in usuarios.users:
-                if x.custom_claims["eliminado"] == False:
+                CLAIMS = x.get("custom_claims") or {}
+                if not x.get("eliminado", True):
                     lista.append({
                         "correo": x.email,
                         "uid": x.uid,
@@ -132,7 +135,7 @@ async def ver_datos_usuarios(firebase_app: App) -> tuple[int, list[dict] | None]
         return (COD_ERROR_INESPERADO, None)
 
 
-async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | None]:
+def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | None]:
     """
     Obtiene los datos de un usuario específico usando el UID.
     Args:
@@ -141,19 +144,20 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
         idioma (str): El idioma para los mensajes de error.
         textos (dict[str, str]): El diccionario de textos para los mensajes de error.
     Returns:
-        tuple[int, dict | str | None]: Un código de estado y los datos del usuario si se encuentra.
+        tuple[int, dict | None]: Un código de estado y los datos del usuario si se encuentra.
     """
     try:
         usuario = get_user(uid, firebase_app)
+        claims = usuario.get("custom_claims") or {}
 
-        if usuario.custom_claims["eliminado"] == True:
+        if claims.get("eliminado", False):
             raise UserNotFoundError("")
 
         RES = {
             "correo": usuario.email,
             "uid": usuario.uid,
             "nombre": usuario.display_name,
-            "administrador": usuario.custom_claims["admin"],
+            "administrador": claims.get("admin", False),
             "estado": not usuario.disabled,
             "fecha_registro": convertir_datetime_str(
                 usuario.user_metadata.creation_timestamp
@@ -166,7 +170,7 @@ async def ver_datos_usuario(firebase_app: App, uid: str) -> tuple[int, dict | No
         return (COD_EXITO, RES)
     except UserNotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except Exception:
+    except:
         return (COD_ERROR_INESPERADO, None)
 
 
@@ -184,7 +188,7 @@ def ver_usuario_firebase(firebase_app: App, uid: str) -> tuple[int, UserRecord |
         return (COD_EXITO, RES)
     except UserNotFoundError:
         return (COD_ERROR_ESPERADO, None)
-    except Exception:
+    except Exception as e:
         return (COD_ERROR_INESPERADO, None)
 
 
@@ -213,7 +217,7 @@ def actualizar_estado_usuario(
             "uid": USUARIO.uid,
             "nombre": USUARIO.display_name,
             "estado": not USUARIO.disabled,
-            "administrador": USUARIO.custom_claims["admin"],
+            "administrador": USUARIO.custom_claims.get("admin", False),
             "fecha_registro": convertir_datetime_str(
                 USUARIO.user_metadata.creation_timestamp
             ),
@@ -229,7 +233,7 @@ def actualizar_estado_usuario(
         return (COD_ERROR_INESPERADO, None)
 
 
-def establecer_rol_usuario(firebase_app: App, uid: str) -> tuple[int, str | None]:
+def establecer_rol_usuario(firebase_app: App, uid: str) -> int:
     """
     Establece el rol de un usuario específico cuando este se registra.
     Args:
@@ -240,8 +244,8 @@ def establecer_rol_usuario(firebase_app: App, uid: str) -> tuple[int, str | None
     """
     try:
         set_custom_user_claims(uid, {"admin": False, "eliminado": False}, app=firebase_app)
-        return (COD_EXITO, None)
+        return COD_EXITO
     except NotFoundError:
-        return (COD_ERROR_ESPERADO, None)
-    except Exception as e:
-        return (COD_ERROR_INESPERADO, str(e))
+        return COD_ERROR_ESPERADO
+    except:
+        return COD_ERROR_INESPERADO
