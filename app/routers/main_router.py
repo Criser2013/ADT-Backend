@@ -26,7 +26,7 @@ async def obtener_credenciales(peticion: Request) -> JSONResponse:
 @router.post("/diagnosticar", dependencies=[Depends(verificar_autenticado)])
 async def diagnosticar(
     peticion: Request,
-    req: InstanciaDiagnostico,
+    instancia: InstanciaDiagnostico,
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
@@ -34,11 +34,10 @@ async def diagnosticar(
     EXPLICADOR = peticion.state.explicador
 
     try:
-        DATOS = req.obtener_diccionario_instancia()
+        DATOS = instancia.obtener_diccionario_instancia()
         DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
         RES = DIAGNOSTICO.generar_diagnostico()
-
-        return RES
+        return JSONResponse(RES, status_code=200, media_type="application/json")
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
@@ -54,7 +53,11 @@ async def verificar_recaptcha(
     TEXTOS = peticion.state.textos
     try:
         RES = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
-        return RES
+        return JSONResponse(
+            RES,
+            status_code=200 if RES["success"] else 401,
+            media_type="application/json"
+        )
     except Exception as e:
         return JSONResponse(
             {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
@@ -71,7 +74,6 @@ async def registrar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
-
     COD, RES = establecer_rol_usuario(FIREBASE_APP, uid)
 
     if COD == COD_ERROR_ESPERADO:
@@ -82,5 +84,5 @@ async def registrar_usuario(
             status_code=500,
             media_type="application/json",
         )
-
-    return {"resultado": "ok"}
+    else:
+        return JSONResponse({"resultado": "ok"}, status_code=200, media_type="application/json")
