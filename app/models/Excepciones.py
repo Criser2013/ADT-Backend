@@ -8,9 +8,8 @@ class AccesoNoAutorizado(Exception):
 class UIDInvalido(Exception):
     """Excepción personalizada para indicar que el UID es inválido."""
 
-    def __init__(self, mensaje: str | dict):
-        self.mensaje = mensaje
-        super().__init__(self.mensaje)
+    def __init__(self):
+        super().__init__("")
 
 class UsuarioInexistente(Exception):
     """Excepción personalizada para indicar que el usuario no existe."""

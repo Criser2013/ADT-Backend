@@ -17,7 +17,7 @@ from utils.Fechas import convertir_datetime_str
 from utils.Validadores import validar_txt_token
 
 
-def actualizar_estado_usuario(
+def actualizar_datos_usuario(
     firebase_app: App, uid: str, usuario: UsuarioActualizar, textos: dict, idioma: str
 ) -> dict:
     """
@@ -64,7 +64,7 @@ def actualizar_estado_usuario(
         raise ErrorInterno(textos[idioma]["errActualizarUsuario"])
 
 
-def registrar_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) -> int:
+def registrar_usuario_firebase(firebase_app: App, uid: str, textos: dict, idioma: str) -> int:
     """
     Establece el rol de un usuario específico cuando este se registra.
     Args:
@@ -106,7 +106,7 @@ def validar_token(
     try:
         return verify_id_token(token, firebase_app, check_revoked=True)
     except (ExpiredIdTokenError, RevokedIdTokenError, UserDisabledError):
-        raise AccesoNoAutorizado({"error": textos[idioma]["errTokenExpirado"]})
+        raise AccesoNoAutorizado(textos[idioma]["errTokenExpirado"])
     except:
         raise ErrorInterno(textos[idioma]["errValidartoken"])
 
@@ -215,6 +215,6 @@ def verificar_token(
     reg_validacion = validar_txt_token(token)
 
     if not reg_validacion:
-        raise AccesoNoAutorizado({"error": textos[idioma]["errTokenInvalido"]})
+        raise AccesoNoAutorizado(textos[idioma]["errTokenInvalido"])
 
     return validar_token(firebase_app, token, textos, idioma)

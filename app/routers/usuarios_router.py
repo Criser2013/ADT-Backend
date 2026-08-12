@@ -21,18 +21,8 @@ def actualizar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     firebase_app = peticion.state.firebase_app
-    CODIGO, RES = actualizar_estado_usuario(firebase_app, uid, instancia_usuario)
-
-    if CODIGO == COD_ERROR_ESPERADO:
-        raise UsuarioInexistente({"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]})
-    elif CODIGO == COD_ERROR_INESPERADO:
-        return JSONResponse(
-            {"error": TEXTOS[idioma]["errActualizarUsuario"] },
-            status_code=500,
-            media_type="application/json",
-        )
-    else:
-        return JSONResponse(RES, status_code=200, media_type="application/json")
+    RES = actualizar_datos_usuario(firebase_app, uid, instancia_usuario, TEXTOS, idioma)
+    return JSONResponse(RES, status_code=200, media_type="application/json")
 
 
 @router.get("/{uid}")
@@ -43,14 +33,8 @@ def ver_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     firebase_app = peticion.state.firebase_app
-    CODIGO, RES = ver_datos_usuario(firebase_app, uid)
-
-    if CODIGO == COD_ERROR_ESPERADO:
-        raise UsuarioInexistente()
-    elif CODIGO == COD_ERROR_INESPERADO:
-        raise ErrorInterno({"error": {TEXTOS[idioma]["errObtenerUsuario"]}})
-    else:
-        return JSONResponse(RES, status_code=200, media_type="application/json")
+    RES = ver_datos_usuario(firebase_app, uid, TEXTOS, idioma)
+    return JSONResponse(RES, status_code=200, media_type="application/json")
 
 
 @router.get("")
@@ -59,11 +43,7 @@ def ver_usuarios(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     firebase_app = peticion.state.firebase_app
-    COD, RES = ver_datos_usuarios(firebase_app)
-
-    if COD != COD_EXITO:
-        raise ErrorInterno({"error": {TEXTOS[idioma]["errObtenerDatosUsuarios"]}})
-
+    RES = ver_datos_usuarios(firebase_app, TEXTOS, idioma)
     return JSONResponse(
         {"usuarios": RES}, status_code=200, media_type="application/json"
     )

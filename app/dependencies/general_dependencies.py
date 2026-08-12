@@ -1,7 +1,5 @@
 from apis.FirebaseAuth import verificar_token
-from constants import COD_ERROR_ESPERADO, COD_EXITO
 from fastapi import Header, Request
-from models.Excepciones import AccesoNoAutorizado
 
 
 def verificar_idioma(language: str | None = Header(default="es")) -> str:
@@ -29,8 +27,4 @@ def verificar_autenticado(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES = verificar_token(firebase_app, authorization)
-
-    if RES != COD_EXITO:
-        texto = "errAccesoDenegado" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
-        raise AccesoNoAutorizado({"error": f"{TEXTOS[language][texto]}"}, 403)
+    verificar_token(firebase_app, authorization, TEXTOS, language)

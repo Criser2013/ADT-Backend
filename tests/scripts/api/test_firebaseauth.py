@@ -345,7 +345,7 @@ def test_50(mocker: MockerFixture):
 
     INSTANCIA = {"correo": "correo@correo.com", "uid": "1234", "nombre": "usuario", "administrador": False, "estado": True, "fecha_registro": "23/07/1975 08:41 AM", "ultima_conexion": "23/07/1975 08:41 AM"}
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user", return_value=USUARIO)
-    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
+    RES = actualizar_datos_usuario("firebase_app", "1234", INST)
 
     assert RES == (1, INSTANCIA)
 
@@ -359,7 +359,7 @@ def test_51(mocker: MockerFixture):
     INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = UserNotFoundError("Estado inválido")
-    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
+    RES = actualizar_datos_usuario("firebase_app", "1234", INST)
 
     assert RES == (0, None)
 
@@ -372,7 +372,7 @@ def test_52(mocker: MockerFixture):
     INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = Exception("Error inesperado")
-    RES = actualizar_estado_usuario("firebase_app", "1234", INST)
+    RES = actualizar_datos_usuario("firebase_app", "1234", INST)
 
     assert RES == (-1, "Error inesperado")
 
@@ -429,7 +429,7 @@ def test_97(mocker: MockerFixture):
     """
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
 
-    RES = registrar_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario_firebase("firebase_app", "a1234h")
 
     assert RES == (1, None)
 
@@ -443,7 +443,7 @@ def test_98(mocker: MockerFixture):
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
     FIREBASE.side_effect = UserNotFoundError("Usuario inexistente")
 
-    RES = registrar_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario_firebase("firebase_app", "a1234h")
 
     assert RES == (0, None)
 
@@ -457,7 +457,7 @@ def test_99(mocker: MockerFixture):
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.set_custom_user_claims")
     FIREBASE.side_effect = Exception("Error inesperado")
 
-    RES = registrar_usuario("firebase_app", "a1234h")
+    RES = registrar_usuario_firebase("firebase_app", "a1234h")
 
     assert RES == (-1, "Error inesperado")
 

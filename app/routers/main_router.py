@@ -1,12 +1,10 @@
-from apis.FirebaseAuth import registrar_usuario
+from apis.FirebaseAuth import registrar_usuario_firebase
 from apis.Recaptcha import verificar_peticion_recaptcha
-from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
 from dependencies.general_dependencies import verificar_idioma, verificar_autenticado
 from dependencies.usuarios_dependencies import validador_uid
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from models.Diagnostico import Diagnostico
-from models.Excepciones import UsuarioInexistente
 from models.Peticiones import *
 
 router = APIRouter()
@@ -54,20 +52,10 @@ async def registrar_usuario(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
-    COD = registrar_usuario(FIREBASE_APP, uid)
-
-    if COD == COD_ERROR_ESPERADO:
-        raise UsuarioInexistente({"error": TEXTOS[idioma]["errUsuarioNoEncontrado"]})
-    elif COD == COD_ERROR_INESPERADO:
-        return JSONResponse(
-            {"error": {TEXTOS[idioma]["errAsignarRol"]}},
-            status_code=500,
-            media_type="application/json",
-        )
-    else:
-        return JSONResponse(
-            {"resultado": "ok"}, status_code=200, media_type="application/json"
-        )
+    registrar_usuario_firebase(FIREBASE_APP, uid, TEXTOS, idioma)
+    return JSONResponse(
+        {"resultado": "ok"}, status_code=200, media_type="application/json"
+    )
 
 
 @router.post("/recaptcha")

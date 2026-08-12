@@ -91,7 +91,7 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
 @app.exception_handler(AccesoNoAutorizado)
 async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
     return JSONResponse(
-        excepcion.mensaje,
+        {"error": excepcion.mensaje},
         status_code=403,
         media_type="application/json",
     )
