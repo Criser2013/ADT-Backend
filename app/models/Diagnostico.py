@@ -1,7 +1,6 @@
 from numpy import ndarray, zeros, float32, array
 from lime.lime_tabular import LimeTabularExplainer
 from onnxruntime import InferenceSession
-from pathlib import Path
 from utils.Preprocesamiento import preprocesar_instancia
 
 
@@ -12,9 +11,8 @@ class Diagnostico:
     """
     def __init__(self, datos: dict, modelo: InferenceSession, explicador: LimeTabularExplainer):
         self.datos = datos
-        self.modelo = modelo
-        self.explicador = explicador
-        self.BASE_PATH = Path(__file__).resolve().parent.parent
+        self._modelo = modelo
+        self._explicador = explicador
 
     def obtener_array_datos(self) -> ndarray:
         """
@@ -65,11 +63,11 @@ class Diagnostico:
         Returns:
             ndarray: Las probabilidades de pertenecer a una clase u otra según el modelo.
         """
-        input_name = [i.name for i in self.modelo.get_inputs()]
+        input_name = [i.name for i in self._modelo.get_inputs()]
         dict_instancias = self.convertir_a_diccionario(instancias)
         dict_preprocesadas = preprocesar_instancia(dict_instancias)
         NUM_INSTANCIAS = len(instancias)
-        RES = self.modelo.run(None, {i: array(dict_preprocesadas[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        RES = self._modelo.run(None, {i: array(dict_preprocesadas[i], dtype=float32).reshape(-1, 1) for i in input_name})
         ARRAY = zeros((NUM_INSTANCIAS, 2), dtype=float32)
         PROBS = RES[1]
 
@@ -82,9 +80,9 @@ class Diagnostico:
         """
         Genera una explicación para la predicción de la instancia usando LIME (5000 muestras y máximo 10 atributos).
         """
-        explicacion = self.explicador.explain_instance(
+        explicacion = self._explicador.explain_instance(
             self.obtener_array_datos(),
-            lambda x: self.obtener_probabilidades_predicciones(x),
+            self.obtener_probabilidades_predicciones,
             num_features=10, num_samples=2000
         )
         SALIDA = []
@@ -100,19 +98,19 @@ class Diagnostico:
 
         self.explicacion = SALIDA
 
-    def generar_diagnostico(self):
+    def generar_diagnostico(self) -> dict:
         """
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
         """
-        input_name = [i.name for i in self.modelo.get_inputs()]
+        input_name = [i.name for i in self._modelo.get_inputs()]
         preprocesados = preprocesar_instancia(self.datos)
-        pred = self.modelo.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
-        self.generar_explicacion()
+        pred = self._modelo.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
         RES = pred[0][0]
+        self.generar_explicacion()
 
         return {
             "prediccion": int(RES) == 1,
-            "probabilidad": float(pred[1][0][1 if RES == 0 else 0]),
+            "probabilidad": float(pred[1][0][1]),
             "lime": self.explicacion,
         }

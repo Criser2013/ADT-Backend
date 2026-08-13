@@ -72,7 +72,7 @@ def test_29():
     """
     Test para validar que la clase reconoce correctamente una instancia.
     """
-    instancia = UsuarioActualizar(**{"desactivar": False, "administrador": True, "eliminado": False})
+    instancia = DatosUsuario(**{"desactivar": False, "administrador": True, "eliminado": False})
     assert instancia.desactivar == False
     assert instancia.administrador == True
 @pytest.mark.skip
@@ -81,7 +81,7 @@ def test_30():
     Test para validar que la clase lanza un error con datos inválidos.
     """
     with pytest.raises(ValidationError):
-        UsuarioActualizar(**{"desactivar": 2, "administrador": "True"})
+        DatosUsuario(**{"desactivar": 2, "administrador": "True"})
 @pytest.mark.skip
 def test_104():
     """

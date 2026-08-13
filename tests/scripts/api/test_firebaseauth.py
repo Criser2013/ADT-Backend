@@ -3,7 +3,7 @@ from fastapi import Request
 import pytest
 from app.apis.FirebaseAuth import *
 from firebase_admin.auth import ExpiredIdTokenError, CertificateFetchError, ListUsersPage, ExportedUserRecord, UserMetadata, UserNotFoundError
-from app.models.Peticiones import UsuarioActualizar
+from app.models.Peticiones import DatosUsuario
 
 @pytest.fixture(autouse=True)
 def setup_module(mocker: MockerFixture):
@@ -360,7 +360,7 @@ def test_50(mocker: MockerFixture):
     METADATOS.last_refresh_timestamp = 175354900809
     USUARIO.user_metadata = METADATOS
 
-    INST = UsuarioActualizar(desactivar=True, administrador=False, eliminado=False)
+    INST = DatosUsuario(desactivar=True, administrador=False, eliminado=False)
 
     INSTANCIA = {"correo": "correo@correo.com", "uid": "1234", "nombre": "usuario", "administrador": False, "estado": True, "fecha_registro": "23/07/1975 08:41 AM", "ultima_conexion": "23/07/1975 08:41 AM"}
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user", return_value=USUARIO)
@@ -375,7 +375,7 @@ def test_51(mocker: MockerFixture):
     Test para validar que la función "actualizar_estado_usuario" retorne un error cuando el UID
     proveído no corresponde a un usuario existente.
     """
-    INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
+    INST = DatosUsuario(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = UserNotFoundError("Estado inválido")
     RES = actualizar_datos_usuario("firebase_app", "1234", INST)
@@ -388,7 +388,7 @@ def test_52(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" maneje correctamente las excepciones
     """
-    INST = UsuarioActualizar(desactivar=False, administrador=False, eliminado=False)
+    INST = DatosUsuario(desactivar=False, administrador=False, eliminado=False)
     FIREBASE = mocker.patch("app.apis.FirebaseAuth.update_user")
     FIREBASE.side_effect = Exception("Error inesperado")
     RES = actualizar_datos_usuario("firebase_app", "1234", INST)

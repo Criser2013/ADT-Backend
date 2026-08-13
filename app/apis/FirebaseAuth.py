@@ -12,13 +12,13 @@ from firebase_admin.auth import (
 )
 from firebase_admin.exceptions import NotFoundError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
-from models.Peticiones import UsuarioActualizar
+from models.Peticiones import DatosUsuario
 from utils.Fechas import convertir_datetime_str
 from utils.Validadores import validar_txt_token
 
 
 def actualizar_datos_usuario(
-    firebase_app: App, uid: str, usuario: UsuarioActualizar, textos: dict, idioma: str
+    firebase_app: App, uid: str, usuario: DatosUsuario, textos: dict, idioma: str
 ) -> dict:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
