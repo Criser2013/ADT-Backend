@@ -13,6 +13,7 @@ from firebase_admin.auth import (
 from firebase_admin.exceptions import NotFoundError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
 from models.Peticiones import DatosUsuario
+from models.Usuario import Usuario
 from utils.Fechas import convertir_datetime_str
 from utils.Validadores import validar_txt_token
 
@@ -45,7 +46,7 @@ def actualizar_datos_usuario(
             },
         )
 
-        return {
+        return Usuario() {
             "correo": USUARIO.email,
             "uid": USUARIO.uid,
             "nombre": USUARIO.display_name,
@@ -126,25 +127,21 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
         dict: Datos del usuario si se encuentra.
     """
     try:
-        usuario = get_user(uid, firebase_app)
-        claims = usuario.custom_claims or {}
+        USUARIO = get_user(uid, firebase_app)
+        CLAIMS = USUARIO.custom_claims or {}
 
-        if claims.get("eliminado", False):
+        if CLAIMS.get("eliminado", False):
             raise UsuarioInexistente()
 
-        return {
-            "correo": usuario.email,
-            "uid": usuario.uid,
-            "nombre": usuario.display_name,
-            "administrador": claims.get("admin", False),
-            "estado": not usuario.disabled,
-            "fecha_registro": convertir_datetime_str(
-                usuario.user_metadata.creation_timestamp
-            ),
-            "ultima_conexion": convertir_datetime_str(
-                usuario.user_metadata.last_refresh_timestamp
-            ),
-        }
+        return Usuario(
+            USUARIO.email,
+            USUARIO.uid,
+            USUARIO.display_name,
+            not USUARIO.disabled,
+            CLAIMS.get("admin", False),
+            USUARIO.user_metadata.creation_timestamp,
+            USUARIO.user_metadata.last_refresh_timestamp
+        )
     except:
         raise ErrorInterno(textos[idioma]["errObtenerUsuario"])
 
@@ -166,26 +163,22 @@ def ver_datos_usuarios(firebase_app: App, textos: dict, idioma: str) -> list[dic
         usuarios = list_users(app=firebase_app)
 
         while True:
-            lista = []
+            LISTA = []
             for x in usuarios.users:
                 CLAIMS = x.custom_claims or {}
                 if not CLAIMS.get("eliminado", True):
-                    lista.append(
-                        {
-                            "correo": x.email,
-                            "uid": x.uid,
-                            "nombre": x.display_name,
-                            "administrador": x.custom_claims["admin"],
-                            "estado": not x.disabled,
-                            "fecha_registro": convertir_datetime_str(
-                                x.user_metadata.creation_timestamp
-                            ),
-                            "ultima_conexion": convertir_datetime_str(
-                                x.user_metadata.last_refresh_timestamp
-                            ),
-                        }
+                    LISTA.append(
+                        Usuario(
+                            x.email,
+                            x.uid,
+                            x.display_name,
+                            not x.disabled,
+                            CLAIMS.get("admin", False),
+                            x.user_metadata.creation_timestamp,
+                            x.user_metadata.last_refresh_timestamp
+                        )
                     )
-            AUX.extend(lista)
+            AUX.extend(LISTA)
             if not usuarios.has_next_page:
                 break
             else:
