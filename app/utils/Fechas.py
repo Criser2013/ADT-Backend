@@ -7,9 +7,8 @@ def convertir_hora(hora: int, minuto: int) -> str:
     Args:
         hora (int): La hora a convertir.
         minuto (int): El minuto a convertir.
-
     Returns:
-        str: La hora en formato HH:MM.
+        str: La hora en formato "HH:MM A".
     """
     HORA = hora % 12
     AUXHORA = 12 if (HORA == 0) else HORA
@@ -24,9 +23,8 @@ def convertir_datetime_str(tiempo: int) -> str:
 
     Args:
         tiempo (int): El tiempo en milisegundos desde la época (1 de enero de 1970).
-
     Returns:
-        str: La fecha en formato ISO 8601.
+        str: La fecha en formato "DD//MM/YYYY HH:mm A".
     """
 
     fecha = datetime.fromtimestamp(

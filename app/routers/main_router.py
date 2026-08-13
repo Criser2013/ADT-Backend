@@ -5,6 +5,7 @@ from dependencies.usuarios_dependencies import validador_uid
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from models.Diagnostico import Diagnostico
+from models.Excepciones import ErrorInterno
 from models.Peticiones import *
 
 router = APIRouter()
@@ -31,16 +32,12 @@ async def diagnosticar(
         DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
         RES = DIAGNOSTICO.generar_diagnostico()
         return JSONResponse(RES, status_code=200, media_type="application/json")
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    except:
+        raise ErrorInterno(TEXTOS[idioma]["errGenerarDiagnostico"])
 
 
 @router.get("/healthcheck")
-async def healthcheck():
+async def healthcheck() -> dict:
     return {"status": "ok"}
 
 
@@ -60,19 +57,14 @@ async def registrar_usuario(
 
 @router.post("/recaptcha")
 async def verificar_recaptcha(
-    peticion: Request, req: TokenRecaptcha, idioma: str = Depends(verificar_idioma)
+    peticion: Request,
+    token_recaptcha: TokenRecaptcha,
+    idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
-    try:
-        RES = verificar_peticion_recaptcha(req.token, idioma, TEXTOS)
-        return JSONResponse(
-            RES,
-            status_code=200 if RES["success"] else 401,
-            media_type="application/json",
-        )
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"{TEXTOS[idioma]['errTry']} {str(e)}"},
-            status_code=500,
-            media_type="application/json",
-        )
+    RES = verificar_peticion_recaptcha(token_recaptcha.token, idioma, TEXTOS)
+    return JSONResponse(
+        RES,
+        status_code=200 if RES["success"] else 401,
+        media_type="application/json",
+    )

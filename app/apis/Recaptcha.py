@@ -15,9 +15,9 @@ def manejador_errores(error: str, idioma: str, textos: dict) -> str:
     """
     match error:
         case "invalid-input-response":
-            return f"{textos[idioma]['errCaptchaTokenErroneo']}"
+            return textos[idioma]["errCaptchaTokenErroneo"]
         case "timeout-or-duplicate":
-            return f"{textos[idioma]['errCaptchaTokenInvalido']}"
+            return textos[idioma]["errCaptchaTokenInvalido"]
         case _:
             return error
 

@@ -5,8 +5,7 @@ def evaluar_intervalo(val: int | float, intervalos: tuple) -> int:
     Args:
         val (int|float): El valor a evaluar.
         intervalos (tuple[tuple]): Una lista de intervalos, donde cada intervalo es una tupla
-                                    (inicio, fin, etiqueta).
-
+        `(inicio, fin, etiqueta)`.
     Returns:
         int: La etiqueta del intervalo en el que se encuentra el valor, o -1 si no se encuentra en ningún intervalo.
     """

@@ -74,7 +74,7 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
-    HEADERS = peticion.get("headers") or {}
+    HEADERS = peticion.headers
     EXISTE = ver_si_existe_clave(HEADERS, "origin")
     if not EXISTE:
         return Response(status_code=400, content="Encabezado 'origin' inválido")

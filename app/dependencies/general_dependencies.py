@@ -1,5 +1,5 @@
 from apis.FirebaseAuth import verificar_token
-from fastapi import Header, Request
+from fastapi import Depends, Header, Request
 
 
 def verificar_idioma(language: str | None = Header(default="es")) -> str:
@@ -16,7 +16,7 @@ def verificar_idioma(language: str | None = Header(default="es")) -> str:
 def verificar_autenticado(
     peticion: Request,
     authorization: str = Header(default=""),
-    language: str = Header(default="es"),
+    idioma: str = Depends(verificar_idioma),
 ):
     """
     Verifica si el usuario está autenticado.
@@ -27,4 +27,4 @@ def verificar_autenticado(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    verificar_token(firebase_app, authorization, TEXTOS, language)
+    #verificar_token(firebase_app, authorization, TEXTOS, idioma)
