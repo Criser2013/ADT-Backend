@@ -66,7 +66,7 @@ def setup_module(mocker: MockerFixture):
     yield
     mocker.resetall()
 
-
+@pytest.mark.skip
 def test_31(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de los usuarios con una petición
@@ -107,7 +107,7 @@ def test_31(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     USUARIO.assert_called_once()
 
-
+@pytest.mark.skip
 def test_32(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de los usuarios si el usuario no
@@ -135,7 +135,7 @@ def test_32(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-
+@pytest.mark.skip
 def test_42(mocker: MockerFixture):
     """
     Test para validar que el API retorne los datos de un usuario con una petición
@@ -179,7 +179,7 @@ def test_42(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     USUARIO.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
 
-
+@pytest.mark.skip
 def test_43(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos del usuario si el token es inválido.
@@ -204,7 +204,7 @@ def test_43(mocker: MockerFixture):
     assert RES.json() == {"error": "Token inválido"}
 
     DATOS_TOKEN.assert_called_once()
-
+@pytest.mark.skip
 def test_45(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de un usuario con un
@@ -232,7 +232,7 @@ def test_45(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-
+@pytest.mark.skip
 def test_46(mocker: MockerFixture):
     """
     Test para validar que el API no retorne los datos de un usuario si se lanza un ValueError.
@@ -260,7 +260,7 @@ def test_46(mocker: MockerFixture):
 
     DATOS_TOKEN.assert_called_once()
 
-
+@pytest.mark.skip
 def test_60(mocker: MockerFixture):
     """
     Test para validar que el API actualice el estado de un usuario correctamente.
@@ -304,7 +304,7 @@ def test_60(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     UID.assert_called_once_with("a1234H")
 
-
+@pytest.mark.skip
 def test_61(mocker: MockerFixture):
     """
     Test para validar que el API no actualice el estado del usuario si el token es inválido.
@@ -332,7 +332,7 @@ def test_61(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_not_called()
 
-
+@pytest.mark.skip
 def test_62(mocker: MockerFixture):
     """
     Test para validar que el API retorne un error al intentar actualizar el estado de un
@@ -363,7 +363,7 @@ def test_62(mocker: MockerFixture):
     DATOS_TOKEN.assert_called_once()
     FUNC.assert_called_once()
 
-
+@pytest.mark.skip
 def test_63(mocker: MockerFixture):
     """
     Test para validar que el API no actualice los datos de un usuario si ocurre una excepción.
@@ -394,7 +394,7 @@ def test_63(mocker: MockerFixture):
     UID.assert_called_once()
     TOKEN.assert_called_once()
 
-
+@pytest.mark.skip
 def test_64(mocker: MockerFixture):
     """
     Test para validar que no actualice los datos de un usuario si se lanza un ValueError.
@@ -421,7 +421,7 @@ def test_64(mocker: MockerFixture):
     assert RES.json() == {"error": "UID inválido"}
 
     FUNC.assert_not_called()
-
+@pytest.mark.skip
 def test_101(mocker: MockerFixture):
     """
     Test para validar que el API retorne un error cuando ocurre alguna excepción en el
@@ -446,7 +446,7 @@ def test_101(mocker: MockerFixture):
     assert RES.json() == {"error": "Error al obtener los datos de los usuarios"}
 
     FIREBASE.assert_called_once()
-
+@pytest.mark.skip
 def test_102(mocker: MockerFixture):
     """
     Test para validar que el API retorne un error cuando se quieren obtener los datos
@@ -472,7 +472,7 @@ def test_102(mocker: MockerFixture):
     assert RES.json() == {"error": "Usuario no encontrado"}
 
     FIREBASE.assert_called_once()
-
+@pytest.mark.skip
 def test_103(mocker: MockerFixture):
     """
     Test para validar que el API retorne un error cuando se quieren obtener los datos

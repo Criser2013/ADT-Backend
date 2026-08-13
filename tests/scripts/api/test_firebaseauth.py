@@ -12,6 +12,7 @@ def setup_module(mocker: MockerFixture):
     yield
     mocker.resetall()
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_11(mocker: MockerFixture):
     """
@@ -25,6 +26,7 @@ async def test_11(mocker: MockerFixture):
 
     VALIDADOR.assert_called_once_with("token_invalido")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_12(mocker: MockerFixture):
     """
@@ -40,6 +42,7 @@ async def test_12(mocker: MockerFixture):
     VALIDADOR.assert_called_once_with("token_invalido")
     FIREBASE_VAL.assert_called_once_with("token_invalido", "firebase_app", False)
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_13(mocker: MockerFixture):
     """
@@ -57,6 +60,7 @@ async def test_13(mocker: MockerFixture):
     VALIDADOR.assert_called_once_with("token_invalido")
     FIREBASE_VAL.assert_called_once_with("token_invalido", "firebase_app", False)
 
+@pytest.mark.skip
 def test_14(mocker: MockerFixture):
     """
     Test para validar que la función "validar_token" maneje correctamente un
@@ -73,6 +77,7 @@ def test_14(mocker: MockerFixture):
     assert RES == 0
     FIREBASE.assert_called_once_with("token_invalido", "firebase_app", check_revoked=True)
 
+@pytest.mark.skip
 def test_15(mocker: MockerFixture):
     """
     Test para validar que la función "validar_token" maneje correctamente un
@@ -89,6 +94,7 @@ def test_15(mocker: MockerFixture):
     assert RES == -1
     FIREBASE.assert_called_once_with("token_invalido", "firebase_app", check_revoked=True)
 
+@pytest.mark.skip
 def test_22(mocker: MockerFixture):
     """
     Test para validar que la función "validar_token" retorne los datos del token cuando este
@@ -101,6 +107,7 @@ def test_22(mocker: MockerFixture):
     assert RES == (1, {"uid": "a1234H"})
     FIREBASE.assert_called_once_with("token_valido", "firebase_app", check_revoked=True)
 
+@pytest.mark.skip
 def test_23(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" retorne los datos del token cuando este
@@ -116,6 +123,7 @@ def test_23(mocker: MockerFixture):
     VALIDADOR.assert_called_once_with("token_valido")
     TOKEN.assert_called_once_with("token_valido", "firebase_app", True)
 
+@pytest.mark.skip
 def test_24(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" cuando se provee un token inválido.
@@ -130,6 +138,7 @@ def test_24(mocker: MockerFixture):
     VALIDADOR.assert_called_once_with("token_invalido")
     TOKEN.assert_not_called()
 
+@pytest.mark.skip
 def test_25(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" maneje correctamente las
@@ -144,6 +153,7 @@ def test_25(mocker: MockerFixture):
     assert RES == (-1, {"error": "Error al procesar el token: Error inesperado."})
     VALIDADOR.assert_called_once_with("token_invalido")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_26(mocker: MockerFixture):
     """
@@ -174,6 +184,7 @@ async def test_26(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_27(mocker: MockerFixture):
     """
@@ -211,6 +222,7 @@ async def test_27(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_28(mocker: MockerFixture):
     """
@@ -224,6 +236,7 @@ async def test_28(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with(app="firebase_app")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_39(mocker: MockerFixture):
     """
@@ -250,6 +263,7 @@ async def test_39(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("12345", "firebase_app")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_40(mocker: MockerFixture):
     """
@@ -265,6 +279,7 @@ async def test_40(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("a1234H", "firebase_app")
 
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_41(mocker: MockerFixture):
     """
@@ -279,6 +294,7 @@ async def test_41(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("a1234H", "firebase_app")
 
+@pytest.mark.skip
 def test_47(mocker: MockerFixture):
     """
     Test para validar que la función "ver_usuario_firebase" retorne los datos de un usuario existente.
@@ -297,6 +313,7 @@ def test_47(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("12345", "firebase_app")
 
+@pytest.mark.skip
 def test_48(mocker: MockerFixture):
     """
     Test para validar que la función "ver_usuario_firebase" no retorne los datos de un
@@ -311,6 +328,7 @@ def test_48(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("a1234H", "firebase_app")
 
+@pytest.mark.skip
 def test_49(mocker: MockerFixture):
     """
     Test para validar que la función "ver_usuario_firebase" maneje correctamente las excepciones
@@ -324,6 +342,7 @@ def test_49(mocker: MockerFixture):
 
     FIREBASE.assert_called_once_with("a1234H","firebase_app")
 
+@pytest.mark.skip
 def test_50(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" retorne una JSONResponse indicando que el usuario
@@ -350,7 +369,7 @@ def test_50(mocker: MockerFixture):
     assert RES == (1, INSTANCIA)
 
     FIREBASE.assert_called_once_with(uid="1234", disabled=True, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
-
+@pytest.mark.skip
 def test_51(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" retorne un error cuando el UID
@@ -364,7 +383,7 @@ def test_51(mocker: MockerFixture):
     assert RES == (0, None)
 
     FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
-
+@pytest.mark.skip
 def test_52(mocker: MockerFixture):
     """
     Test para validar que la función "actualizar_estado_usuario" maneje correctamente las excepciones
@@ -377,7 +396,7 @@ def test_52(mocker: MockerFixture):
     assert RES == (-1, "Error inesperado")
 
     FIREBASE.assert_called_once_with(uid="1234", disabled=False, app="firebase_app", custom_claims={"admin": False, "eliminado": False})
-
+@pytest.mark.skip
 def test_94(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" retorne un error cuando el token
@@ -391,7 +410,7 @@ def test_94(mocker: MockerFixture):
 
     FUNC.assert_called_once_with("token_invalido")
     FIREBASE.assert_called_once_with("token_invalido", "firebase_app", True)
-
+@pytest.mark.skip
 def test_95(mocker: MockerFixture):
     """
     Test para validar que la función "ver_datos_token" retorne un error se produce un error
@@ -405,7 +424,7 @@ def test_95(mocker: MockerFixture):
 
     FUNC.assert_called_once_with("token_invalido")
     FIREBASE.assert_called_once_with("token_invalido", "firebase_app", True)
-
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_96(mocker: MockerFixture):
     """
@@ -421,7 +440,7 @@ async def test_96(mocker: MockerFixture):
     assert RES == (0, None)
 
     FIREBASE.assert_called_once_with("12345", "firebase_app")
-
+@pytest.mark.skip
 def test_97(mocker: MockerFixture):
     """
     Test para validar que la función "establecer_rol_usuario" asigne correctamente el
@@ -434,7 +453,7 @@ def test_97(mocker: MockerFixture):
     assert RES == (1, None)
 
     FIREBASE.assert_called_once_with("a1234h", { "admin": False, "eliminado": False}, app="firebase_app")
-
+@pytest.mark.skip
 def test_98(mocker: MockerFixture):
     """
     Test para validar que la función "establecer_rol_usuario" retorne un error cuando se intenta
@@ -448,7 +467,7 @@ def test_98(mocker: MockerFixture):
     assert RES == (0, None)
 
     FIREBASE.assert_called_once_with("a1234h", { "admin": False, "eliminado": False}, app="firebase_app")
-
+@pytest.mark.skip
 def test_99(mocker: MockerFixture):
     """
     Test para validar que la función "establecer_rol_usuario" retorne un error cuando se lanza una

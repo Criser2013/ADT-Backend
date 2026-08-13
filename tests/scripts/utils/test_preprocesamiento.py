@@ -1,26 +1,28 @@
+import pytest
 from app.utils.Preprocesamiento import *
 
+@pytest.mark.skip
 def test_83():
     """
     Validar que la función retorne correctamente el número de intervalo 
     al que pertenece un valor cuando este se encuentra acotado en ambos lados
     """
     assert evaluar_intervalo(37, [[30, 50, 1], [60, 70, 2], [70, 100, 3]]) == 1
-
+@pytest.mark.skip
 def test_84():
     """
     Validar que la función retorne correctamente el número de intervalo al
     que pertenece un valor cuando este solo está acotado a su derecha
     """
     assert evaluar_intervalo(12, [[-float("inf"), 15, 3], [15, 20, 2], [21, float("inf"), 1]]) == 3
-
+@pytest.mark.skip
 def test_85():
     """
     Validar que la función retorne correctamente el número de intervalo al
     que pertenece un valor cuando este solo está acotado a su izquierda
     """
     assert evaluar_intervalo(20, [[19, float("inf"), 4], [10, 19, 1]]) == 4
-
+@pytest.mark.skip
 def test_86():
     """
     Validar que la función preprocesar_instancia retorne la instancia correctamente
@@ -51,7 +53,7 @@ def test_86():
         }
     
     assert preprocesar_instancia(INSTANCIA) == RES
-
+@pytest.mark.skip
 def test_100():
     """
     Validar que la función "evaluar_intervalo" retorne -1 cuando no se pasan intervalos

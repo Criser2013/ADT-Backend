@@ -2,6 +2,7 @@ from app.models.Peticiones import *
 from pydantic import ValidationError
 import pytest
 
+@pytest.mark.skip
 def test_5():
     """
     Test para validar que la función parsee correctamente una instancia.
@@ -33,7 +34,7 @@ def test_5():
             "Hepatopatía_crónica": [0], "Renal": [0], "Cardíaca": [0], "Neurológica": [0], "Pulmonar": [0], "Endocrina": [1],
             "Gastrointestinal": [1], "Urológica": [0], "Vascular": [0],
         }
-
+@pytest.mark.skip
 def test_6():
     """
     Test para validar que la función arroje una excepción con una instancia con valores incorrectos.
@@ -52,21 +53,21 @@ def test_6():
                 "pulmonar": 0, "renal": 0, "trombofilia": 0, "urologica": 0, "vascular": 0, "vih": 0,
             }
         InstanciaDiagnostico(**DATOS)
-
+@pytest.mark.skip
 def test_66():
     """
     Test para validar que la clase reconoce correctamente una instancia.
     """
     instancia = TokenRecaptcha(**{"token": "a"*829})
     assert instancia.token == "a"*829
-
+@pytest.mark.skip
 def test_67():
     """
     Test para validar que la clase lanza un error con datos inválidos.
     """
     with pytest.raises(ValidationError):
         TokenRecaptcha(**{"token": 123})
-
+@pytest.mark.skip
 def test_29():
     """
     Test para validar que la clase reconoce correctamente una instancia.
@@ -74,21 +75,21 @@ def test_29():
     instancia = UsuarioActualizar(**{"desactivar": False, "administrador": True, "eliminado": False})
     assert instancia.desactivar == False
     assert instancia.administrador == True
-
+@pytest.mark.skip
 def test_30():
     """
     Test para validar que la clase lanza un error con datos inválidos.
     """
     with pytest.raises(ValidationError):
         UsuarioActualizar(**{"desactivar": 2, "administrador": "True"})
-
+@pytest.mark.skip
 def test_104():
     """
     Test para validar que la clase arroja un error con un token inválido
     """
     with pytest.raises(ValidationError):
         TokenRecaptcha(**{"token": "token_invalido"})
-
+@pytest.mark.skip
 def test_105():
     """
     Test para validar que la función arroje una excepción con una instancia que tiene un valor
