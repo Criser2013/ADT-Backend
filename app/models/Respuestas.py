@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from utils.Fechas import convertir_datetime_str
 
 
@@ -6,6 +6,7 @@ class Usuario(BaseModel):
     """
     Clase para representar los datos de un usuario de la aplicación.
     """
+
     correo: str
     uid: str
     nombre: str
@@ -46,10 +47,18 @@ class Usuario(BaseModel):
             ultima_conexion=ULTIMA_CONEXION,
         )
 
+
 class InstanciaDiagnosticada(BaseModel):
     """
     Clase para representar la respuesta del modelo a la clasificación de una instancia.
     """
+
     prediccion: bool
     probabilidad: float
     lime: list[dict]
+
+    @model_validator(mode="after")
+    def verificar_probabilidad(self):
+        if (self.probabilidad < 0) or (self.probabilidad > 1):
+            raise ValueError("El valor del campo 'probabilidad' es inválido")
+        return self

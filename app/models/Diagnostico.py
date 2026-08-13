@@ -10,7 +10,10 @@ class Diagnostico:
     Clase que representa una instancia de diagnóstico usando el modelo
     de red neuronal en ONNX.
     """
-    def __init__(self, datos: dict, modelo: InferenceSession, explicador: LimeTabularExplainer):
+
+    def __init__(
+        self, datos: dict, modelo: InferenceSession, explicador: LimeTabularExplainer
+    ):
         self.datos = datos
         self._modelo = modelo
         self._explicador = explicador
@@ -38,24 +41,59 @@ class Diagnostico:
             dict: El diccionario con los datos del diagnóstico.
         """
         campos = (
-            "Edad", "Género", "Bebedor", "Fumador", "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias",
-            "Inmovilidad_de_M_inferiores", "Viaje_prolongado", "TEP___TVP_Previo", "Malignidad", "Disnea", "Dolor_toracico",
-            "Tos", "Hemoptisis", "Síntomas_disautonomicos", "Edema_de_M_inferiores", "Frecuencia_respiratoria",
-            "Saturación_de_la_sangre", "Frecuencia_cardíaca", "Presión_sistólica","Presión_diastólica", "Fiebre",
-            "Crepitaciones", "Sibilancias", "Soplos", "WBC", "HB", "PLT", "Derrame", "Otra_Enfermedad", "Hematologica",
-            "Cardíaca", "Enfermedad_coronaria", "Diabetes_Mellitus", "Endocrina", "Gastrointestinal", "Hepatopatía_crónica",
-            "Hipertensión_arterial", "Neurológica", "Pulmonar", "Renal", "Trombofilia", "Urológica", "Vascular","VIH"
+            "Edad",
+            "Género",
+            "Bebedor",
+            "Fumador",
+            "Procedimiento_Quirurgicos___Traumatismo_Grave_en_los_últimos_15_dias",
+            "Inmovilidad_de_M_inferiores",
+            "Viaje_prolongado",
+            "TEP___TVP_Previo",
+            "Malignidad",
+            "Disnea",
+            "Dolor_toracico",
+            "Tos",
+            "Hemoptisis",
+            "Síntomas_disautonomicos",
+            "Edema_de_M_inferiores",
+            "Frecuencia_respiratoria",
+            "Saturación_de_la_sangre",
+            "Frecuencia_cardíaca",
+            "Presión_sistólica",
+            "Presión_diastólica",
+            "Fiebre",
+            "Crepitaciones",
+            "Sibilancias",
+            "Soplos",
+            "WBC",
+            "HB",
+            "PLT",
+            "Derrame",
+            "Otra_Enfermedad",
+            "Hematologica",
+            "Cardíaca",
+            "Enfermedad_coronaria",
+            "Diabetes_Mellitus",
+            "Endocrina",
+            "Gastrointestinal",
+            "Hepatopatía_crónica",
+            "Hipertensión_arterial",
+            "Neurológica",
+            "Pulmonar",
+            "Renal",
+            "Trombofilia",
+            "Urológica",
+            "Vascular",
+            "VIH",
         )
-        claves = { i: [] for i in campos }
-        
+        claves = {i: [] for i in campos}
+
         for i in array_datos:
             for j, clave in enumerate(claves.keys()):
                 claves[clave].append(i[j])
         return claves
 
-    def obtener_probabilidades_predicciones(
-        self, instancias: ndarray
-    ) -> ndarray:
+    def obtener_probabilidades_predicciones(self, instancias: ndarray) -> ndarray:
         """
         Hace la clasificación de varias instancias empleando el modelo
 
@@ -68,7 +106,13 @@ class Diagnostico:
         dict_instancias = self.convertir_a_diccionario(instancias)
         dict_preprocesadas = preprocesar_instancia(dict_instancias)
         NUM_INSTANCIAS = len(instancias)
-        RES = self._modelo.run(None, {i: array(dict_preprocesadas[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        RES = self._modelo.run(
+            None,
+            {
+                i: array(dict_preprocesadas[i], dtype=float32).reshape(-1, 1)
+                for i in input_name
+            },
+        )
         ARRAY = zeros((NUM_INSTANCIAS, 2), dtype=float32)
         PROBS = RES[1]
 
@@ -84,7 +128,8 @@ class Diagnostico:
         explicacion = self._explicador.explain_instance(
             self.obtener_array_datos(),
             self.obtener_probabilidades_predicciones,
-            num_features=10, num_samples=2000
+            num_features=10,
+            num_samples=2000,
         )
         SALIDA = []
         explicacion = explicacion.as_list()
@@ -109,8 +154,17 @@ class Diagnostico:
         """
         input_name = [i.name for i in self._modelo.get_inputs()]
         preprocesados = preprocesar_instancia(self.datos)
-        pred = self._modelo.run(None, {i: array(preprocesados[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        pred = self._modelo.run(
+            None,
+            {
+                i: array(preprocesados[i], dtype=float32).reshape(-1, 1)
+                for i in input_name
+            },
+        )
         RES = pred[0][0]
         self.generar_explicacion()
-
-        return InstanciaDiagnosticada(int(RES) == 1, float(pred[1][0][1]), self.explicacion)
+        return InstanciaDiagnosticada(
+            prediccion=int(RES) == 1,
+            probabilidad=float(pred[1][0][1]),
+            lime=self.explicacion,
+        )

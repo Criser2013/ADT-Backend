@@ -31,8 +31,11 @@ async def diagnosticar(
         DATOS = instancia.obtener_diccionario_instancia()
         DIAGNOSTICO = Diagnostico(DATOS, MODELO, EXPLICADOR)
         RES = DIAGNOSTICO.generar_diagnostico()
-        return JSONResponse(RES, status_code=200, media_type="application/json")
-    except:
+        return JSONResponse(
+            RES.model_dump(), status_code=200, media_type="application/json"
+        )
+    except Exception as e:
+        print(e)
         raise ErrorInterno(TEXTOS[idioma]["errGenerarDiagnostico"])
 
 
@@ -63,6 +66,7 @@ async def verificar_recaptcha(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     RES = verificar_peticion_recaptcha(token_recaptcha.token, idioma, TEXTOS)
+
     return JSONResponse(
         RES,
         status_code=200 if RES["success"] else 401,

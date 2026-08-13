@@ -102,7 +102,7 @@ async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
     TEXTOS = peticion.state.textos
     IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        TEXTOS[IDIOMA]["errUIDInvalido"],
+        {"error": TEXTOS[IDIOMA]["errUIDInvalido"]},
         status_code=400,
         media_type="application/json",
     )
@@ -112,7 +112,7 @@ async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexi
     TEXTOS = peticion.state.textos
     IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        TEXTOS[IDIOMA]["errusuarioNoEncontrado"],
+        {"error": TEXTOS[IDIOMA]["errUsuarioNoEncontrado"]},
         status_code=404,
         media_type="application/json",
     )
