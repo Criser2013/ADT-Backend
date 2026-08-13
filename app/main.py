@@ -2,6 +2,7 @@ from constants import *
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI, Response, Request
+from fastapi.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
@@ -119,6 +120,7 @@ async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexi
 
 @app.exception_handler(ErrorInterno)
 async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
+    logger.exception(excepcion)
     return JSONResponse(
         {"error": excepcion.mensaje},
         status_code=500,
