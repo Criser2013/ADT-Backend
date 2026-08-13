@@ -45,3 +45,11 @@ class Usuario(BaseModel):
             fecha_registro=FECHA_REGISTRO,
             ultima_conexion=ULTIMA_CONEXION,
         )
+
+class InstanciaDiagnosticada(BaseModel):
+    """
+    Clase para representar la respuesta del modelo a la clasificación de una instancia.
+    """
+    prediccion: bool
+    probabilidad: float
+    lime: list[dict]

@@ -13,14 +13,13 @@ from firebase_admin.auth import (
 from firebase_admin.exceptions import NotFoundError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
 from models.Peticiones import DatosUsuario
-from models.Usuario import Usuario
-from utils.Fechas import convertir_datetime_str
+from models.Respuestas import Usuario
 from utils.Validadores import validar_txt_token
 
 
 def actualizar_datos_usuario(
     firebase_app: App, uid: str, usuario: DatosUsuario, textos: dict, idioma: str
-) -> dict:
+) -> Usuario:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:
@@ -33,7 +32,7 @@ def actualizar_datos_usuario(
         UsuarioInexistente: Si el UID del usuario proveído es inexistente.
         Errorinterno: Si ocurre alguna excepción al tratar de validar el token.
     Returns:
-        dict: Datos del usuario actualizado si se actualiza correctamente.
+        Usuario: Instancia de usuario actualizado si se actualiza correctamente.
     """
     try:
         USUARIO = update_user(
@@ -46,19 +45,15 @@ def actualizar_datos_usuario(
             },
         )
 
-        return Usuario() {
-            "correo": USUARIO.email,
-            "uid": USUARIO.uid,
-            "nombre": USUARIO.display_name,
-            "estado": not USUARIO.disabled,
-            "administrador": USUARIO.custom_claims.get("admin", False),
-            "fecha_registro": convertir_datetime_str(
-                USUARIO.user_metadata.creation_timestamp
-            ),
-            "ultima_conexion": convertir_datetime_str(
-                USUARIO.user_metadata.last_refresh_timestamp
-            ),
-        }
+        return Usuario(
+            USUARIO.email,
+            USUARIO.uid,
+            USUARIO.display_name,
+            not USUARIO.disabled,
+            USUARIO.custom_claims.get("admin", False),
+            USUARIO.user_metadata.creation_timestamp,
+            USUARIO.user_metadata.last_refresh_timestamp
+        )
     except NotFoundError:
         raise UsuarioInexistente()
     except:
@@ -124,7 +119,7 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
         UsuarioInexistente: Si el UID del usuario proveído es inexistente.
         Errorinterno: Si ocurre alguna excepción al tratar de validar el token.
     Returns:
-        dict: Datos del usuario si se encuentra.
+        Usuario: Instancia de usuario si es encontrado.
     """
     try:
         USUARIO = get_user(uid, firebase_app)
@@ -146,7 +141,7 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
         raise ErrorInterno(textos[idioma]["errObtenerUsuario"])
 
 
-def ver_datos_usuarios(firebase_app: App, textos: dict, idioma: str) -> list[dict]:
+def ver_datos_usuarios(firebase_app: App, textos: dict, idioma: str) -> list[Usuario]:
     """
     Obtiene los datos de los usuarios registrados en Firebase.
     Args:
@@ -156,7 +151,7 @@ def ver_datos_usuarios(firebase_app: App, textos: dict, idioma: str) -> list[dic
     Raises:
         Errorinterno: Si ocurre alguna excepción al tratar de validar el token
     Returns:
-        list[dict]: Los datos de los usuarios si se obtuvieron correctamente
+        list[Usuario]: Los datos de los usuarios si se obtuvieron correctamente
     """
     try:
         AUX = []

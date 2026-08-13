@@ -1,5 +1,6 @@
 from numpy import ndarray, zeros, float32, array
 from lime.lime_tabular import LimeTabularExplainer
+from models.Respuestas import InstanciaDiagnosticada
 from onnxruntime import InferenceSession
 from utils.Preprocesamiento import preprocesar_instancia
 
@@ -98,10 +99,13 @@ class Diagnostico:
 
         self.explicacion = SALIDA
 
-    def generar_diagnostico(self) -> dict:
+    def generar_diagnostico(self) -> InstanciaDiagnosticada:
         """
         Genera el diagnóstico de los datos usando el modelo ONNX para normalizarlos
         y luego clasificarlos
+
+        Returns:
+            InstanciaDiagnosticada: Clasificación de la instancia del diagnóstico según el modelo.
         """
         input_name = [i.name for i in self._modelo.get_inputs()]
         preprocesados = preprocesar_instancia(self.datos)
@@ -109,8 +113,4 @@ class Diagnostico:
         RES = pred[0][0]
         self.generar_explicacion()
 
-        return {
-            "prediccion": int(RES) == 1,
-            "probabilidad": float(pred[1][0][1]),
-            "lime": self.explicacion,
-        }
+        return InstanciaDiagnosticada(int(RES) == 1, float(pred[1][0][1]), self.explicacion)
