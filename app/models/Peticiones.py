@@ -119,7 +119,7 @@ class InstanciaDiagnostico(BaseModel):
             "VIH": [self.vih],
         }
     
-class UsuarioActualizar(BaseModel):
+class DatosUsuario(BaseModel):
     """
     Clase que representa una petición para actualizar el estado de un usuario.
     """

@@ -12,14 +12,14 @@ from firebase_admin.auth import (
 )
 from firebase_admin.exceptions import NotFoundError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
-from models.Peticiones import UsuarioActualizar
-from utils.Fechas import convertir_datetime_str
+from models.Peticiones import DatosUsuario
+from models.Respuestas import Usuario
 from utils.Validadores import validar_txt_token
 
 
 def actualizar_datos_usuario(
-    firebase_app: App, uid: str, usuario: UsuarioActualizar, textos: dict, idioma: str
-) -> dict:
+    firebase_app: App, uid: str, usuario: DatosUsuario, textos: dict, idioma: str
+) -> Usuario:
     """
     Actualiza el estado (activado/desactivado) de un usuario específico.
     Args:
@@ -32,7 +32,7 @@ def actualizar_datos_usuario(
         UsuarioInexistente: Si el UID del usuario proveído es inexistente.
         Errorinterno: Si ocurre alguna excepción al tratar de validar el token.
     Returns:
-        dict: Datos del usuario actualizado si se actualiza correctamente.
+        Usuario: Instancia de usuario actualizado si se actualiza correctamente.
     """
     try:
         USUARIO = update_user(
@@ -45,19 +45,15 @@ def actualizar_datos_usuario(
             },
         )
 
-        return {
-            "correo": USUARIO.email,
-            "uid": USUARIO.uid,
-            "nombre": USUARIO.display_name,
-            "estado": not USUARIO.disabled,
-            "administrador": USUARIO.custom_claims.get("admin", False),
-            "fecha_registro": convertir_datetime_str(
-                USUARIO.user_metadata.creation_timestamp
-            ),
-            "ultima_conexion": convertir_datetime_str(
-                USUARIO.user_metadata.last_refresh_timestamp
-            ),
-        }
+        return Usuario(
+            correo=USUARIO.email,
+            uid=USUARIO.uid,
+            nombre=USUARIO.display_name,
+            estado=not USUARIO.disabled,
+            administrador=USUARIO.custom_claims.get("admin", False),
+            fecha_registro=USUARIO.user_metadata.creation_timestamp,
+            ultima_conexion=USUARIO.user_metadata.last_refresh_timestamp
+        )
     except NotFoundError:
         raise UsuarioInexistente()
     except:
@@ -111,7 +107,7 @@ def validar_token(
         raise ErrorInterno(textos[idioma]["errValidartoken"])
 
 
-def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) -> dict:
+def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) -> Usuario:
     """
     Obtiene los datos de un usuario específico usando el UID.
     Args:
@@ -123,28 +119,24 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
         UsuarioInexistente: Si el UID del usuario proveído es inexistente.
         Errorinterno: Si ocurre alguna excepción al tratar de validar el token.
     Returns:
-        dict: Datos del usuario si se encuentra.
+        Usuario: Instancia de usuario si es encontrado.
     """
     try:
-        usuario = get_user(uid, firebase_app)
-        claims = usuario.custom_claims or {}
+        USUARIO = get_user(uid, firebase_app)
+        CLAIMS = USUARIO.custom_claims or {}
 
-        if claims.get("eliminado", False):
+        if CLAIMS.get("eliminado", False):
             raise UsuarioInexistente()
 
-        return {
-            "correo": usuario.email,
-            "uid": usuario.uid,
-            "nombre": usuario.display_name,
-            "administrador": claims.get("admin", False),
-            "estado": not usuario.disabled,
-            "fecha_registro": convertir_datetime_str(
-                usuario.user_metadata.creation_timestamp
-            ),
-            "ultima_conexion": convertir_datetime_str(
-                usuario.user_metadata.last_refresh_timestamp
-            ),
-        }
+        return Usuario(
+            correo=USUARIO.email,
+            uid=USUARIO.uid,
+            nombre=USUARIO.display_name,
+            estado=not USUARIO.disabled,
+            administrador=CLAIMS.get("admin", False),
+            fecha_registro=USUARIO.user_metadata.creation_timestamp,
+            ultima_conexion=USUARIO.user_metadata.last_refresh_timestamp
+        )
     except:
         raise ErrorInterno(textos[idioma]["errObtenerUsuario"])
 
@@ -166,26 +158,22 @@ def ver_datos_usuarios(firebase_app: App, textos: dict, idioma: str) -> list[dic
         usuarios = list_users(app=firebase_app)
 
         while True:
-            lista = []
+            LISTA = []
             for x in usuarios.users:
                 CLAIMS = x.custom_claims or {}
                 if not CLAIMS.get("eliminado", True):
-                    lista.append(
-                        {
-                            "correo": x.email,
-                            "uid": x.uid,
-                            "nombre": x.display_name,
-                            "administrador": x.custom_claims["admin"],
-                            "estado": not x.disabled,
-                            "fecha_registro": convertir_datetime_str(
-                                x.user_metadata.creation_timestamp
-                            ),
-                            "ultima_conexion": convertir_datetime_str(
-                                x.user_metadata.last_refresh_timestamp
-                            ),
-                        }
+                    LISTA.append(
+                        Usuario(
+                            correo=x.email,
+                            uid=x.uid,
+                            nombre=x.display_name,
+                            estado=not x.disabled,
+                            administrador=CLAIMS.get("admin", False),
+                            fecha_registro=x.user_metadata.creation_timestamp,
+                            ultima_conexion=x.user_metadata.last_refresh_timestamp
+                        ).model_dump()
                     )
-            AUX.extend(lista)
+            AUX.extend(LISTA)
             if not usuarios.has_next_page:
                 break
             else:

@@ -27,4 +27,4 @@ def verificar_autenticado(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    #verificar_token(firebase_app, authorization, TEXTOS, idioma)
+    verificar_token(firebase_app, authorization, TEXTOS, idioma)
