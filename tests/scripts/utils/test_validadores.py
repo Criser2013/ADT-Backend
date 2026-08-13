@@ -1,5 +1,5 @@
 import pytest
-from app.utils.Validadores import *
+from utils.Validadores import *
 
 
 @pytest.mark.parametrize(

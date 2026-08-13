@@ -1,7 +1,7 @@
 import pytest
 from pytest_mock import MockerFixture
 from fastapi import Request
-from app.dependencies.general_dependencies import *
+from dependencies.general_dependencies import *
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_91(mocker: MockerFixture):
     PETICION.state.firebase_app = "FIREBASE_APP"
     PETICION.state.textos = TEXTOS
     FUNC = mocker.patch(
-        "app.dependencies.general_dependencies.verificar_token",
+        "dependencies.general_dependencies.verificar_token",
         return_value={"display_name": "usuario", "uid": "1234"},
     )
 

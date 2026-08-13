@@ -1,5 +1,5 @@
 import pytest
-from app.utils.Fechas import *
+from utils.Fechas import *
 
 
 @pytest.mark.parametrize(

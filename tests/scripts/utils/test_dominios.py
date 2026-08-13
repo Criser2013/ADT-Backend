@@ -1,5 +1,5 @@
 import pytest
-from app.utils.Dominios import obtener_lista_dominios
+from utils.Dominios import obtener_lista_dominios
 
 
 @pytest.mark.parametrize(

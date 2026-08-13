@@ -1,5 +1,5 @@
 import pytest
-from app.utils.Diccionario import ver_si_existe_clave
+from utils.Diccionario import ver_si_existe_clave
 
 DICCIONARIO = {"clave1": 1, "clave2": 2, "clave3": 3}
 

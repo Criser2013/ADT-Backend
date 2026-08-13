@@ -1,5 +1,5 @@
 import pytest
-from app.utils.Preprocesamiento import *
+from utils.Preprocesamiento import *
 
 
 @pytest.mark.parametrize(

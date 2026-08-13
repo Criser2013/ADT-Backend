@@ -1,5 +1,5 @@
 from fastapi import Request
-from app.dependencies.usuarios_dependencies import *
+from dependencies.usuarios_dependencies import *
 from pytest_mock import MockerFixture
 import pytest
 
@@ -29,7 +29,7 @@ def test_verificar_usuario_administrador(
     PETICION.state.textos = TEXTOS
     PETICION.state.firebase_app = "firebase_app"
     DATOS_TOKEN = mocker.patch(
-        "app.dependencies.usuarios_dependencies.verificar_token",
+        "dependencies.usuarios_dependencies.verificar_token",
         return_value=mock_token,
     )
 
@@ -55,7 +55,7 @@ def test_validador_uid(
     Test para validar que la dependencia "validador_uid" retorne el uid si es válido.
     """
     VALIDAR_UID = mocker.patch(
-        "app.dependencies.usuarios_dependencies.validar_uid",
+        "dependencies.usuarios_dependencies.validar_uid",
         return_value=mock_validador,
     )
 
