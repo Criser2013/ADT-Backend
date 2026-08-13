@@ -1,17 +1,16 @@
-from fastapi import FastAPI
+from constants import *
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-from routers.main_router import router as main_router
-from routers.usuarios_router import router as usuarios_router
-from constants import *
-from utils.Validadores import validar_origen
-from utils.Diccionario import ver_si_existe_clave
-from contextlib import asynccontextmanager
 from firebase_admin_config import inicializar_firebase
 from models.Excepciones import *
+from routers.main_router import router as main_router
+from routers.usuarios_router import router as usuarios_router
+from utils.Diccionario import ver_si_existe_clave
+from utils.Validadores import validar_origen
 
 load_dotenv()
 
@@ -75,7 +74,8 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
-    EXISTE = ver_si_existe_clave(peticion.headers, "origin")
+    HEADERS = peticion.headers
+    EXISTE = ver_si_existe_clave(HEADERS, "origin")
     if not EXISTE:
         return Response(status_code=400, content="Encabezado 'origin' inválido")
     ORIGEN = peticion.headers["origin"]
@@ -91,24 +91,28 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
 @app.exception_handler(AccesoNoAutorizado)
 async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
     return JSONResponse(
-        excepcion.mensaje,
-        status_code=excepcion.codigo,
+        {"error": excepcion.mensaje},
+        status_code=403,
         media_type="application/json",
     )
 
 
 @app.exception_handler(UIDInvalido)
 async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        TEXTOS[IDIOMA]["errUIDInvalido"],
         status_code=400,
         media_type="application/json",
     )
 
 @app.exception_handler(UsuarioInexistente)
 async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexistente):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        TEXTOS[IDIOMA]["errusuarioNoEncontrado"],
         status_code=404,
         media_type="application/json",
     )
@@ -116,7 +120,7 @@ async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexi
 @app.exception_handler(ErrorInterno)
 async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
     return JSONResponse(
-        excepcion.mensaje,
-        status_code=400,
+        {"error": excepcion.mensaje},
+        status_code=500,
         media_type="application/json",
     )

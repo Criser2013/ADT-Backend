@@ -1,9 +1,10 @@
-from os import getenv
-from utils.Dominios import obtener_lista_dominios
-from pathlib import Path
 from dill import load as dload
 from json import load as jload
 from onnxruntime import InferenceSession
+from os import getenv
+from pathlib import Path
+from utils.Dominios import obtener_lista_dominios
+
 
 COD_EXITO = 1
 COD_ERROR_ESPERADO = 0

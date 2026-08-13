@@ -1,7 +1,7 @@
-from onnxruntime import InferenceSession
-from lime.lime_tabular import LimeTabularExplainer
-from pathlib import Path
 from numpy import ndarray, zeros, float32, array
+from lime.lime_tabular import LimeTabularExplainer
+from onnxruntime import InferenceSession
+from pathlib import Path
 from utils.Preprocesamiento import preprocesar_instancia
 
 
@@ -62,18 +62,19 @@ class Diagnostico:
 
         Args:
             instancias (ndarray): Las instancias a clasificar.
-
         Returns:
             ndarray: Las probabilidades de pertenecer a una clase u otra según el modelo.
         """
         input_name = [i.name for i in self.modelo.get_inputs()]
-        instancias = self.convertir_a_diccionario(instancias)
-        instancias = preprocesar_instancia(instancias)
-        RES = self.modelo.run(None, {i: array(instancias[i], dtype=float32).reshape(-1, 1) for i in input_name})
-        ARRAY = zeros((len(instancias["Edad"]), 2), dtype=float32)
+        dict_instancias = self.convertir_a_diccionario(instancias)
+        dict_preprocesadas = preprocesar_instancia(dict_instancias)
+        NUM_INSTANCIAS = len(instancias)
+        RES = self.modelo.run(None, {i: array(dict_preprocesadas[i], dtype=float32).reshape(-1, 1) for i in input_name})
+        ARRAY = zeros((NUM_INSTANCIAS, 2), dtype=float32)
+        PROBS = RES[1]
 
-        for i in range(len(instancias["Edad"])):
-            ARRAY[i] = array([RES[1][i][0], RES[1][i][1]])
+        for i in range(NUM_INSTANCIAS):
+            ARRAY[i] = array([PROBS[i][0], PROBS[i][1]])
 
         return ARRAY
 
@@ -112,6 +113,6 @@ class Diagnostico:
 
         return {
             "prediccion": int(RES) == 1,
-            "probabilidad": float(pred[1][0][RES]),
+            "probabilidad": float(pred[1][0][1 if RES == 0 else 0]),
             "lime": self.explicacion,
         }

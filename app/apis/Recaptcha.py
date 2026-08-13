@@ -2,23 +2,22 @@ from constants import RECAPTCHA_SECRET, RECAPTCHA_API_URL
 from requests import post
 
 
-def manejador_errores(error: str, idioma: str, textos: dict[str, str]) -> str:
+def manejador_errores(error: str, idioma: str, textos: dict) -> str:
     """
     Maneja los errores devueltos por la API de reCAPTCHA.
 
     Args:
         error (str): El mensaje de error devuelto por la API de reCAPTCHA.
         idioma (str): El idioma para los mensajes de error.
-        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
-
+        textos (dict): El diccionario de textos para los mensajes de error.
     Returns:
         str: Un mensaje de error amigable para el usuario.
     """
     match error:
         case "invalid-input-response":
-            return f"{textos[idioma]['errCaptchaTokenErroneo']}"
+            return textos[idioma]["errCaptchaTokenErroneo"]
         case "timeout-or-duplicate":
-            return f"{textos[idioma]['errCaptchaTokenInvalido']}"
+            return textos[idioma]["errCaptchaTokenInvalido"]
         case _:
             return error
 
@@ -31,7 +30,6 @@ def verificar_peticion_recaptcha(token: str, idioma: str, textos: dict[str, str]
         token (str): El token de ReCAPTCHA a verificar.
         idioma (str): El idioma para los mensajes de error.
         textos (dict[str, str]): El diccionario de textos para los mensajes de error.
-
     Returns:
         dict: La respuesta del API de ReCAPTCHA.
     """
