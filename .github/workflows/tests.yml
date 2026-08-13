@@ -15,7 +15,7 @@ jobs:
         - ${{ github.workspace  }}:/app
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Firebase credentials
         run: echo $FIREBASE_CREDENTIALS >> ./firebase_token.json
@@ -36,7 +36,7 @@ jobs:
           FIREBASE_ADMIN_CREDS_PATH: "./firebase_token.json"
 
       - name: Save tests results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Resultado de la pruebas
           path: |
