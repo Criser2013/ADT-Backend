@@ -34,8 +34,7 @@ async def diagnosticar(
         return JSONResponse(
             RES.model_dump(), status_code=200, media_type="application/json"
         )
-    except Exception as e:
-        print(e)
+    except:
         raise ErrorInterno(TEXTOS[idioma]["errGenerarDiagnostico"])
 
 
@@ -50,6 +49,7 @@ async def registrar_usuario(
     uid: str = Depends(validador_uid),
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
+    print("XD")
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
     registrar_usuario_firebase(FIREBASE_APP, uid, TEXTOS, idioma)
@@ -66,7 +66,6 @@ async def verificar_recaptcha(
 ) -> JSONResponse:
     TEXTOS = peticion.state.textos
     RES = verificar_peticion_recaptcha(token_recaptcha.token, idioma, TEXTOS)
-
     return JSONResponse(
         RES,
         status_code=200 if RES["success"] else 401,

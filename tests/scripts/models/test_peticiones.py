@@ -1,6 +1,6 @@
+import pytest
 from models.Peticiones import *
 from pydantic import ValidationError
-import pytest
 
 
 DATOS_INSTANCIA_1 = {

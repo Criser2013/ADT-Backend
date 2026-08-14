@@ -1,3 +1,4 @@
+import pytest
 from models.Diagnostico import Diagnostico
 from models.Respuestas import InstanciaDiagnosticada
 from onnxruntime import InferenceSession
@@ -7,7 +8,7 @@ from dill import load as dload
 from pytest_mock import MockerFixture
 from onnxruntime import InferenceSession
 from pathlib import Path
-import pytest
+
 
 @pytest.fixture(autouse=True)
 def setup_module(mocker: MockerFixture):
