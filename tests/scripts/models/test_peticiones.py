@@ -102,7 +102,7 @@ def test_token_captcha(token, respuesta_esperada, arroja_excepcion):
     ],
     ids=["test_29", "test_30"],
 )
-def test_29(datos, arroja_excepcion):
+def test_datos_usuario(datos, arroja_excepcion):
     """
     Test para validar que la clase valida correctamente los datos de un usuario a actualizar
     """
