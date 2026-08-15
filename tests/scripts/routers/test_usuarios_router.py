@@ -154,7 +154,7 @@ def test_endpoint_ver_usuario(
         "models.Respuestas.convertir_datetime_str", return_value="24/04/2026 12:30 AM"
     )
     UID = mocker.patch(
-        "dependencies.usuarios_dependencies.validar_uid", return_value="a1234H"
+        "dependencies.usuarios_dependencies.validar_uid", return_value=True
     )
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.verificar_token",

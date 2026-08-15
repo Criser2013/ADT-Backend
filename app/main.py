@@ -1,7 +1,7 @@
 from constants import *
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Request
 from fastapi.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -68,22 +68,26 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
 # Middlewares personalizados
 @app.middleware("http")
-async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
+async def verificar_origen_autorizado(peticion: Request, call_next) -> JSONResponse:
     """
     Middleware para verificar el origen de la solicitud.
     Args:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
+    TEXTOS = peticion.state.textos
     HEADERS = peticion.headers
     EXISTE = ver_si_existe_clave(HEADERS, "origin")
+    IDIOMA = ver_si_existe_clave(HEADERS, "language") or "es"
+
     if not EXISTE:
-        return Response(status_code=400, content="Encabezado 'origin' inválido")
+        return JSONResponse({ "error": TEXTOS[IDIOMA]["errHeaderOrigin"]}, status_code=400)
+
     ORIGEN = peticion.headers["origin"]
     RES = validar_origen(ORIGEN, ORIGENES_AUTORIZADOS)
 
     if not RES:
-        return Response(status_code=403, content="Origen no autorizado")
+        return JSONResponse({ "error": TEXTOS[IDIOMA]["errOrigenNoAutorizado"]}, status_code=403)
     else:
         return await call_next(peticion)
 
