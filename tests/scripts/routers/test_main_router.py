@@ -6,7 +6,7 @@ from models.Respuestas import InstanciaDiagnosticada
 from pytest_mock import MockerFixture
 
 # Constantes de prueba
-TEST_CREDS = {
+MOCK_CREDS_FIREBASE = {
     "apiKey": "test_api_key",
     "authDomain": "test_auth_domain",
     "projectId": "test_project_id",
@@ -25,7 +25,7 @@ MOCK_FIREBASE_APP = {
     "cred": {"projectId": "test_project_id", "certificated": True},
 }
 
-TEXTOS = {
+MOCK_TEXTOS = {
     "es": {
         "errGenerarDiagnostico": "Error al generar el diagnóstico",
         "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
@@ -37,10 +37,10 @@ TEXTOS = {
 async def mock_inicializar_modelos(app):
     yield {
         "explicador": None,
-        "textos": TEXTOS,
+        "textos": MOCK_TEXTOS,
         "modelo": None,
         "firebase_app": MOCK_FIREBASE_APP,
-        "credenciales": TEST_CREDS,
+        "credenciales": MOCK_CREDS_FIREBASE,
     }
 
 
@@ -75,7 +75,7 @@ def setup_module(mocker: MockerFixture):
             },
             False,
         ),
-        ({"status_code": 500, "error": TEXTOS["es"]["errGenerarDiagnostico"]}, True),
+        ({"status_code": 500, "error": MOCK_TEXTOS["es"]["errGenerarDiagnostico"]}, True),
     ],
     ids=["test_16", "test_17"],
 )
@@ -101,8 +101,7 @@ def test_endpoint_diagnosticar(
     }
 
     app.router.lifespan_context = mock_inicializar_modelos
-    VALIDADOR = mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
-    FIREBASE = mocker.patch("apis.FirebaseAuth.verify_id_token", return_value=1)
+    FIREBASE = mocker.patch("dependencies.general_dependencies.verificar_token", return_value={"uid": "a1234H", "admin": False})
     DIAGNOSTICO = mocker.patch("models.Diagnostico.Diagnostico.generar_diagnostico")
     DIAGNOSTICO.side_effect = (
         Exception("Error al generar el diagnóstico") if arroja_excepcion else None
@@ -138,9 +137,8 @@ def test_endpoint_diagnosticar(
         assert JSON["probabilidad"] == respuesta_esperada["probabilidad"]
         assert len(JSON["lime"]) == 10
 
-    VALIDADOR.assert_called_once_with("token_valido")
     FIREBASE.assert_called_once_with(
-        "token_valido", MOCK_FIREBASE_APP, check_revoked=True
+        MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es"
     )
     DIAGNOSTICO.assert_called_once()
 
@@ -157,12 +155,12 @@ def test_endpoint_diagnosticar(
                 "status_code": 401,
                 "success": False,
                 "hostname": "0.0.0.0",
-                "error-codes": [TEXTOS["es"]["errCaptchaTokenInvalido"]],
+                "error-codes": [MOCK_TEXTOS["es"]["errCaptchaTokenInvalido"]],
             },
             {
                 "success": False,
                 "hostname": "0.0.0.0",
-                "error-codes": [TEXTOS["es"]["errCaptchaTokenInvalido"]],
+                "error-codes": [MOCK_TEXTOS["es"]["errCaptchaTokenInvalido"]],
             },
         ),
     ],
@@ -198,7 +196,7 @@ def test_endpoint_recaptcha(
     assert JSON["hostname"] == respuesta_esperada["hostname"]
     assert JSON["success"] or (JSON["error-codes"] == respuesta_esperada["error-codes"])
 
-    FUNC.assert_called_once_with("token_valido" * 80, "es", TEXTOS)
+    FUNC.assert_called_once_with("token_valido" * 80, "es", MOCK_TEXTOS)
 
 
 def test_33():
@@ -235,4 +233,4 @@ def test_34(mocker: MockerFixture):
         assert RES.status_code == 200
         assert RES.json() == {"resultado": "ok"}
 
-    FIREBASE.assert_called_once_with(MOCK_FIREBASE_APP, UID, TEXTOS, "es")
+    FIREBASE.assert_called_once_with(MOCK_FIREBASE_APP, UID, MOCK_TEXTOS, "es")

@@ -1,12 +1,14 @@
 from pytest_mock import MockerFixture
 from fastapi.testclient import TestClient
 from firebase_admin.auth import UserRecord
-from app.main import app
+from main import app
+from models.Respuestas import Usuario
+from models.Peticiones import DatosUsuario
 import pytest
 from contextlib import asynccontextmanager
 
 # Constantes de prueba
-TEST_CREDS = {
+MOCK_TEST_CREDS = {
     "apiKey": "test_api_key",
     "authDomain": "test_auth_domain",
     "projectId": "test_project_id",
@@ -26,7 +28,6 @@ MOCK_FIREBASE_APP = {
 
 MOCK_TEXTOS = {
     "es": {
-        "errTry": "Error al procesar la solicitud:",
         "errAccesoDenegado": "Acceso denegado.",
         "errTokenInvalido": "Token inválido",
         "errUIDInvalido": "UID inválido",
@@ -40,56 +41,69 @@ MOCK_TEXTOS = {
 @asynccontextmanager
 async def mock_inicializar_modelos(app):
     yield {
-        "explicador": None,  # Mock del explicador
+        "explicador": None,
         "textos": MOCK_TEXTOS,
-        "modelo": None,  # Mock del modelo
+        "modelo": None,
         "firebase_app": MOCK_FIREBASE_APP,
-        "credenciales": TEST_CREDS,
+        "credenciales": MOCK_TEST_CREDS,
     }
 
 
 @pytest.fixture(autouse=True)
 def setup_module(mocker: MockerFixture):
     mocker.patch(
-        "app.main.CORS_ORIGINS",
+        "main.CORS_ORIGINS",
         [
             "http://localhost:5178",
         ],
     )
     mocker.patch(
-        "app.main.ALLOWED_HOSTS",
+        "main.ALLOWED_HOSTS",
         [
             "localhost",
         ],
     )
-    mocker.patch("app.main.ORIGENES_AUTORIZADOS", ["*"])
+    mocker.patch("main.ORIGENES_AUTORIZADOS", ["*"])
     yield
     mocker.resetall()
 
-@pytest.mark.skip
-def test_31(mocker: MockerFixture):
+
+DATOS = [
+    {
+        "correo": "usuario@correo.com",
+        "uid": "a1234H",
+        "nombre": "usuario",
+        "fecha_registro": "24/04/2026 12:30 AM",
+        "ultima_conexion": "24/04/2026 12:30 AM",
+        "administrador": False,
+        "estado": True,
+    }
+]
+
+
+@pytest.mark.parametrize(
+    "respuesta_esperada,mock_ver_usuarios,es_admin",
+    [
+        ({"status_code": 200, "usuarios": DATOS}, DATOS, True),
+        ({"status_code": 403, "error": "Acceso denegado."}, None, False),
+    ],
+    ids=["test_31", "test_32"],
+)
+def test_endpoint_usuarios(
+    mocker: MockerFixture, respuesta_esperada, mock_ver_usuarios, es_admin
+):
     """
     Test para validar que el API retorne los datos de los usuarios con una petición
     autenticada.
     """
-    DATOS = [
-        {
-            "correo": "usuario@correo.com",
-            "uid": "a1234H",
-            "nombre": "usuario",
-            "ultima_conexion": 1000,
-            "rol": 0,
-            "estado": True,
-        }
-    ]
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": True}),
-    )
-
-    USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuarios")
-    USUARIO.return_value = (1, DATOS)
     app.router.lifespan_context = mock_inicializar_modelos
+    DATOS_TOKEN = mocker.patch(
+        "dependencies.usuarios_dependencies.verificar_token",
+        return_value=({"uid": "a1234H", "admin": es_admin}),
+    )
+    USUARIO = mocker.patch(
+        "routers.usuarios_router.ver_datos_usuarios", return_value=mock_ver_usuarios
+    )
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.get(
@@ -100,66 +114,55 @@ def test_31(mocker: MockerFixture):
                 "Authorization": "Bearer token_valido",
             },
         )
+        JSON = RES.json()
 
-    assert RES.status_code == 200
-    assert RES.json() == {"usuarios": DATOS}
-
-    DATOS_TOKEN.assert_called_once()
-    USUARIO.assert_called_once()
-
-@pytest.mark.skip
-def test_32(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de los usuarios si el usuario no
-    es administrador.
-    """
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": False}),
+    assert RES.status_code == respuesta_esperada["status_code"]
+    assert (
+        (JSON["usuarios"] == respuesta_esperada["usuarios"])
+        if es_admin
+        else (JSON["error"] == respuesta_esperada["error"])
     )
 
-    app.router.lifespan_context = mock_inicializar_modelos
+    DATOS_TOKEN.assert_called_once_with(
+        MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es"
+    )
 
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
+    if es_admin:
+        USUARIO.assert_called_once_with(MOCK_FIREBASE_APP, MOCK_TEXTOS, "es")
 
-    assert RES.status_code == 403
-    assert RES.json() == {"error": "Acceso denegado."}
 
-    DATOS_TOKEN.assert_called_once()
-
-@pytest.mark.skip
-def test_42(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "respuesta_esperada,mock_ver_usuario,es_admin",
+    [
+        ({"status_code": 200, "usuario": DATOS[0].copy()}, DATOS[0].copy(), True),
+        (
+            {"status_code": 403, "error": MOCK_TEXTOS["es"]["errAccesoDenegado"]},
+            None,
+            False,
+        ),
+    ],
+    ids=["test_42", "test_43"],
+)
+def test_endpoint_ver_usuario(
+    mocker: MockerFixture, respuesta_esperada, mock_ver_usuario, es_admin
+):
     """
     Test para validar que el API retorne los datos de un usuario con una petición
     autenticada.
     """
-    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
-    DATOS = {
-        "correo": "usuario@correo.com",
-        "uid": "a1234H",
-        "nombre": "usuario",
-        "ultima_conexion": 1000,
-        "rol": 0,
-        "estado": True,
-    }
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": True}),
-    )
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=True)
-
     app.router.lifespan_context = mock_inicializar_modelos
-
-    USUARIO = mocker.patch("routers.usuarios_router.ver_datos_usuario")
-    USUARIO.return_value = (1, DATOS)
+    mocker.patch(
+        "models.Respuestas.convertir_datetime_str", return_value="24/04/2026 12:30 AM"
+    )
+    UID = mocker.patch(
+        "dependencies.usuarios_dependencies.validar_uid", return_value="a1234H"
+    )
+    DATOS_TOKEN = mocker.patch(
+        "dependencies.usuarios_dependencies.verificar_token",
+        return_value=({"uid": "a1234H", "admin": es_admin}),
+    )
+    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuario")
+    FIREBASE.return_value = None if not es_admin else Usuario(**mock_ver_usuario)
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.get(
@@ -171,121 +174,85 @@ def test_42(mocker: MockerFixture):
                 "Language": "es",
             },
         )
+        JSON = RES.json()
 
-    assert RES.status_code == 200
-    assert RES.json() == DATOS
+    assert RES.status_code == respuesta_esperada["status_code"]
 
-    UID.assert_called_once_with("a1234H")
-    DATOS_TOKEN.assert_called_once()
-    USUARIO.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H")
-
-@pytest.mark.skip
-def test_43(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos del usuario si el token es inválido.
-    """
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(0, {"error": "Token inválido"}),
-    )
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_invalido",
-            },
+    if not es_admin:
+        assert JSON["error"] == respuesta_esperada["error"]
+        FIREBASE.assert_not_called()
+    else:
+        assert JSON["correo"] == respuesta_esperada["usuario"]["correo"]
+        assert JSON["uid"] == respuesta_esperada["usuario"]["uid"]
+        assert JSON["nombre"] == respuesta_esperada["usuario"]["nombre"]
+        assert JSON["estado"] == respuesta_esperada["usuario"]["estado"]
+        assert JSON["administrador"] == respuesta_esperada["usuario"]["administrador"]
+        assert JSON["fecha_registro"] == respuesta_esperada["usuario"]["fecha_registro"]
+        assert (
+            JSON["ultima_conexion"] == respuesta_esperada["usuario"]["ultima_conexion"]
         )
+        FIREBASE.assert_called_once_with(MOCK_FIREBASE_APP, "a1234H", MOCK_TEXTOS, "es")
+        UID.assert_called_once_with("a1234H")
 
-    assert RES.status_code == 403
-    assert RES.json() == {"error": "Token inválido"}
-
-    DATOS_TOKEN.assert_called_once()
-@pytest.mark.skip
-def test_45(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de un usuario con un
-    UID inválido
-    """
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": True}),
+    DATOS_TOKEN.assert_called_once_with(
+        MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es"
     )
-    mocker.patch("routers.usuarios_router.validar_uid", return_value=False)
-    app.router.lifespan_context = mock_inicializar_modelos
 
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
+
+@pytest.mark.parametrize(
+    "instancia,respuesta_esperada,mock_actualizar,es_admin",
+    [
+        (
+            DatosUsuario(desactivar=False, administrador=False, eliminado=False),
+            {
+                "status_code": 200,
+                "usuario": {
+                    "correo": "correo@correo.com",
+                    "uid": "a1234H",
+                    "estado": True,
+                    "nombre": "usuario",
+                    "fecha_registro": "31/12/1969 07:00 PM",
+                    "ultima_conexion": "31/12/1969 07:00 PM",
+                    "administrador": False,
+                },
             },
-        )
-
-    assert RES.status_code == 400
-    assert RES.json() == {"error": "UID inválido"}
-
-    DATOS_TOKEN.assert_called_once()
-
-@pytest.mark.skip
-def test_46(mocker: MockerFixture):
-    """
-    Test para validar que el API no retorne los datos de un usuario si se lanza un ValueError.
-    """
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": True}),
-    )
-    MOCK = mocker.patch("routers.usuarios_router.validar_uid")
-    MOCK.side_effect = ValueError("UID inválido")
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
-
-    assert RES.status_code == 400
-    assert RES.json() == {"error": "UID inválido"}
-
-    DATOS_TOKEN.assert_called_once()
-
-@pytest.mark.skip
-def test_60(mocker: MockerFixture):
+            Usuario(
+                nombre="usuario",
+                uid="a1234H",
+                estado=True,
+                correo="correo@correo.com",
+                fecha_registro=1,
+                ultima_conexion=1,
+                administrador=False,
+            ),
+            True,
+        ),
+        (
+            DatosUsuario(desactivar=False, administrador=False, eliminado=False),
+            {"status_code": 403, "error": MOCK_TEXTOS["es"]["errAccesoDenegado"]},
+            None,
+            False,
+        ),
+    ],
+    ids=["test_60", "test_61"],
+)
+def test_endpoint_actualizar_usuario(
+    mocker: MockerFixture, instancia, respuesta_esperada, mock_actualizar, es_admin
+):
     """
     Test para validar que el API actualice el estado de un usuario correctamente.
     """
-    MOCK_USUARIO = {
-        "correo" : "correo@correo.com", "uid" : "a1234H",
-        "nombre": "correo", "estado": False,
-        "fecha_registro": "12/12/2025 4:00 PM",
-        "ultima_conexion": "12/12/2025 4:00 PM",
-    }
-    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
-    DATOS_TOKEN = mocker.patch(
-        "dependencies.usuarios_dependencies.ver_datos_token",
-        return_value=(1, {"uid": "a1234H", "admin": True}),
-    )
-
-    USUARIO = mocker.MagicMock(spec=UserRecord)
-    USUARIO.uid = "a1234H"
-
-    ACT = mocker.patch(
-        "routers.usuarios_router.actualizar_estado_usuario",
-    )
-    ACT.return_value = (1, MOCK_USUARIO)
-
     app.router.lifespan_context = mock_inicializar_modelos
+    UID = mocker.patch(
+        "dependencies.usuarios_dependencies.validar_uid", return_value="a1234H"
+    )
+    DATOS_TOKEN = mocker.patch(
+        "dependencies.usuarios_dependencies.verificar_token",
+        return_value=({"uid": "a1234H", "admin": es_admin}),
+    )
+    FIREBASE = mocker.patch(
+        "routers.usuarios_router.actualizar_datos_usuario", return_value=mock_actualizar
+    )
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.patch(
@@ -297,204 +264,28 @@ def test_60(mocker: MockerFixture):
             },
             json={"desactivar": False, "administrador": False, "eliminado": False},
         )
+        JSON = RES.json()
 
-    assert RES.status_code == 200
-    assert RES.json() == MOCK_USUARIO
+    assert RES.status_code == respuesta_esperada["status_code"]
 
-    DATOS_TOKEN.assert_called_once()
-    UID.assert_called_once_with("a1234H")
-
-@pytest.mark.skip
-def test_61(mocker: MockerFixture):
-    """
-    Test para validar que el API no actualice el estado del usuario si el token es inválido.
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (0, {"error": "Token inválido"})
-
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario")
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_invalido",
-            },
-            json={"desactivar": True, "administrador": False, "eliminado": False},
+    if not es_admin:
+        assert JSON["error"] == respuesta_esperada["error"]
+        FIREBASE.assert_not_called()
+    else:
+        assert JSON["correo"] == respuesta_esperada["usuario"]["correo"]
+        assert JSON["uid"] == respuesta_esperada["usuario"]["uid"]
+        assert JSON["nombre"] == respuesta_esperada["usuario"]["nombre"]
+        assert JSON["estado"] == respuesta_esperada["usuario"]["estado"]
+        assert JSON["administrador"] == respuesta_esperada["usuario"]["administrador"]
+        assert JSON["fecha_registro"] == respuesta_esperada["usuario"]["fecha_registro"]
+        assert (
+            JSON["ultima_conexion"] == respuesta_esperada["usuario"]["ultima_conexion"]
+        )
+        UID.assert_called_once_with("a1234H")
+        FIREBASE.assert_called_once_with(
+            MOCK_FIREBASE_APP, "a1234H", instancia, MOCK_TEXTOS, "es"
         )
 
-    assert RES.status_code == 403
-    assert RES.json() == {"error": "Token inválido"}
-
-    DATOS_TOKEN.assert_called_once()
-    FUNC.assert_not_called()
-
-@pytest.mark.skip
-def test_62(mocker: MockerFixture):
-    """
-    Test para validar que el API retorne un error al intentar actualizar el estado de un
-    usuario inexistente.
-    """
-    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
-
-    FUNC = mocker.patch("routers.usuarios_router.actualizar_estado_usuario", return_value=(0, None))
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-            json={"desactivar": True, "administrador": False, "eliminado": False},
-        )
-
-    assert RES.status_code == 404
-    assert RES.json() == {"error": "Usuario no encontrado"}
-
-    UID.assert_called_once_with("a1234H")
-    DATOS_TOKEN.assert_called_once()
-    FUNC.assert_called_once()
-
-@pytest.mark.skip
-def test_63(mocker: MockerFixture):
-    """
-    Test para validar que el API no actualice los datos de un usuario si ocurre una excepción.
-    """
-    UID = mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value="a1234H")
-    TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token", return_value=(1, {"uid": "a1234H", "admin": True}))
-
-    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario", return_value=(-1, "Error inesperado"))
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-            json={"desactivar": True, "administrador": False, "eliminado": False},
-        )
-
-    assert RES.status_code == 500
-    assert RES.json() == {
-        "error": "Error al procesar la solicitud:"
-    }
-
-    FUNC.assert_not_called()
-    UID.assert_called_once()
-    TOKEN.assert_called_once()
-
-@pytest.mark.skip
-def test_64(mocker: MockerFixture):
-    """
-    Test para validar que no actualice los datos de un usuario si se lanza un ValueError.
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
-
-    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=False)
-    FUNC = mocker.patch("app.routers.usuarios_router.actualizar_estado_usuario")
-
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.patch(
-            "/admin/usuarios/a1234H?desactivar=true",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-                "Authorization": "Bearer token_valido",
-            },
-        )
-
-    assert RES.status_code == 400
-    assert RES.json() == {"error": "UID inválido"}
-
-    FUNC.assert_not_called()
-@pytest.mark.skip
-def test_101(mocker: MockerFixture):
-    """
-    Test para validar que el API retorne un error cuando ocurre alguna excepción en el
-    endpoint de ver usuarios
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
-
-    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuarios", return_value=(-1, None))
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-            },
-        )
-
-    assert RES.status_code == 400
-    assert RES.json() == {"error": "Error al obtener los datos de los usuarios"}
-
-    FIREBASE.assert_called_once()
-@pytest.mark.skip
-def test_102(mocker: MockerFixture):
-    """
-    Test para validar que el API retorne un error cuando se quieren obtener los datos
-    de un usuario inexistente
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
-    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
-
-    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuario", return_value=(0, None))
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-            }
-        )
-
-    assert RES.status_code == 404
-    assert RES.json() == {"error": "Usuario no encontrado"}
-
-    FIREBASE.assert_called_once()
-@pytest.mark.skip
-def test_103(mocker: MockerFixture):
-    """
-    Test para validar que el API retorne un error cuando se quieren obtener los datos
-    de un usuario inexistente
-    """
-    DATOS_TOKEN = mocker.patch("dependencies.usuarios_dependencies.ver_datos_token")
-    DATOS_TOKEN.return_value = (1, {"uid": "a1234H", "admin": True})
-    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
-
-    FIREBASE = mocker.patch("routers.usuarios_router.ver_datos_usuario", return_value=(-1, None))
-    app.router.lifespan_context = mock_inicializar_modelos
-
-    with TestClient(app) as CLIENTE:
-        RES = CLIENTE.get(
-            "/admin/usuarios/a1234H",
-            headers={
-                "Origin": "http://localhost:5178",
-                "Host": "localhost",
-            }
-        )
-
-    assert RES.status_code == 400
-    assert RES.json() == {"error": "Error al obtener los datos de los usuarios"}
-
-    FIREBASE.assert_called_once()
+    DATOS_TOKEN.assert_called_once_with(
+        MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es"
+    )
