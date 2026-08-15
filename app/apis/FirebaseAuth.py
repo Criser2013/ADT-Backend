@@ -8,9 +8,9 @@ from firebase_admin.auth import (
     set_custom_user_claims,
     update_user,
     UserDisabledError,
+    UserNotFoundError,
     verify_id_token,
 )
-from firebase_admin.exceptions import NotFoundError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
 from models.Peticiones import DatosUsuario
 from models.Respuestas import Usuario
@@ -54,7 +54,7 @@ def actualizar_datos_usuario(
             fecha_registro=USUARIO.user_metadata.creation_timestamp,
             ultima_conexion=USUARIO.user_metadata.last_refresh_timestamp
         )
-    except NotFoundError:
+    except UserNotFoundError:
         raise UsuarioInexistente()
     except:
         raise ErrorInterno(textos[idioma]["errActualizarUsuario"])
@@ -77,7 +77,7 @@ def registrar_usuario_firebase(firebase_app: App, uid: str, textos: dict, idioma
             uid, {"admin": False, "eliminado": False}, app=firebase_app
         )
         return COD_EXITO
-    except NotFoundError:
+    except UserNotFoundError:
         raise UsuarioInexistente()
     except:
         raise ErrorInterno(textos[idioma]["errAsignarRol"])
@@ -104,7 +104,7 @@ def validar_token(
     except (ExpiredIdTokenError, RevokedIdTokenError, UserDisabledError):
         raise AccesoNoAutorizado(textos[idioma]["errTokenExpirado"])
     except:
-        raise ErrorInterno(textos[idioma]["errValidartoken"])
+        raise ErrorInterno(textos[idioma]["errValidarToken"])
 
 
 def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) -> Usuario:
@@ -126,7 +126,7 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
         CLAIMS = USUARIO.custom_claims or {}
 
         if CLAIMS.get("eliminado", False):
-            raise UsuarioInexistente()
+            raise UserNotFoundError("Usuario eliminado")
 
         return Usuario(
             correo=USUARIO.email,
@@ -137,6 +137,8 @@ def ver_datos_usuario(firebase_app: App, uid: str, textos: dict, idioma: str) ->
             fecha_registro=USUARIO.user_metadata.creation_timestamp,
             ultima_conexion=USUARIO.user_metadata.last_refresh_timestamp
         )
+    except UserNotFoundError:
+        raise UsuarioInexistente()
     except:
         raise ErrorInterno(textos[idioma]["errObtenerUsuario"])
 

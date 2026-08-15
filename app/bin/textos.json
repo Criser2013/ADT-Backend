@@ -11,7 +11,8 @@
         "errAsignarRol": "Error at user sign up, try again.",
         "errActualizarUsuario": "An error ocurred when updating user information.",
         "errTokenExpirado": "Token has expired",
-        "errGenerarDiagnostico": "Error at diagnosis generation"
+        "errGenerarDiagnostico": "Error at diagnosis generation",
+        "errTokenInvalido": "Invalid token"
     },
     "es": {
         "errValidarToken": "Error al validar el token",
@@ -25,6 +26,7 @@
         "errAsignarRol": "Error al registrar el usuario, reintente nuevamente.",
         "errActualizarUsuario": "Error al actualizar los datos del usuario.",
         "errTokenExpirado": "El token proveído ya ha expirado",
-        "errGenerarDiagnostico": "Error al generar el diagnóstico"
+        "errGenerarDiagnostico": "Error al generar el diagnóstico",
+        "errTokenInvalido": "Token inválido"
     }
 }
