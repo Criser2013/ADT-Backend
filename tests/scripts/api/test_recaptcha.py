@@ -1,66 +1,88 @@
-from app.apis.Recaptcha import manejador_errores, verificar_peticion_recaptcha
+import pytest
+from apis.Recaptcha import manejador_errores, verificar_peticion_recaptcha
 from pytest_mock import MockerFixture
 from requests import Response
-import pytest
 
-@pytest.mark.skip
-def test_68():
+
+MOCK_TEXTOS = {
+    "es": {
+        "errCaptchaTokenErroneo": "El token proveído tiene errores.",
+        "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
+    }
+}
+
+
+@pytest.fixture(autouse=True)
+def setup_module(mocker: MockerFixture):
+    mocker.patch("apis.Recaptcha.RECAPTCHA_SECRET", "secret_token")
+    mocker.patch("apis.Recaptcha.RECAPTCHA_API_URL", "url")
+    yield
+    mocker.resetall()
+
+
+@pytest.mark.parametrize(
+    "error,respuesta_esperada",
+    [
+        ("invalid-input-response", MOCK_TEXTOS["es"]["errCaptchaTokenErroneo"]),
+        ("timeout-or-duplicate", MOCK_TEXTOS["es"]["errCaptchaTokenInvalido"]),
+        ("invalid-input-secret", "invalid-input-secret"),
+    ],
+    ids=["test_68", "test_69", "test_70"],
+)
+def test_manejador_errores(error, respuesta_esperada):
     """
     Test para validar que la función "manejador_errores" devuelve el mensaje de error correcto
     cuando el token es erroneo.
     """
-    TEXTOS = { "es": { "errCaptchaTokenErroneo": "El token proveído tiene errores." }}
-    RES = manejador_errores("invalid-input-response", "es", TEXTOS)
-    assert RES == "El token proveído tiene errores."
+    RES = manejador_errores(error, "es", MOCK_TEXTOS)
+    assert RES == respuesta_esperada
 
-@pytest.mark.skip
-def test_69():
-    """
-    Test para validar que la función "manejador_errores" devuelve el mensaje de error correcto
-    cuando el token ya expiró o no es válido.
-    """
-    TEXTOS = { "es": { "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado." }}
-    RES = manejador_errores("timeout-or-duplicate", "es", TEXTOS)
-    assert RES == "El token ha expirado o ya fue utilizado."
-@pytest.mark.skip
-def test_70():
-    """
-    Test para validar que la función "manejador_errores" no devuelve ningún mensaje cuando el
-    error no es conocido.
-    """
-    RES = manejador_errores("invalid-input-secret", "es", {})
-    assert RES == "invalid-input-secret"
-@pytest.mark.skip
-def test_71(mocker: MockerFixture):
+
+@pytest.mark.parametrize(
+    "token,respuesta_esperada,mock_peticion",
+    [
+        (
+            "token_valido",
+            {"success": True, "hostname": "host.com"},
+            {"success": True, "hostname": "host.com"},
+        ),
+        (
+            "token_invalido",
+            {
+                "success": False,
+                "hostname": "host.com",
+                "error-codes": [
+                    MOCK_TEXTOS["es"]["errCaptchaTokenErroneo"],
+                    MOCK_TEXTOS["es"]["errCaptchaTokenInvalido"],
+                ],
+            },
+            {
+                "success": False,
+                "hostname": "host.com",
+                "error-codes": ["invalid-input-response", "timeout-or-duplicate"],
+            },
+        ),
+    ],
+    ids=["test_71","test_72"]
+)
+def test_verificar_peticion_recaptcha(mocker: MockerFixture, token, respuesta_esperada, mock_peticion):
     """
     Test para validar que la función "verificar_peticion_recaptcha" no procesa los errores sino
     han habido.
     """
-
     RESPUESTA = mocker.MagicMock(spec=Response)
-    RESPUESTA.json.return_value = {"success": True, "hostname": "host.com"}
+    RESPUESTA.json.return_value = mock_peticion
+    RECAPTCHA = mocker.patch("apis.Recaptcha.post", return_value=RESPUESTA)
+    RES = verificar_peticion_recaptcha(token, "es", MOCK_TEXTOS)
 
-    MOCK = mocker.patch("app.apis.Recaptcha.post")
-    MOCK.return_value = RESPUESTA
+    assert RES["success"] == respuesta_esperada["success"]
+    assert RES["hostname"] == respuesta_esperada["hostname"]
 
-    FUNC = mocker.patch("app.apis.Recaptcha.manejador_errores")
-    RES = verificar_peticion_recaptcha("token_valido", "es", {})
+    if not respuesta_esperada["success"]:
+        assert RES["error-codes"] == respuesta_esperada["error-codes"]
 
-    assert RES == {"success": True, "hostname": "host.com" }
-    FUNC.assert_not_called()
-@pytest.mark.skip
-def test_72(mocker: MockerFixture):
-    """
-    Test para validar que la función "verificar_peticion_recaptcha" no procese los errores.
-    """
-    TEXTOS = { "es": { "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
-     "errCaptchaTokenErroneo": "El token proveído tiene errores."}}
-    RESPUESTA = mocker.MagicMock(spec=Response)
-    RESPUESTA.json.return_value = {"success": False, "error-codes": ["invalid-input-response", "timeout-or-duplicate"]}
-
-    MOCK = mocker.patch("app.apis.Recaptcha.post")
-    MOCK.return_value = RESPUESTA
-
-    RES = verificar_peticion_recaptcha("token_invalido", "es", TEXTOS)
-
-    assert RES == {"success": False, "error-codes": ["El token proveído tiene errores.", "El token ha expirado o ya fue utilizado."] }
+    RECAPTCHA.assert_called_once_with(
+        "url",
+        data={"secret": "secret_token", "response": token},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )

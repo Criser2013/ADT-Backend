@@ -1,11 +1,10 @@
-from pytest_mock import MockerFixture
+import pytest
+from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
-from firebase_admin.auth import UserRecord
 from main import app
 from models.Respuestas import Usuario
 from models.Peticiones import DatosUsuario
-import pytest
-from contextlib import asynccontextmanager
+from pytest_mock import MockerFixture
 
 # Constantes de prueba
 MOCK_TEST_CREDS = {

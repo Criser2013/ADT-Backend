@@ -22,14 +22,14 @@ def manejador_errores(error: str, idioma: str, textos: dict) -> str:
             return error
 
 
-def verificar_peticion_recaptcha(token: str, idioma: str, textos: dict[str, str]) -> dict:
+def verificar_peticion_recaptcha(token: str, idioma: str, textos: dict) -> dict:
     """
     Envía una petición al API de ReCAPTCHA para verificar que el token es válido.
 
     Args:
         token (str): El token de ReCAPTCHA a verificar.
         idioma (str): El idioma para los mensajes de error.
-        textos (dict[str, str]): El diccionario de textos para los mensajes de error.
+        textos (dict): El diccionario de textos para los mensajes de error.
     Returns:
         dict: La respuesta del API de ReCAPTCHA.
     """
