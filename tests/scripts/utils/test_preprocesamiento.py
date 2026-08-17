@@ -10,7 +10,7 @@ from utils.Preprocesamiento import *
         (20, ((19, float("inf"), 4), (10, 19, 1)), 4),
         (18, (), -1),
     ],
-    ids=["test_83", "test_84", "test_85", "test_100"],
+    ids=["test_83", "test_84", "test_85", "test_13"],
 )
 def test_evaluar_Intervalo(valor, intervalos, respuesta_esperada):
     """

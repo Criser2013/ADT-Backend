@@ -93,7 +93,7 @@ def test_88():
         assert "campo" in i.keys()
         assert "contribucion" in i.keys()
 
-def test_obtener_array_datos():
+def test_56():
     """
     Validar que el método 'obtener_array_datos' retorne un arreglo de numpy con los datos de la instancia.
     """
@@ -106,7 +106,7 @@ def test_obtener_array_datos():
     RES = OBJ.obtener_array_datos()
     assert RES.all() == RES_ESPERADA.all()
 
-def test_convertir_a_diccionario():
+def test_63():
     """
     Validar que el método 'convertir_a_diccionario' retorne el diccionario correcto según el arreglo de datos.
     """

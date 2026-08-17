@@ -324,7 +324,7 @@ def test_actualizar_datos_usuario(
 @pytest.mark.parametrize(
     "respuesta_esperada,arroja_excepcion,excepcion_usuario_inexistente",
     [(1, False, False), (None, True, True), (None, True, False)],
-    ids=["test_97", "test_98", "test_99"],
+    ids=["test_92", "test_93", "test_94"],
 )
 def test_registrar_usuario_firebase(
     mocker: MockerFixture,

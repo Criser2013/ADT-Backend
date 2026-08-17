@@ -18,7 +18,7 @@ from tests.scripts.conftest import MOCK_TEST_CREDS, MOCK_TEXTOS
         ("localhost", {"status_code": 200}, True),
         ("google", {"status_code": 400, "contenido": "Invalid host header"}, False),
     ],
-    ids=["test_8", "test_no_asignado"],
+    ids=["test_8", "test_22"],
 )
 def test_middleware_trusted_host(lifespan_mock, host, respuesta_esperada, es_satisfactoria):
     """
@@ -85,7 +85,7 @@ def test_65(mocker: MockerFixture):
     FUNC.assert_called_once_with(CERT)
 
 
-def test_106(monkeypatch: MonkeyPatch):
+def test_95(monkeypatch: MonkeyPatch):
     """
     Test para validar que la función cargue correctamente las credenciales desde
     las variables de entorno
@@ -106,7 +106,11 @@ def test_106(monkeypatch: MonkeyPatch):
     assert RES == MOCK_TEST_CREDS
 
 
-def test_107(mocker: MockerFixture):
+def test_81(mocker: MockerFixture):
+    """
+    Test para validar que la función "inicializar_modelos_ml" cargue correctamente el
+    explicador LIME y el modelo ONNX.
+    """
     mocker.patch("constants.dload", return_value="explicador_mock")
     mocker.patch("constants.jload", return_value=MOCK_TEXTOS)
     mocker.patch(
@@ -120,7 +124,7 @@ def test_107(mocker: MockerFixture):
     assert RES["modelo"] == "modelo_mock"
 
 
-def test_manejador_uid_invalido(lifespan_mock, mocker: MockerFixture):
+def test_45(lifespan_mock, mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_uid_invalido' funcione correctamente.
     """
@@ -145,7 +149,7 @@ def test_manejador_uid_invalido(lifespan_mock, mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errUIDInvalido"]}
 
 
-def test_manejador_usuario_inexistente(lifespan_mock,mocker: MockerFixture):
+def test_46(lifespan_mock,mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_usuario_inexistente' funcione correctamente.
     """
@@ -173,7 +177,7 @@ def test_manejador_usuario_inexistente(lifespan_mock,mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errUsuarioNoEncontrado"]}
 
 
-def test_manejador_acceso_no_autorizado(lifespan_mock, mocker: MockerFixture):
+def test_47(lifespan_mock, mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_acceso_no_autorizado' funcione correctamente.
     """
@@ -197,7 +201,7 @@ def test_manejador_acceso_no_autorizado(lifespan_mock, mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errAccesoDenegado"]}
 
 
-def test_manejador_error_interno(lifespan_mock,mocker: MockerFixture):
+def test_48(lifespan_mock,mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_error_interno' funcione correctamente.
     """
@@ -221,7 +225,7 @@ def test_manejador_error_interno(lifespan_mock,mocker: MockerFixture):
     assert RES.status_code == 500
     assert JSON == {"error": MOCK_TEXTOS["es"]["errValidarToken"]}
 
-def test_lifespan(mocker: MockerFixture):
+def test_49(mocker: MockerFixture):
     """
     Test para validar que el lifespan para iniciar Firebase y los modelos de ML y explicación 
     sean iniciados al iniciar la aplicación.

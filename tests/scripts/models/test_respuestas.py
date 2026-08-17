@@ -4,7 +4,10 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 
-def test_usuario(mocker: MockerFixture):
+def test_64(mocker: MockerFixture):
+    """
+    Test para validar el modelo de pydantic "Usuario".
+    """
     MOCK = mocker.patch(
         "models.Respuestas.convertir_datetime_str", return_value="13/03/2026 12:00 AM"
     )
@@ -63,7 +66,7 @@ def test_usuario(mocker: MockerFixture):
             True,
         ),
     ],
-    ids=["test_no_1", "test_no_2", "test_no_3", "test_no_4"],
+    ids=["test_23", "test_24", "test_25", "test_28"],
 )
 def test_instancia_diagnosticada(datos, arroja_excepcion):
     if arroja_excepcion:

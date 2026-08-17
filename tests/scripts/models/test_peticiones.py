@@ -62,7 +62,7 @@ RES_ESPERADA = {
         (DATOS_INSTANCIA_2.copy(), None, True),
         (DATOS_INSTANCIA_3.copy(), None, True),
     ),
-    ids=["test_5", "test_6", "test_105"],
+    ids=["test_5", "test_6", "test_55"],
 )
 def test_instancia_diagnostico(datos, respuesta_esperada, arroja_excepcion):
     """
@@ -80,7 +80,7 @@ def test_instancia_diagnostico(datos, respuesta_esperada, arroja_excepcion):
 @pytest.mark.parametrize(
     "token,respuesta_esperada,arroja_excepcion",
     [("a" * 829, "a" * 829, False), (123, None, True), ("token_invalido", None, True)],
-    ids=["test_66", "test_67", "test_104"],
+    ids=["test_66", "test_67", "test_62"],
 )
 def test_token_captcha(token, respuesta_esperada, arroja_excepcion):
     """

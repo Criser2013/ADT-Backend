@@ -23,7 +23,7 @@ from tests.scripts.conftest import MOCK_FIREBASE_APP, MOCK_TEXTOS
         ({"status_code": 500, "error": MOCK_TEXTOS["es"]["errGenerarDiagnostico"]}, True, True),
         ({"status_code": 403, "error": MOCK_TEXTOS["es"]["errTokenExpirado"]}, False, False)
     ],
-    ids=["test_16", "test_17", "test_no_asignado"],
+    ids=["test_82", "test_17", "test_38"],
 )
 def test_endpoint_diagnosticar(
     lifespan_mock, mocker: MockerFixture, respuesta_esperada, peticion_autorizada, arroja_excepcion
@@ -167,7 +167,7 @@ def test_33(lifespan_mock):
 @pytest.mark.parametrize("respuesta_esperada,peticion_autorizada",[
     ({"status_code": 200, "resultado": "ok"}, True),
     ({"status_code": 403, "error": MOCK_TEXTOS["es"]["errTokenExpirado"]}, False)
-], ids=["test_34","test_no_asignado"])
+], ids=["test_34","test_37"])
 def test_endpoint_registrar(lifespan_mock, mocker: MockerFixture, respuesta_esperada, peticion_autorizada):
     """
     Test para validar que el endpoint de registro de usuarios funcione correctamente
