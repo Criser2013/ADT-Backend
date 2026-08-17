@@ -43,13 +43,12 @@ async def healthcheck() -> dict:
     return {"status": "ok"}
 
 
-@router.post("/registrar")
+@router.post("/registrar", dependencies=[Depends(verificar_autenticado)])
 async def registrar_usuario(
     peticion: Request,
     uid: str = Depends(validador_uid),
     idioma: str = Depends(verificar_idioma),
 ) -> JSONResponse:
-    print("XD")
     TEXTOS = peticion.state.textos
     FIREBASE_APP = peticion.state.firebase_app
     registrar_usuario_firebase(FIREBASE_APP, uid, TEXTOS, idioma)

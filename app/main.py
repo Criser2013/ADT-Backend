@@ -23,7 +23,6 @@ async def inicializar_modelos(app: FastAPI):
     FIREBASE_APP = inicializar_firebase()
     MODELOS = inicializar_modelos_ml()
     CREDS_FIREBASE_CLIENTE = cargar_credenciales_cliente_firebase()
-    print("lifespan llamado")
     yield {
         "explicador": MODELOS["explicador"],
         "textos": MODELOS["textos"],

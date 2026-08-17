@@ -184,15 +184,13 @@ def test_ver_datos_usuarios(
     [
         (
             Usuario(
-                **{
-                    "correo": "usuario@correo.com",
-                    "uid": "12345",
-                    "nombre": "usuario",
-                    "administrador": False,
-                    "estado": True,
-                    "fecha_registro": 1753549006090,
-                    "ultima_conexion": 1753549006090,
-                }
+                correo="usuario@correo.com",
+                uid="12345",
+                nombre="usuario",
+                administrador=False,
+                estado=True,
+                fecha_registro=1753549006090,
+                ultima_conexion=1753549006090
             ),
             False,
             False,

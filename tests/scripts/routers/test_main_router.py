@@ -1,13 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import app
+from models.Excepciones import AccesoNoAutorizado
 from models.Respuestas import InstanciaDiagnosticada
 from pytest_mock import MockerFixture
 from tests.scripts.conftest import MOCK_FIREBASE_APP, MOCK_TEXTOS
 
 
 @pytest.mark.parametrize(
-    "respuesta_esperada,arroja_excepcion",
+    "respuesta_esperada,peticion_autorizada,arroja_excepcion",
     [
         (
             {
@@ -16,14 +17,16 @@ from tests.scripts.conftest import MOCK_FIREBASE_APP, MOCK_TEXTOS
                 "probabilidad": 0,
                 "tam_lime": 10,
             },
-            False,
+            True,
+            False
         ),
-        ({"status_code": 500, "error": MOCK_TEXTOS["es"]["errGenerarDiagnostico"]}, True),
+        ({"status_code": 500, "error": MOCK_TEXTOS["es"]["errGenerarDiagnostico"]}, True, True),
+        ({"status_code": 403, "error": MOCK_TEXTOS["es"]["errTokenExpirado"]}, False, False)
     ],
-    ids=["test_16", "test_17"],
+    ids=["test_16", "test_17", "test_no_asignado"],
 )
 def test_endpoint_diagnosticar(
-    lifespan_mock, mocker: MockerFixture, respuesta_esperada, arroja_excepcion
+    lifespan_mock, mocker: MockerFixture, respuesta_esperada, peticion_autorizada, arroja_excepcion
 ):
     """
     Test para validar que eel endpoint '/diagnosticar' cuando una petición se procesa exitosamente o si ocurre
@@ -43,14 +46,20 @@ def test_endpoint_diagnosticar(
         "vih": 0,
     }
 
-    FIREBASE = mocker.patch("dependencies.general_dependencies.verificar_token", return_value={"uid": "a1234H", "admin": False})
+    FIREBASE = mocker.patch("dependencies.general_dependencies.verificar_token")
+
+    if peticion_autorizada:
+        FIREBASE.return_value = {"uid": "a1234H", "admin": False}
+    else:
+        FIREBASE.side_effect = AccesoNoAutorizado(MOCK_TEXTOS["es"]["errTokenExpirado"])
+
     DIAGNOSTICO = mocker.patch("models.Diagnostico.Diagnostico.generar_diagnostico")
     DIAGNOSTICO.side_effect = (
         Exception("Error al generar el diagnóstico") if arroja_excepcion else None
     )
     DIAGNOSTICO.return_value = (
         None
-        if arroja_excepcion
+        if arroja_excepcion or (not peticion_autorizada)
         else InstanciaDiagnosticada(
             prediccion=respuesta_esperada["prediccion"],
             probabilidad=respuesta_esperada["probabilidad"],
@@ -72,7 +81,7 @@ def test_endpoint_diagnosticar(
 
     assert RES.status_code == respuesta_esperada["status_code"]
 
-    if arroja_excepcion:
+    if arroja_excepcion or (not peticion_autorizada):
         assert JSON["error"] == respuesta_esperada["error"]
     else:
         assert JSON["prediccion"] == respuesta_esperada["prediccion"]
@@ -82,7 +91,9 @@ def test_endpoint_diagnosticar(
     FIREBASE.assert_called_once_with(
         MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es"
     )
-    DIAGNOSTICO.assert_called_once()
+
+    if peticion_autorizada:
+        DIAGNOSTICO.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -153,23 +164,42 @@ def test_33(lifespan_mock):
         assert RES.json() == {"status": "ok"}
 
 
-def test_34(lifespan_mock, mocker: MockerFixture):
+@pytest.mark.parametrize("respuesta_esperada,peticion_autorizada",[
+    ({"status_code": 200, "resultado": "ok"}, True),
+    ({"status_code": 403, "error": MOCK_TEXTOS["es"]["errTokenExpirado"]}, False)
+], ids=["test_34","test_no_asignado"])
+def test_endpoint_registrar(lifespan_mock, mocker: MockerFixture, respuesta_esperada, peticion_autorizada):
     """
     Test para validar que el endpoint de registro de usuarios funcione correctamente
     """
     UID = "uid"
-    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+    TOKEN = mocker.patch("dependencies.general_dependencies.verificar_token")
     FIREBASE = mocker.patch(
-        "routers.main_router.registrar_usuario_firebase", return_value=1
-    )
+            "routers.main_router.registrar_usuario_firebase", return_value=1
+        )
+    mocker.patch("dependencies.usuarios_dependencies.validar_uid", return_value=True)
+
+    if peticion_autorizada:
+        TOKEN.return_value = {"uid": "a1234H", "admin": False}
+    else:
+        TOKEN.side_effect = AccesoNoAutorizado(MOCK_TEXTOS["es"]["errTokenExpirado"])
 
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.post(
             f"/registrar",
-            headers={"Origin": "http://localhost:5178", "Host": "localhost"},
+            headers={
+                "Origin": "http://localhost:5178",
+                "Host": "localhost",
+                "Authorization": "Bearer token_valido",
+            },
             params={"uid": UID},
         )
-        assert RES.status_code == 200
-        assert RES.json() == {"resultado": "ok"}
+        JSON = RES.json()
+        CLAVE = "resultado" if peticion_autorizada else "error"
+        assert RES.status_code == respuesta_esperada["status_code"]
+        assert JSON[CLAVE] == respuesta_esperada[CLAVE]
 
-    FIREBASE.assert_called_once_with(MOCK_FIREBASE_APP, UID, MOCK_TEXTOS, "es")
+    if peticion_autorizada:
+        FIREBASE.assert_called_once_with(MOCK_FIREBASE_APP, UID, MOCK_TEXTOS, "es")
+
+    TOKEN.assert_called_once_with(MOCK_FIREBASE_APP, "Bearer token_valido", MOCK_TEXTOS, "es")

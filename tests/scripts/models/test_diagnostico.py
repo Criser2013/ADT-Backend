@@ -1,13 +1,11 @@
 import pytest
+from dill import load
 from models.Diagnostico import Diagnostico
 from models.Respuestas import InstanciaDiagnosticada
-from onnxruntime import InferenceSession
 from numpy import array, float32
-from pathlib import Path
-from dill import load as dload
-from pytest_mock import MockerFixture
 from onnxruntime import InferenceSession
 from pathlib import Path
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture(autouse=True)
@@ -16,7 +14,7 @@ def setup_module(mocker: MockerFixture):
 
     PATH_BASE = f"{Path(__file__).resolve().parent.parent.parent.parent}/app"
     with open(f"{PATH_BASE}/bin/explicador.pkl", "rb") as archivo:
-        EXPLAINER = dload(archivo)
+        EXPLAINER = load(archivo)
 
     MODELO = InferenceSession(
         f"{PATH_BASE}/bin/modelo_red_neuronal.onnx",
