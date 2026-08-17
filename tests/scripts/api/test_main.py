@@ -1,6 +1,5 @@
 import pytest
 from constants import cargar_credenciales_cliente_firebase, inicializar_modelos_ml
-from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
 from firebase_admin import App
 from firebase_admin.auth import UserNotFoundError
@@ -10,69 +9,7 @@ from firebase_admin_config import inicializar_firebase
 from main import app
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
-
-
-# Constantes de prueba
-MOCK_TEST_CREDS = {
-    "apiKey": "test_api_key",
-    "authDomain": "test_auth_domain",
-    "projectId": "test_project_id",
-    "storageBucket": "test_storage_bucket",
-    "messagingSenderId": "test_messaging_sender_id",
-    "appId": "test_app_id",
-    "measurementId": "test_measurement_id",
-    "driveScopes": [
-        "https://www.googleapis.com/auth/drive",
-    ],
-    "reCAPTCHA": "test_captcha",
-}
-
-MOCK_FIREBASE_APP = {
-    "appId": "test_app_id",
-    "cred": {"projectId": "test_project_id", "certificated": True},
-}
-
-MOCK_TEXTOS = {
-    "es": {
-        "errTry": "Error de prueba:",
-        "errOrigenNoAutorizado": "Origen no autorizado",
-        "errHeaderOrigin": "Encabezado 'Origin' no especificado",
-        "errUIDInvalido": "UID inválido",
-        "errUsuarioNoEncontrado": "Usuario no encontrado",
-        "errAccesoDenegado": "Acceso denegado.",
-        "errValidarToken": "Error al validar el token",
-    }
-}
-
-
-@asynccontextmanager
-async def mock_inicializar_modelos(app):
-    yield {
-        "explicador": None,  # Mock del explicador
-        "textos": MOCK_TEXTOS,
-        "modelo": None,  # Mock del modelo
-        "firebase_app": MOCK_FIREBASE_APP,
-        "credenciales": MOCK_TEST_CREDS,
-    }
-
-
-@pytest.fixture(autouse=True)
-def setup_module(mocker: MockerFixture):
-    mocker.patch(
-        "main.CORS_ORIGINS",
-        [
-            "http://localhost:5178",
-        ],
-    )
-    mocker.patch(
-        "main.ALLOWED_HOSTS",
-        [
-            "localhost",
-        ],
-    )
-    mocker.patch("main.ORIGENES_AUTORIZADOS", ["http://localhost:5178"])
-    yield
-    mocker.resetall()
+from tests.scripts.conftest import MOCK_TEST_CREDS, MOCK_TEXTOS
 
 
 @pytest.mark.parametrize(
@@ -83,11 +20,10 @@ def setup_module(mocker: MockerFixture):
     ],
     ids=["test_8", "test_no_asignado"],
 )
-def test_middleware_trusted_host(host, respuesta_esperada, es_satisfactoria):
+def test_middleware_trusted_host(lifespan_mock, host, respuesta_esperada, es_satisfactoria):
     """
     Test para validar que el funcionamiento del middleware 'TrustedHost'
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.get(
             "/credenciales",
@@ -121,14 +57,12 @@ def test_middleware_trusted_host(host, respuesta_esperada, es_satisfactoria):
     ids=["test_9", "test_10", "test_80"],
 )
 def test_middleware_verificar_origen_autorizado(
-    mocker: MockerFixture, headers, respuesta_esperada, arroja_error
+    lifespan_mock, headers, respuesta_esperada, arroja_error
 ):
     """
     Test para validar que el middleware que revisa el header 'Origin' para solo dejar pasar
     peticiones de origenes autorizadas.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
-
     with TestClient(app) as CLIENTE:
         RES = CLIENTE.get("/credenciales", headers=headers)
         JSON = RES.json()
@@ -186,11 +120,10 @@ def test_107(mocker: MockerFixture):
     assert RES["modelo"] == "modelo_mock"
 
 
-def test_manejador_uid_invalido(mocker: MockerFixture):
+def test_manejador_uid_invalido(lifespan_mock, mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_uid_invalido' funcione correctamente.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     mocker.patch(
         "dependencies.usuarios_dependencies.verificar_token",
         return_value=({"uid": "a1234H", "admin": True}),
@@ -212,11 +145,10 @@ def test_manejador_uid_invalido(mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errUIDInvalido"]}
 
 
-def test_manejador_usuario_inexistente(mocker: MockerFixture):
+def test_manejador_usuario_inexistente(lifespan_mock,mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_usuario_inexistente' funcione correctamente.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     mocker.patch(
         "dependencies.usuarios_dependencies.verificar_token",
         return_value=({"uid": "a1234H", "admin": True}),
@@ -241,11 +173,10 @@ def test_manejador_usuario_inexistente(mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errUsuarioNoEncontrado"]}
 
 
-def test_manejador_acceso_no_autorizado(mocker: MockerFixture):
+def test_manejador_acceso_no_autorizado(lifespan_mock, mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_acceso_no_autorizado' funcione correctamente.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     mocker.patch(
         "dependencies.usuarios_dependencies.verificar_token",
         return_value=({"uid": "a1234H", "admin": False}),
@@ -266,11 +197,10 @@ def test_manejador_acceso_no_autorizado(mocker: MockerFixture):
     assert JSON == {"error": MOCK_TEXTOS["es"]["errAccesoDenegado"]}
 
 
-def test_manejador_error_interno(mocker: MockerFixture):
+def test_manejador_error_interno(lifespan_mock,mocker: MockerFixture):
     """
     Test para validar que el manejador de excepciones 'manejar_error_interno' funcione correctamente.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     mocker.patch("apis.FirebaseAuth.validar_txt_token", return_value=True)
     mocker.patch(
         "apis.FirebaseAuth.verify_id_token",
@@ -290,3 +220,23 @@ def test_manejador_error_interno(mocker: MockerFixture):
 
     assert RES.status_code == 500
     assert JSON == {"error": MOCK_TEXTOS["es"]["errValidarToken"]}
+
+def test_lifespan(mocker: MockerFixture):
+    """
+    Test para validar que el lifespan para iniciar Firebase y los modelos de ML y explicación 
+    sean iniciados al iniciar la aplicación.
+    """
+    FIREBASE = mocker.MagicMock(App)
+    INICIO_FIREBASE = mocker.patch("main.inicializar_firebase", return_value=FIREBASE)
+    INICIO_ML = mocker.patch("main.inicializar_modelos_ml", return_value={"explicador": {}, "textos": MOCK_TEXTOS, "modelo": {}})
+    INICIO_CREDS = mocker.patch("main.cargar_credenciales_cliente_firebase", return_value=MOCK_TEST_CREDS)
+
+    with TestClient(app) as CLIENTE:
+        CLIENTE.get(
+            "/credenciales",
+            headers={"Origin": "http://localhost:5178", "Host": "localhost"},
+        )
+
+    INICIO_CREDS.assert_called_once()
+    INICIO_FIREBASE.assert_called_once()
+    INICIO_ML.assert_called_once()

@@ -2,22 +2,7 @@ import pytest
 from apis.Recaptcha import manejador_errores, verificar_peticion_recaptcha
 from pytest_mock import MockerFixture
 from requests import Response
-
-
-MOCK_TEXTOS = {
-    "es": {
-        "errCaptchaTokenErroneo": "El token proveído tiene errores.",
-        "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
-    }
-}
-
-
-@pytest.fixture(autouse=True)
-def setup_module(mocker: MockerFixture):
-    mocker.patch("apis.Recaptcha.RECAPTCHA_SECRET", "secret_token")
-    mocker.patch("apis.Recaptcha.RECAPTCHA_API_URL", "url")
-    yield
-    mocker.resetall()
+from tests.scripts.conftest import MOCK_TEXTOS
 
 
 @pytest.mark.parametrize(

@@ -1,71 +1,10 @@
 import pytest
-from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
 from main import app
 from models.Respuestas import Usuario
 from models.Peticiones import DatosUsuario
 from pytest_mock import MockerFixture
-
-# Constantes de prueba
-MOCK_TEST_CREDS = {
-    "apiKey": "test_api_key",
-    "authDomain": "test_auth_domain",
-    "projectId": "test_project_id",
-    "storageBucket": "test_storage_bucket",
-    "messagingSenderId": "test_messaging_sender_id",
-    "appId": "test_app_id",
-    "measurementId": "test_measurement_id",
-    "driveScopes": [
-        "https://www.googleapis.com/auth/drive",
-    ],
-}
-
-MOCK_FIREBASE_APP = {
-    "appId": "test_app_id",
-    "cred": {"projectId": "test_project_id", "certificated": True},
-}
-
-MOCK_TEXTOS = {
-    "es": {
-        "errAccesoDenegado": "Acceso denegado.",
-        "errTokenInvalido": "Token inválido",
-        "errUIDInvalido": "UID inválido",
-        "errObtenerUsuario": "Error al obtener el usuario",
-        "errUsuarioNoEncontrado": "Usuario no encontrado",
-        "errObtenerDatosUsuarios": "Error al obtener los datos de los usuarios",
-    }
-}
-
-
-@asynccontextmanager
-async def mock_inicializar_modelos(app):
-    yield {
-        "explicador": None,
-        "textos": MOCK_TEXTOS,
-        "modelo": None,
-        "firebase_app": MOCK_FIREBASE_APP,
-        "credenciales": MOCK_TEST_CREDS,
-    }
-
-
-@pytest.fixture(autouse=True)
-def setup_module(mocker: MockerFixture):
-    mocker.patch(
-        "main.CORS_ORIGINS",
-        [
-            "http://localhost:5178",
-        ],
-    )
-    mocker.patch(
-        "main.ALLOWED_HOSTS",
-        [
-            "localhost",
-        ],
-    )
-    mocker.patch("main.ORIGENES_AUTORIZADOS", ["*"])
-    yield
-    mocker.resetall()
-
+from tests.scripts.conftest import MOCK_FIREBASE_APP, MOCK_TEXTOS
 
 DATOS = [
     {
@@ -89,13 +28,12 @@ DATOS = [
     ids=["test_31", "test_32"],
 )
 def test_endpoint_usuarios(
-    mocker: MockerFixture, respuesta_esperada, mock_ver_usuarios, es_admin
+    lifespan_mock, mocker: MockerFixture, respuesta_esperada, mock_ver_usuarios, es_admin
 ):
     """
     Test para validar que el API retorne los datos de los usuarios con una petición
     autenticada.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     DATOS_TOKEN = mocker.patch(
         "dependencies.usuarios_dependencies.verificar_token",
         return_value=({"uid": "a1234H", "admin": es_admin}),
@@ -143,13 +81,12 @@ def test_endpoint_usuarios(
     ids=["test_42", "test_43"],
 )
 def test_endpoint_ver_usuario(
-    mocker: MockerFixture, respuesta_esperada, mock_ver_usuario, es_admin
+    lifespan_mock, mocker: MockerFixture, respuesta_esperada, mock_ver_usuario, es_admin
 ):
     """
     Test para validar que el API retorne los datos de un usuario con una petición
     autenticada.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     mocker.patch(
         "models.Respuestas.convertir_datetime_str", return_value="24/04/2026 12:30 AM"
     )
@@ -236,12 +173,11 @@ def test_endpoint_ver_usuario(
     ids=["test_60", "test_61"],
 )
 def test_endpoint_actualizar_usuario(
-    mocker: MockerFixture, instancia, respuesta_esperada, mock_actualizar, es_admin
+    lifespan_mock, mocker: MockerFixture, instancia, respuesta_esperada, mock_actualizar, es_admin
 ):
     """
     Test para validar que el API actualice el estado de un usuario correctamente.
     """
-    app.router.lifespan_context = mock_inicializar_modelos
     UID = mocker.patch(
         "dependencies.usuarios_dependencies.validar_uid", return_value="a1234H"
     )

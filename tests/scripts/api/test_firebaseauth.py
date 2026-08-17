@@ -14,44 +14,7 @@ from firebase_admin.exceptions import FirebaseError
 from models.Excepciones import AccesoNoAutorizado, ErrorInterno, UsuarioInexistente
 from models.Peticiones import DatosUsuario
 from pytest_mock import MockerFixture
-
-# Constantes de prueba
-MOCK_TEST_CREDS = {
-    "apiKey": "test_api_key",
-    "authDomain": "test_auth_domain",
-    "projectId": "test_project_id",
-    "storageBucket": "test_storage_bucket",
-    "messagingSenderId": "test_messaging_sender_id",
-    "appId": "test_app_id",
-    "measurementId": "test_measurement_id",
-    "driveScopes": [
-        "https://www.googleapis.com/auth/drive",
-    ],
-}
-
-MOCK_FIREBASE_APP = {
-    "appId": "test_app_id",
-    "cred": {"projectId": "test_project_id", "certificated": True},
-}
-
-MOCK_TEXTOS = {
-    "es": {
-        "errTokenInvalido": "Token inválido",
-        "errValidarToken": "Error al validar el token",
-        "errTokenExpirado": "El token proveído ya ha expirado",
-        "errObtenerDatosUsuarios": "Error al obtener los datos de los usuarios",
-        "errObtenerUsuario": "Error al obtener el usuario",
-        "errActualizarUsuario": "Error al actualizar los datos del usuario.",
-        "errAsignarRol": "Error al registrar el usuario, reintente nuevamente.",
-    }
-}
-
-
-@pytest.fixture(autouse=True)
-def setup_module(mocker: MockerFixture):
-    mocker.patch("apis.FirebaseAuth.COD_EXITO", 1)
-    yield
-    mocker.resetall()
+from tests.scripts.conftest import MOCK_FIREBASE_APP, MOCK_TEXTOS
 
 
 @pytest.mark.parametrize(
@@ -155,6 +118,15 @@ def test_validar_token(
                     "estado": True,
                     "fecha_registro": "26/07/2025 11:56 AM",
                     "ultima_conexion": "26/07/2025 11:56 AM",
+                },
+                {
+                    "administrador": False,
+                    "correo": "usuario@correo.com",
+                    "uid": "12345",
+                    "nombre": "usuario",
+                    "estado": True,
+                    "fecha_registro": "26/07/2025 11:56 AM",
+                    "ultima_conexion": "26/07/2025 11:56 AM",
                 }
             ],
             False,
@@ -195,7 +167,11 @@ def test_ver_datos_usuarios(
         USUARIO.custom_claims = {"admin": False, "eliminado": False}
         LISTA = mocker.MagicMock(spec=ListUsersPage)
         LISTA.users = [USUARIO]
-        LISTA.has_next_page = False
+        LISTA.has_next_page = True
+        LISTA.get_next_page = lambda: LISTA2
+        LISTA2 = mocker.MagicMock(spec=ListUsersPage)
+        LISTA2.users = [USUARIO]
+        LISTA2.has_next_page = False
         FIREBASE.return_value = LISTA
         RES = ver_datos_usuarios(MOCK_FIREBASE_APP, MOCK_TEXTOS, "es")
         assert RES == respuesta_esperada
