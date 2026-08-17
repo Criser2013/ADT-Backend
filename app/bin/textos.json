@@ -1,30 +1,36 @@
 {
     "en": {
         "errValidarToken": "Error validating the token",
-        "errTry": "Error processing the request:",
-        "errTokenInvalido": "Invalid token",
         "errObtenerDatosUsuarios": "Error retrieving user data",
         "errUIDInvalido": "Invalid UID",
         "errUsuarioNoEncontrado": "User not found",
         "errObtenerUsuario": "Error retrieving user",
-        "msgUsuarioActualizado": "User status updated successfully",
-        "errProcesarToken": "Error processing the token",
         "errCaptchaTokenErroneo": "The provided token contains errors.",
         "errCaptchaTokenInvalido": "The token has expired or has already been used.",
-        "errAccesoDenegado": "Access denied."
+        "errAccesoDenegado": "Access denied.",
+        "errAsignarRol": "Error at user sign up, try again.",
+        "errActualizarUsuario": "An error ocurred when updating user information.",
+        "errTokenExpirado": "Token has expired",
+        "errGenerarDiagnostico": "Error at diagnosis generation",
+        "errTokenInvalido": "Invalid token",
+        "errOrigenNoAutorizado": "Origin not allowed",
+        "errHeaderOrigin": "'Origin' header not set"
     },
     "es": {
         "errValidarToken": "Error al validar el token",
-        "errTry": "Error al procesar la solicitud:",
-        "errTokenInvalido": "Token inválido",
         "errObtenerDatosUsuarios": "Error al obtener los datos de los usuarios",
         "errUIDInvalido": "UID inválido",
         "errUsuarioNoEncontrado": "Usuario no encontrado",
         "errObtenerUsuario": "Error al obtener el usuario",
-        "msgUsuarioActualizado": "Estado del usuario actualizado correctamente",
-        "errProcesarToken": "Error al procesar el token",
         "errCaptchaTokenErroneo": "El token proveído tiene errores.",
         "errCaptchaTokenInvalido": "El token ha expirado o ya fue utilizado.",
-        "errAccesoDenegado": "Acceso denegado."
+        "errAccesoDenegado": "Acceso denegado.",
+        "errAsignarRol": "Error al registrar el usuario, reintente nuevamente.",
+        "errActualizarUsuario": "Error al actualizar los datos del usuario.",
+        "errTokenExpirado": "El token proveído ya ha expirado",
+        "errGenerarDiagnostico": "Error al generar el diagnóstico",
+        "errTokenInvalido": "Token inválido",
+        "errOrigenNoAutorizado": "Origen no autorizado",
+        "errHeaderOrigin": "Encabezado 'Origin' no especificado"
     }
 }

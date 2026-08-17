@@ -1,9 +1,10 @@
-from os import getenv
-from utils.Dominios import obtener_lista_dominios
-from pathlib import Path
 from dill import load as dload
 from json import load as jload
 from onnxruntime import InferenceSession
+from os import getenv
+from pathlib import Path
+from utils.Dominios import obtener_lista_dominios
+
 
 COD_EXITO = 1
 COD_ERROR_ESPERADO = 0
@@ -31,7 +32,7 @@ def inicializar_modelos_ml() -> dict:
 
     return { "explicador": EXPLAINER, "textos": TEXTOS, "modelo": MODELO }
 
-def cargar_credenciales_cliente_firebase() -> dict[str, str]:
+def cargar_credenciales_cliente_firebase() -> dict:
     return {
         "apiKey": getenv("CLIENTE_FIREBASE_API_KEY"),
         "authDomain": getenv("CLIENTE_FIREBASE_AUTH_DOMAIN"),

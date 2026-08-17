@@ -6,7 +6,6 @@ def validar_txt_token(token: str) -> bool:
 
     Args:
         token (str): Token a probar.
-
     Returns:
         bool: Si el texto es un token.
     """
@@ -20,7 +19,6 @@ def validar_uid(uid: str) -> bool:
 
     Args:
         uid (str): UID a probar.
-
     Returns:
         bool: Si el texto es un UID.
     """

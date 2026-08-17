@@ -1,111 +1,186 @@
-# Backend - HADT
+# Backend — HADT
 
-Backend para la aplicación "Herramienta para apoyar el diagnóstico de TEP". Se requiere un proyecto de Firebase con los servicios de autenticación y base de datos habilitados (firestore). El proyecto hace uso de las siguientes bibliotecas:
+API REST que proporciona las funcionalidades de inferencia y gestión de usuarios para la aplicación **“Herramienta para apoyar el diagnóstico de TEP”**.
 
-- FastAPI.
-- ONNX.
-- ONNX runtime.
-- Firebase admin.
-- Lime.
+Este proyecto requiere un proyecto de **Firebase** con los servicios de **Authentication** y **Firestore** habilitados. El backend utiliza las siguientes tecnologías y bibliotecas principales:
 
-Lo anterior, ejecutado sobre **Python 3.13.2**
+- **FastAPI**
+- **ONNX**
+- **ONNX Runtime**
+- **Firebase Admin SDK**
+- **LIME**
+- **reCAPTCHA**
 
-## ¿Cómo ejecutar el proyecto?
+El objetivo del proyecto es proporcionar la infraestructura backend para una aplicación web responsiva que permita utilizar un modelo de inteligencia artificial como herramienta de apoyo al diagnóstico de **tromboembolismo pulmonar (TEP)**.
 
-1. Cree un entorno virtual de Python:
+En particular, este componente aloja el modelo de clasificación de instancias de TEP y proporciona funcionalidades para la gestión de los usuarios registrados en la aplicación.
 
+## Requisitos
+
+Antes de ejecutar el proyecto, es necesario contar con los siguientes recursos y configuraciones:
+
+- Un proyecto creado en **Firebase** con los servicios de **Authentication** y **Cloud Firestore** habilitados.
+- **Firebase Authentication** configurado para utilizar **Google** como proveedor de autenticación.
+- Una clave de acceso a la **API de Google Drive**. Para obtenerla, es necesario crear y configurar un proyecto en **Google Cloud**.
+- Una clave privada para utilizar **Google reCAPTCHA v2**.
+- Las credenciales necesarias para utilizar el **Firebase Admin SDK**.
+- **Python** y **pip** instalados.
+- **Docker**, en caso de realizar un despliegue mediante contenedores.
+
+## Ejecución en entorno de desarrollo
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Criser2013/ADT-Backend.git
+cd ADT-Backend
 ```
-virtualenv -m <nombre-entorno>
-```
-2. Ejecute el entorno con alguno de los comandos:
 
-```
-.\<nombre-entorno>\Scripts\activate        # En el caso de Windows
-source .\<nombre-entorno>\Scripts          # En el caso de MacOS y Linux
+### 2. Crear un entorno virtual de Python
+
+Se recomienda utilizar un entorno virtual para aislar las dependencias del proyecto.
+
+```bash
+pip install virtualenv
+virtualenv <nombre-entorno>
 ```
 
-3. Para ejecutar el proyecto debe instalar las dependencias con el siguiente comando:
+### 3. Activar el entorno virtual e instalar las dependencias
 
+- En Windows:
+
+```bash
+.\<nombre-entorno>\Scripts\activate
 ```
+
+- En macOS/Linux:
+```bash
+source <nombre-entorno>/bin/activate
+```
+
+Una vez activado el entorno, instalar las dependencias:
+
+```bash
 pip install -r requirements-dev.txt
 ```
 
-4. Para ejecutar la aplicación utilice el siguiente comando:
+### 4. Configurar las variables de entorno
 
-```
-fastapi dev main.py
-```
+Crear un archivo `.env` a partir de `.env.example` y establecer los valores correspondientes para cada variable de entorno.
 
-Tenga en cuenta que de esta forma se requiere un header con la clave `Authorization` y el valor `Bearer <token-firebase>` para que las peticiones no sean rechazadas.
+### 5. Ejecutar el proyecto en modo desarrollo
 
-### Credenciales de Firebase admin
-Debe tener un archivo en formato JSON con el nombre `firebase_token.json`. Este archivo puede ser obtenido desde el apartado de configuración del proyecto en la consola de Firebase.
-
-### Variables de entorno requeridas
-```
-CORS_ORIGINS=<string>                       # URLs permitidas para CORS (separadas por comas)
-ALLOWED_HOSTS=<string>                      # Hosts permitidos (separados por comas)
-ORIGENES_AUTORIZADOS=<string>               # Origenes permitidos (separados por comas)
-CLIENTE_FIREBASE_API_KEY=<string>           # API key del proyecto de Firebase
-CLIENTE_FIREBASE_AUTH_DOMAIN=<string>       # Dominio de autenticación de Firebase
-CLIENTE_FIREBASE_PROJECT_ID=<string>        # ID del proyecto en Firebase
-CLIENTE_FIREBASE_STORE_BUCKET=<string>      # ID del bucket de Firestore
-CLIENTE_FIREBASE_MESSAGING_SENDER_ID=<int>  # ID para envío de mensajes
-CLIENTE_FIREBASE_APP_ID=<string>            # ID de la aplicación de Firebase
-CLIENTE_FIREBASE_MEASUREMENT_ID=<string>    # ID de Google Analytics (métricas)
-CLIENTE_DRIVE_SCOPES=<string>               # URLs de permisos de Drive requeridos
-CLIENTE_CAPTCHA=<string>                    # API key de reCAPTCHA
-CAPTCHA_SECRET=<string>                     # Clave secreta de reCAPTCHA
-API_RECAPTCHA_URL=<string>                  # URL del API de reCAPTCHA
-FIREBASE_ADMIN_CREDS_PATH=<string>          # Ruta al archivo de credenciales de administrador de Firebase
-ACTIVAR_DOCS=<string>                       #Activar documentación de la API "false" o "true"
+```bash
+fastapi dev "./app/main.py" --port 5000
 ```
 
-## Versión de contenedor
 
-La imagen generada por el `Dockerfile` corresponde a una imagen de despliegue, para construirla use el comando:
+La aplicación estará disponible en el puerto 5000.
 
+La documentación interactiva de la API estará disponible en:
 ```
+/docs — documentación Swagger UI.
+/redoc — documentación ReDoc.
+```
+
+Por ejemplo:
+```
+http://localhost:5000/docs
+http://localhost:5000/redoc
+```
+
+## Despliegue en producción
+
+La aplicación puede desplegarse mediante servicios de alojamiento como Render o utilizando un contenedor Docker.
+
+Se recomienda construir una imagen a partir del Dockerfile incluido en el repositorio.
+
+### 1. Construir la imagen
+```bash
 docker image build -t <nombre-imagen> .
 ```
 
-Para crear el contenedor utilice el comando:
+### 2. Configurar las variables de entorno
 
-```
-docker container create --name <nombre-contenedor> -p 80:80 --env-file <ruta-archivo> <nombre-imagen>
+Preparar un archivo .env que contenga las variables de entorno requeridas por la aplicación.
+
+### 3. Crear el contenedor
+```bash
+docker container create \
+  --name <nombre-contenedor> \
+  -p 80:80 \
+  --env-file <ruta-archivo-env> \
+  <nombre-imagen>
 ```
 
-Luego se requiere copiar el archivo con las credenciales de Firebase admin con el comando:
+### 4. Copiar las credenciales de Firebase Admin
 
-```
+Copiar el archivo de credenciales de **Firebase Admin SDK** al contenedor:
+
+```bash
 docker cp <ruta-archivo-creds> <nombre-contenedor>:<ruta-archivo-contenedor>
 ```
 
-Finalmente, inicie el contenedor con:
-
-```
+### 5. Iniciar el contenedor
+```bash
 docker start <nombre-contenedor>
 ```
 
-La aplicación será visible en el puerto `80` del `localhost`.
 
-## Sobre el modelo
-Puede cambiar el modelo reemplazando el archivo `modelo_redes_neuronales.onnx` en la carpeta `app/bin`.  
-Las explicaciones de cada instancia son generadas utilizando la biblioteca **LIME**. El explainer puede ser reemplazado al cambiar el archivo `explicador.pkl` de la carpeta mencionada anteriormente. Este objeto está configurado para realizar 5000 muestras de la instancia y retornar los 10 atributos más relevantes.
+Una vez iniciado, la API estará disponible en el puerto `80`: `http://localhost:80`. También puede accederse mediante `http://127.0.0.1:80`.
 
-## Pruebas unitarias
+## Modelo de ML para la clasificación de TEP
 
-Para ejecutar las pruebas unitarias utilice el siguiente comando:
+El proyecto utiliza un modelo de redes neuronales basado en `MLPClassifier` de **Scikit-learn** para clasificar las instancias de TEP.
+
+El modelo se encuentra exportado al formato **ONNX**, lo que permite realizar la inferencia mediante **ONNX Runtime** y facilita su integración independientemente del lenguaje o framework utilizado para entrenarlo originalmente.
+
+El modelo puede reemplazarse por otra versión compatible sustituyendo el archivo: `app/bin/modelo_redes_neuronales.onnx`
+
+## Explicación de las predicciones
+
+Las explicaciones de las predicciones se generan mediante la biblioteca **LIME** (*Local Interpretable Model-agnostic Explanations*).
+
+El objeto explicador se encuentra almacenado en: `app/bin/explicador.pkl`
+
+
+Este objeto está configurado para:
+
+- Generar **2000 muestras** a partir de cada instancia analizada.
+- Identificar y retornar los **10 atributos más relevantes** para la predicción.
+
+Para modificar el comportamiento del explicador, es necesario generar una nueva configuración compatible y reemplazar el archivo `explicador.pkl`.
+
+## Pruebas y aseguramiento de la calidad
+
+El aseguramiento de la calidad y la validación del correcto funcionamiento de la aplicación son aspectos fundamentales durante su desarrollo.
+
+El proyecto cuenta con pruebas unitarias implementadas mediante pytest, orientadas a validar las principales funcionalidades del backend.
+
+Actualmente, los indicadores de cobertura son:
+
+- **Cobertura de sentencias:** 100 %
+- **Cobertura de ramas:** 96 %
+
+Los casos de prueba y los scripts relacionados se encuentran en: `/tests/scripts`
+
+
+Los resultados de las pruebas y los informes de cobertura se almacenan, respectivamente, en:
 
 ```
-./ejecutar-tests.sh
-```  
-En la carpeta `tests/scripts` se encuentran los scripts de prueba. En la carpeta `cobertura` se guardan los informes de cobertura de código de las pruebas. De igual forma, la carpeta `resultados` almacena los informes de ejecución en formato **HTML**.  
-
-Sino desea ejecutar las pruebas sin almacenar el informe de resultados y la cobertura, ejecute el comando:
-
+/tests/resultados
+/tests/cobertura
 ```
+
+### Ejecución de las pruebas
+
+Las pruebas pueden ejecutarse mediante cualquiera de las siguientes opciones:
+
+```bash
 pytest
 ```
 
-Para cambiar la configuración de este apartado, modifique el archivo `pytest.ini` y `conftest.py`. Para más informaciónc consulte la [documentación](https://docs.pytest.org/en/stable/reference/customize.html).
+o, utilizando el script proporcionado por el proyecto:
+```bash
+./ejecutar-tests.sh
+```

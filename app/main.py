@@ -1,17 +1,17 @@
-from fastapi import FastAPI
+from constants import *
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-from routers.main_router import router as main_router
-from routers.usuarios_router import router as usuarios_router
-from constants import *
-from utils.Validadores import validar_origen
-from utils.Diccionario import ver_si_existe_clave
-from contextlib import asynccontextmanager
 from firebase_admin_config import inicializar_firebase
 from models.Excepciones import *
+from routers.main_router import router as main_router
+from routers.usuarios_router import router as usuarios_router
+from utils.Diccionario import ver_si_existe_clave
+from utils.Validadores import validar_origen
 
 load_dotenv()
 
@@ -23,7 +23,6 @@ async def inicializar_modelos(app: FastAPI):
     FIREBASE_APP = inicializar_firebase()
     MODELOS = inicializar_modelos_ml()
     CREDS_FIREBASE_CLIENTE = cargar_credenciales_cliente_firebase()
-
     yield {
         "explicador": MODELOS["explicador"],
         "textos": MODELOS["textos"],
@@ -33,7 +32,6 @@ async def inicializar_modelos(app: FastAPI):
     }
 
     # Esto se ejecuta después de cerrar el backend
-
     FIREBASE_APP._cleanup()
 
     del MODELOS["explicador"]
@@ -69,21 +67,26 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
 # Middlewares personalizados
 @app.middleware("http")
-async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
+async def verificar_origen_autorizado(peticion: Request, call_next) -> JSONResponse:
     """
     Middleware para verificar el origen de la solicitud.
     Args:
         peticion (Diagnostico): La solicitud que contiene el token.
         call_next: La función para pasar al siguiente middleware o ruta.
     """
-    EXISTE = ver_si_existe_clave(peticion.headers, "origin")
+    TEXTOS = peticion.state.textos
+    HEADERS = peticion.headers
+    EXISTE = ver_si_existe_clave(HEADERS, "origin")
+    IDIOMA = ver_si_existe_clave(HEADERS, "language") or "es"
+
     if not EXISTE:
-        return Response(status_code=400, content="Encabezado 'origin' inválido")
+        return JSONResponse({ "error": TEXTOS[IDIOMA]["errHeaderOrigin"]}, status_code=400)
+
     ORIGEN = peticion.headers["origin"]
     RES = validar_origen(ORIGEN, ORIGENES_AUTORIZADOS)
 
     if not RES:
-        return Response(status_code=403, content="Origen no autorizado")
+        return JSONResponse({ "error": TEXTOS[IDIOMA]["errOrigenNoAutorizado"]}, status_code=403)
     else:
         return await call_next(peticion)
 
@@ -92,32 +95,37 @@ async def verificar_origen_autorizado(peticion: Request, call_next) -> Response:
 @app.exception_handler(AccesoNoAutorizado)
 async def manejar_acceso_no_autorizado(peticion: Request, excepcion: AccesoNoAutorizado):
     return JSONResponse(
-        excepcion.mensaje,
-        status_code=excepcion.codigo,
+        {"error": excepcion.mensaje},
+        status_code=403,
         media_type="application/json",
     )
 
 
 @app.exception_handler(UIDInvalido)
 async def manejar_uid_invalido(peticion: Request, excepcion: UIDInvalido):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        {"error": TEXTOS[IDIOMA]["errUIDInvalido"]},
         status_code=400,
         media_type="application/json",
     )
 
 @app.exception_handler(UsuarioInexistente)
 async def manejar_usuario_inexistente(peticion: Request, excepcion: UsuarioInexistente):
+    TEXTOS = peticion.state.textos
+    IDIOMA = peticion.headers.get("Language", "es")
     return JSONResponse(
-        excepcion.mensaje,
+        {"error": TEXTOS[IDIOMA]["errUsuarioNoEncontrado"]},
         status_code=404,
         media_type="application/json",
     )
 
 @app.exception_handler(ErrorInterno)
 async def manejar_error_interno(peticion: Request, excepcion: ErrorInterno):
+    logger.exception(excepcion)
     return JSONResponse(
-        excepcion.mensaje,
-        status_code=400,
+        {"error": excepcion.mensaje},
+        status_code=500,
         media_type="application/json",
     )

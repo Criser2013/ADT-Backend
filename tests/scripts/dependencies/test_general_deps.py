@@ -1,72 +1,40 @@
 import pytest
 from pytest_mock import MockerFixture
 from fastapi import Request
-from app.dependencies.general_dependencies import *
+from dependencies.general_dependencies import *
 
-@pytest.mark.asyncio
-async def test_89():
+
+@pytest.mark.parametrize(
+    "idioma,respuesta_esperada",
+    [("en", "en"), ("fr", "es")],
+    ids=["test_89", "test_90"],
+)
+def test_verificar_idioma(idioma, respuesta_esperada):
     """
     Test para validar que la dependencia "verificar_idioma" retorne el idioma de la petición
     """
-    RES = await verificar_idioma("en")
+    RES = verificar_idioma(idioma)
+    assert RES == respuesta_esperada
 
-    assert RES == "en"
 
-@pytest.mark.asyncio
-async def test_90():
-    """
-    Test para validar que la dependencia "verificar_idioma" retorne el idioma "es" cuando se recibe
-    un idioma inválido.
-    """
-    RES = await verificar_idioma("fr")
-
-    assert RES == "es"
-
-@pytest.mark.asyncio
-async def test_91(mocker: MockerFixture):
+def test_91(mocker: MockerFixture):
     """
     Test para validar que la dependencia "verificar_autenticado" permita el acceso
     cuando recibe un token válido
     """
+    TEXTOS = {
+        "es": {
+            "errAccesoDenegado": "Acceso denegado",
+            "errTokenInvalido": "Token inválido",
+        }
+    }
     PETICION = mocker.MagicMock(spec=Request)
     PETICION.state.firebase_app = "FIREBASE_APP"
-    PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_EXITO)
+    PETICION.state.textos = TEXTOS
+    FUNC = mocker.patch(
+        "dependencies.general_dependencies.verificar_token",
+        return_value={"display_name": "usuario", "uid": "1234"},
+    )
 
-    await verificar_autenticado(PETICION, "Bearer token_valido", "es")
-
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_valido")
-
-@pytest.mark.asyncio
-async def test_92(mocker: MockerFixture):
-    """
-    Test para validar que la dependencia "verificar_autenticado" lance una excepción
-    con el mensaje adecuado cuando recibe un token inválido
-    """
-    PETICION = mocker.MagicMock(spec=Request)
-    PETICION.state.firebase_app = "FIREBASE_APP"
-    PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_ERROR_ESPERADO)
-
-    with pytest.raises(AccesoNoAutorizado) as EXC:
-        await verificar_autenticado(PETICION, "Bearer token_invalido", "es")
-        assert EXC.mensaje == {"error": "Acceso denegado"}
-
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido")
-
-@pytest.mark.asyncio
-async def test_93(mocker: MockerFixture):
-    """
-    Test para validar que la dependencia "verificar_autenticado" lance una excepción
-    con el mensaje adecuado cuando recibe un token inválido
-    """
-    PETICION = mocker.MagicMock(spec=Request)
-    PETICION.state.firebase_app = "FIREBASE_APP"
-    PETICION.state.textos = {"es": {"errAccesoDenegado": "Acceso denegado", "errTokenInvalido": "Token inválido"}}
-    FUNC = mocker.patch("app.dependencies.general_dependencies.verificar_token", return_value=COD_ERROR_ESPERADO)
-
-    with pytest.raises(AccesoNoAutorizado) as EXC:
-        await verificar_autenticado(PETICION, "Bearer token_invalido", "es")
-        assert EXC.mensaje == {"error": "Token inválido"}
-
-    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_invalido")
+    verificar_autenticado(PETICION, "Bearer token_valido", "es")
+    FUNC.assert_called_once_with("FIREBASE_APP", "Bearer token_valido", TEXTOS, "es")

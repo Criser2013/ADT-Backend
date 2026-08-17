@@ -1,12 +1,11 @@
-def evaluar_intervalo(val: int | float, intervalos: tuple[tuple]) -> int:
+def evaluar_intervalo(val: int | float, intervalos: tuple) -> int:
     """
     Evalúa en qué intervalo se encuentra un valor dado.
 
     Args:
         val (int|float): El valor a evaluar.
         intervalos (tuple[tuple]): Una lista de intervalos, donde cada intervalo es una tupla
-                                    (inicio, fin, etiqueta).
-
+        `(inicio, fin, etiqueta)`.
     Returns:
         int: La etiqueta del intervalo en el que se encuentra el valor, o -1 si no se encuentra en ningún intervalo.
     """
@@ -26,14 +25,13 @@ def evaluar_intervalo(val: int | float, intervalos: tuple[tuple]) -> int:
 
 
 def preprocesar_instancia(
-    instancia: dict[str, list[int | float]]
+    instancia: dict
 ) -> dict[str, list[int | float]]:
     """
     Preprocesa los atributos numéricos de la instancia.
 
     Args:
-        instancia (dict[str, list[int | float]]): La instancia a preprocesar.
-
+        instancia (dict): La instancia a preprocesar.
     Returns:
         dict[str, list[int | float]]: La instancia preprocesada.
     """
@@ -86,6 +84,6 @@ def preprocesar_instancia(
         ),
     )
 
-    for i in CLAVES:
-        instancia[i[0]] = [evaluar_intervalo(j, i[1]) for j in instancia[i[0]]]
+    for clave, intervalos in CLAVES:
+        instancia[clave] = [evaluar_intervalo(j, intervalos) for j in instancia[clave]]
     return instancia

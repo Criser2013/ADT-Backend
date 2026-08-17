@@ -1,10 +1,8 @@
 from apis.FirebaseAuth import verificar_token
-from fastapi import Header, Request
-from models.Excepciones import AccesoNoAutorizado
-from constants import COD_ERROR_ESPERADO, COD_EXITO
+from fastapi import Depends, Header, Request
 
 
-async def verificar_idioma(language: str | None = Header(default="es")) -> str:
+def verificar_idioma(language: str | None = Header(default="es")) -> str:
     """
     Verifica si el idioma de la solicitud es válido.
     Args:
@@ -15,11 +13,11 @@ async def verificar_idioma(language: str | None = Header(default="es")) -> str:
     return "es" if language not in ("es", "en") else language
 
 
-async def verificar_autenticado(
+def verificar_autenticado(
     peticion: Request,
-    authorization: str | None = Header(default=""),
-    language: str = Header(default="es"),
-) -> bool:
+    authorization: str = Header(default=""),
+    idioma: str = Depends(verificar_idioma),
+):
     """
     Verifica si el usuario está autenticado.
     Args:
@@ -29,8 +27,4 @@ async def verificar_autenticado(
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES = await verificar_token(firebase_app, authorization)
-
-    if RES != COD_EXITO:
-        texto = "errAccesoDenegado" if RES == COD_ERROR_ESPERADO else "errTokenInvalido"
-        raise AccesoNoAutorizado({"error": f"{TEXTOS[language][texto]}"}, 403)
+    verificar_token(firebase_app, authorization, TEXTOS, idioma)

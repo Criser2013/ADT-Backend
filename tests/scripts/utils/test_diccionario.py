@@ -1,15 +1,16 @@
-from app.utils.Diccionario import ver_si_existe_clave
+import pytest
+from utils.Diccionario import ver_si_existe_clave
 
-def test_35():
+DICCIONARIO = {"clave1": 1, "clave2": 2, "clave3": 3}
+
+
+@pytest.mark.parametrize(
+    "diccionario,clave,respuesta_esperada",
+    [(DICCIONARIO, "clave1", True), (DICCIONARIO, "clave4", False)],
+    ids=["test_35", "test_36"],
+)
+def test_ver_si_existe_clave(diccionario, clave, respuesta_esperada):
     """
     Test para validar que las función "ver_si_existe_clave" retorne True si la clave existe en el diccionario.
     """
-    DICT = {"clave1": 1, "clave2": 2, "clave3": 3}
-    assert ver_si_existe_clave(DICT, "clave1") == True
-
-def test_36():
-    """
-    Test para validar que las función "ver_si_existe_clave" retorne False si la clave no existe en el diccionario.
-    """
-    DICT = {"clave1": 1, "clave2": 2, "clave3": 3}
-    assert ver_si_existe_clave(DICT, "clave4") == False
+    assert ver_si_existe_clave(diccionario, clave) == respuesta_esperada

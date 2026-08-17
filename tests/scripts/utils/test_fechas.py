@@ -1,40 +1,24 @@
-from datetime import datetime
-from app.utils.Fechas import *
+import pytest
+from utils.Fechas import *
 
-def test_18():
+
+@pytest.mark.parametrize(
+    "hora,minuto,resultado_esperado",
+    [(0, 30, "12:30 AM"), (12, 30, "12:30 PM"), (14, 59, "02:59 PM")],
+    ids=["test_18", "test_19", "test_20"],
+)
+def test_convertir_hora(hora, minuto, resultado_esperado):
     """
     Test para validar que la función convierte correctamente una hora y minuto
-    en formato HH:MM de 12 horas cuando son las 12 AM.
+    en formato HH:MM de 12 horas.
     """
-    hora = 0
-    minuto = 30
     resultado = convertir_hora(hora, minuto)
-    assert resultado == "12:30 AM"
-
-def test_19():
-    """
-    Test para validar que la función convierte correctamente una hora y minuto
-    en formato HH:MM de 12 horas cuando son las 12 del mediodía (12 PM).
-    """
-    hora = 12
-    minuto = 30
-    resultado = convertir_hora(hora, minuto)
-    assert resultado == "12:30 PM"
-
-def test_20():
-    """
-    Test para validar que la función convierte correctamente una hora y minuto
-    en formato HH:MM de 12 horas cuando la hora no es divisible entre 12.
-    """
-    hora = 14
-    minuto = 59
-    resultado = convertir_hora(hora, minuto)
-    assert resultado == "02:59 PM"
+    assert resultado == resultado_esperado
 
 def test_21():
     """
     Test para validar que la función convierte correctamente un objeto datetime
-    a una cadena de texto en formato ISO 8601.
+    a una cadena de texto en formato 'DD/MM/YYYY HH:mm A'.
     """
     fecha = 1759674600 * 1000
     resultado = convertir_datetime_str(fecha)

@@ -1,18 +1,16 @@
-from apis.FirebaseAuth import ver_datos_token
-from fastapi import Header, Request, Depends
-from fastapi.responses import JSONResponse
-from constants import COD_ERROR_ESPERADO, COD_ERROR_INESPERADO
-from models.Excepciones import AccesoNoAutorizado, UIDInvalido
-from utils.Validadores import validar_uid
-from urllib.parse import unquote
+from apis.FirebaseAuth import verificar_token
 from dependencies.general_dependencies import verificar_idioma
+from fastapi import Header, Request, Depends
+from models.Excepciones import AccesoNoAutorizado, UIDInvalido
+from urllib.parse import unquote
+from utils.Validadores import validar_uid
 
 
-async def verificar_usuario_administrador(
+def verificar_usuario_administrador(
     peticion: Request,
-    authorization: str | None = Header(default=""),
+    authorization: str = Header(default=""),
     idioma: str = Depends(verificar_idioma),
-) -> tuple[bool, JSONResponse | None]:
+):
     """
     Verifica si el usuario está autenticado y es administrador antes de permitir el acceso a las rutas protegidas.
 
@@ -20,37 +18,33 @@ async def verificar_usuario_administrador(
         peticion (Request): La solicitud HTTP entrante.
         authorization (str | None): El token de autorización de Firebase.
         idioma (str): El idioma preferido del usuario, obtenido a través de la dependencia `verificar_idioma`.
+    Raises:
+        AccesoNoAutorizado: Si el token no es válido o ha expirado
+        ErrorInterno: Si ocurre alguna excepción al tratar de validar el token
     """
     firebase_app = peticion.state.firebase_app
     TEXTOS = peticion.state.textos
-    RES, DATOS = ver_datos_token(authorization, firebase_app, idioma, TEXTOS)
-    
-    if RES in (COD_ERROR_INESPERADO, COD_ERROR_ESPERADO):
-        raise AccesoNoAutorizado(DATOS, 403)
+    DATOS = verificar_token(firebase_app, authorization, TEXTOS, idioma) or {}
 
-    if DATOS["admin"] != True:
-        raise AccesoNoAutorizado({ "error": TEXTOS[idioma]["errAccesoDenegado"] }, 403)
+    if not DATOS.get("admin", False):
+        raise AccesoNoAutorizado(TEXTOS[idioma]["errAccesoDenegado"])
 
 
-async def validador_uid(
-    peticion: Request, uid: str, idioma: str = Depends(verificar_idioma)
-) -> str:
+def validador_uid(uid: str) -> str:
     """
     Valida el UID proporcionado en la solicitud. Si es inválido lanza una excepción.
 
     Args:
-        peticion (Request): La solicitud HTTP entrante.
-        uid (str): El UID a validar.
-        idioma (str): El idioma preferido del usuario, obtenido a través de la dependencia `
-
+        uid (str): UID del usuario.
+    Raises:
+        UIDInvalido: Si el UID proveído no sigue el formato especificado.
     Returns:
         str: El UID validado.
     """
     uid = unquote(uid)
-    TEXTOS = peticion.state.textos
     VALIDACION = validar_uid(uid)
 
     if not VALIDACION:
-        raise UIDInvalido({"error": f"{TEXTOS[idioma]['errUIDInvalido']}"})
+        raise UIDInvalido()
 
     return uid
