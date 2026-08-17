@@ -6,7 +6,7 @@ from urllib.parse import unquote
 from utils.Validadores import validar_uid
 
 
-async def verificar_usuario_administrador(
+def verificar_usuario_administrador(
     peticion: Request,
     authorization: str = Header(default=""),
     idioma: str = Depends(verificar_idioma),
@@ -30,12 +30,12 @@ async def verificar_usuario_administrador(
         raise AccesoNoAutorizado(TEXTOS[idioma]["errAccesoDenegado"])
 
 
-async def validador_uid(uid: str) -> str:
+def validador_uid(uid: str) -> str:
     """
     Valida el UID proporcionado en la solicitud. Si es inválido lanza una excepción.
 
     Args:
-        peticion (Request): La solicitud HTTP entrante.
+        uid (str): UID del usuario.
     Raises:
         UIDInvalido: Si el UID proveído no sigue el formato especificado.
     Returns:
